@@ -1,9 +1,67 @@
 #!/bin/bash
 
+# Not possible to get pins yet
+
+# PERSONAL TODO
+# Get activity within the last week (changes to issues + prs)
+# See new branches
+# See new commits + stats
+# Read about projects (what is classic?)
+# Get language
+# Check for actions based on language
+# Check for pre-commit (do pre-commit?)
+
+# TODO nobody can push to main branch without me
+# TODO who can accept pull requests into main branch?
+# TODO who can modify branches?
+# TODO who can run actions (gotta figure out actions)
+# TODO -- pull requests only
+# TODO -- approved pull requests and approved users
+# TODO -- daily/weekly/activity summary
+# GET PINS AND PROFILE
+#
+# # TODO check app access
+# check slack integration after this
+
+
+# CREATE REPO
+
 gh auth status | grep -q "Logged in" || { echo "Not logged in" && exit 1; }
 
 set -e
 set -u
+
+FLAGS=("--audit")
+ARGFLAGS=("--collab" "--solo" "--activity")
+
+usage=(
+  "hub status is to help you keep track of all your github repos. It will"
+  "show you information such as: active teams, what they have access to,"
+  "which repositories are pinned, activity over time period of repository"
+  "or its issues etc. It checks to make sure basic rules are set-up, etc."
+  ""
+  "Usage (DO NOT USE --long-flags=something, just --long-flag something):"
+  "You can always try -v or --verbose, maybe no change."
+  ""
+  "hub [-h|--h]: display this help"
+  ""
+  "hub [--audit]: will show collaborators for all non-archived repositories"
+  ""
+  "hub [--collab] ORG/REPO,ORG: A comma seperated list of repos that are analyzed"
+  "                             assuming that other people are collaborating."
+  ""
+  "hub [--solo] ORG/REPO,ORG: A comma seperated list of repos that are analyzed"
+  "                             assuming that you are the only writer."
+  ""
+  "hub [--activity] ORG/REPO,ORG: A comma seperated list of repos that are analyzed"
+  "                             assuming that you have only read access."
+  ""
+  "Examples:"
+  ""
+  "hub --solo ayjayt shows only public since we assume no one has read to private"
+  "hub --audit --solo ayjayt shows everything w/ access to check who has access,"
+  "                          but it doesn't bother checking archived"
+)
 
 util_error()
 {
@@ -15,69 +73,143 @@ if [[ -z "${usage-}" ]]; then
   util_error "The script author must create a \`usage\` string-array prior to calling utilities.sh or flags.sh"
 fi
 
-AUDIT=false
-if [[ "${1}" == "audit" ]]; then
-  AUDIT=true
+if [[ ! "$(declare -p FLAGS)" =~ "declare -a" ]] || [[ ! "$(declare -p ARGFLAGS)" =~ "declare -a" ]]; then
+  util_error "The script author must at least declare a FLAGS and ARGFLAGS array. FLAGS=(); ARGFLAGS=();"
 fi
 
-# PERSONAL TODO
-# Get pins
-# Get activity within the last week
-# (what about projects?)
-# check for actions based on language
-# check for pre-commit
-# python checklist
+declare -A ARGS
+NO_VERBOSE=true
+while (( $# )); do
+  case $1 in
+    -h|--help)      printf "%s\n" "${usage[@]}"; exit 0  ;;
+    -v|--verbose)   NO_VERBOSE=false                     ;;
+    *)
+      if [[ "${1}" == -* ]]; then
+        if [[ " ${FLAGS[*]} " =~ " ${1} " ]]; then
+          ARGS["${1}"]=true
+        elif [[ " ${ARGFLAGS[*]} " =~ " ${1} " ]]; then
+          KEY="${1}"; shift
+          ARGS["$KEY"]="${1}"
+        elif [[ "${1}" == "--" ]]; then
+          shift
+          ARGS[":"]="${@}"
+          break 1
+        else
+          util_error "Unknown flag: \"${1}\". See --help."
+        fi
+      elif [[ " ${FLAGS[*]} " =~ " : " ]]; then
+        ARGS[":"]="${@}"
+        break 1
+      else
+        util_error "Unknown argument: ${1}. See --help" || true
+      fi
+      ;;
+  esac
+  shift
+done
 
-# specify
-# orgs and repos (collab check)
-
-# TODO nobody can push to main branch without me
-# TODO who can accept pull requests into main branch?
-# TODO who can modify branches?
-# TODO who can run actions (gotta figure out actions)
-# TODO -- pull requests only
-# TODO -- approved pull requests and approved users
-# TODO -- daily/weekly/activity summary
-# GET PINS AND PROFILE
-
-# CREATE REPO
+flags_resolve()
+{
+  DEFAULT="$1"
+  shift
+  while (( $# )); do
+    [[ -v ARGS["$1"] ]] && echo "${ARGS[$1]}" && return || true
+    shift
+  done
+  echo "$DEFAULT"
+}
 
 
-me="$(gh api /user --jq .login)"
-echo $me
-public=""
-while read -r name vis archive desc; do
-  if [[ "$AUDIT" == "false" ]] && [[ "$vis" == "PRIVATE" ]]; then
-    break;
-  fi
+AUDIT="$(flags_resolve false "--audit")"
+IFS="," read -a COLLAB <<< "$(flags_resolve "" "--collab")"
+IFS="," read -a SOLO <<< "$(flags_resolve "" "--solo")"
+IFS="," read -a ACTIVITY <<< "$(flags_resolve "" "--activity")"
 
-  color="$(tput setaf 7)"
-  collabs="?"
-  if [[ "$archive" == "true" ]]; then
-    color="$(tput setaf 1)"
-    collabs="archived"
+# TODO: api commands
+#
+# get issue and PR activity
+## 3 TODO: put in fn: gh api /repos/plotly/choreographer/issues --jq '.[] | "\(.updated_at) \(if .pull_request!=null then "PR" else "ISSUE" end) \(.title)"'
+## TODO: get branches made
+## TODO: stats on branches
+## function for day/week/month
+
+# get collaborators on repo:
+# # 1 TODO: extract
+# # TODO: does it show show can just read? need to test
+# #
+#
+
+# get members in org, members in each team, permission of team, etc
+# sets globals: org, repo, org_type, select
+org_info() {
+  IFS="/" read -r org repo <<< "$1"
+  if [[ -n "$repo" ]]; then
+    org_type="repo"
+    select=".[] | select(.name==\"$repo\") "
   else
-    if [[ "$AUDIT" == "true" ]]; then
-      collabs="$(echo $(gh api /repos/$me/$name/collaborators --jq '.[].login'))"
+    select="sort_by(.isPrivate, .isArchived)[] "
+    org_type="$(gh api /users/$org --jq '.type' | tr '[:upper:]' '[:lower:]')"
+    if [[ "$org_type" == "organization" ]]; then
+      # WHAT IS TEAM PERMISSION PULL
+      # orginfo: default_repository_permission, #members_can_create_respositories, #two_factor_requirement_enabled on /orgs/NAME and /orgs/NAME/outside_collaborators
+      # /org/NAME/rulesets[/rule-suites]? TODO what is it
+      # get teams /orgs/ORG/teams # ./TEAM_SLUG/members/ ./TEAM_SLUG/projects #./TEAM_SLUG/repositories # ./OWNER/REPO
+      # get membership of teams
     fi
   fi
+  select="$select"' | "\(.name) \(.visibility) \(.isArchived) \(.description)"'
+}
 
-  if [[ "$public" != "false" ]] && [[ "$vis" == "PRIVATE" ]]; then
-    public=false
-    printf "${color} private\t\t\t\t\n"
-  elif [[ "$public" != "true" ]] && [[ "$vis" == "PUBLIC" ]]; then
-    public=true
-    printf "${color} public\t\t\t\t\n"
-  fi
+red="$(tput setaf 1)"
+white="$(tput setaf 7)"
+color()
+{
+  echo -en $1
+}
 
-  status="$(gh api /repos/$me/$name --jq '"\(.open_issues) 🚨 \(.forks) 🍴 \(.watchers) 👀 \(.stargazers_count) 🌟"')"
-  printf "\t${color}%s\t%s\t%s\t%s\n" "$name" "$desc" "$collabs" "$status"
+for identifier in "${SOLO[@]}"; do
+  echo "$identifier"
 
-  # for single user .isPrivate, .isArchived since if private nothing else really matters, se non-archived first, since private is still active
-done< <(gh repo list -L 300 --json name,isPrivate,isArchived,visibility --jq 'sort_by(.isPrivate, .isArchived)[] | "\(.name) \(.visibility) \(.isArchived) \(.description)"') | column -t -s $'\t'
+  org=""
+  repo=""
+  select=""
+  org_type=""
+  org_info $identifier
 
+  public=""
+  while read -r name vis archive desc; do
+    if [[ "$AUDIT" == "false" ]] && [[ "$vis" == "PRIVATE" ]] && [[ -z "$repo" ]]; then
+      continue # specific to SOLO, add conditional
+    fi
 
-echo -en "$(tput setaf 7)"
+    if [[ "$archive" == "true" ]]; then
+      color $red
+    else
+      color $white
+    fi
+
+    # Print
+    collabs="????"
+    if [[ "$AUDIT" == "true" ]]; then
+      collabs="$(echo $(gh api /repos/$org/$name/collaborators --jq '.[].login'))"
+    fi
+
+    # Print Headers
+    if [[ "$public" != "false" ]] && [[ "$vis" == "PRIVATE" ]]; then
+      public=false
+      printf " private\t\t\t\t\n"
+    elif [[ "$public" != "true" ]] && [[ "$vis" == "PUBLIC" ]]; then
+      public=true
+      printf " public\t\t\t\t\n"
+    fi
+
+    status="$(gh api /repos/$org/$name --jq '"\(.open_issues) 🚨  \(.forks) 🍴  \(.watchers) 👀  \(.stargazers_count) 🌟"')"
+    printf "\t%s\t%s\t%s\t%s\n" "$name" "$desc" "$collabs" "$status"
+
+    color $white
+    # for single user .isPrivate, .isArchived since if private nothing else really matters, set non-archived first, since private is still active
+  done< <(gh repo list $org -L 300 --json name,isPrivate,isArchived,visibility --jq "$select") | column -t -s $'\t' # api has language and default branch
+done
 
 
 
