@@ -1,0 +1,91 @@
+#!/bin/bash
+
+gh auth status | grep -q "Logged in" || { echo "Not logged in" && exit 1; }
+
+set -e
+set -u
+
+util_error()
+{
+    echo -e "Error: $@" >&2
+    exit 1
+}
+
+if [[ -z "${usage-}" ]]; then
+  util_error "The script author must create a \`usage\` string-array prior to calling utilities.sh or flags.sh"
+fi
+
+AUDIT=false
+if [[ "${1}" == "audit" ]]; then
+  AUDIT=true
+fi
+
+# PERSONAL TODO
+# Get pins
+# Get activity within the last week
+# (what about projects?)
+# check for actions based on language
+# check for pre-commit
+# python checklist
+
+# specify
+# orgs and repos (collab check)
+
+# TODO nobody can push to main branch without me
+# TODO who can accept pull requests into main branch?
+# TODO who can modify branches?
+# TODO who can run actions (gotta figure out actions)
+# TODO -- pull requests only
+# TODO -- approved pull requests and approved users
+# TODO -- daily/weekly/activity summary
+# GET PINS AND PROFILE
+
+# CREATE REPO
+
+
+me="$(gh api /user --jq .login)"
+echo $me
+public=""
+while read -r name vis archive desc; do
+  if [[ "$AUDIT" == "false" ]] && [[ "$vis" == "PRIVATE" ]]; then
+    break;
+  fi
+
+  color="$(tput setaf 7)"
+  collabs="?"
+  if [[ "$archive" == "true" ]]; then
+    color="$(tput setaf 1)"
+    collabs="archived"
+  else
+    if [[ "$AUDIT" == "true" ]]; then
+      collabs="$(echo $(gh api /repos/$me/$name/collaborators --jq '.[].login'))"
+    fi
+  fi
+
+  if [[ "$public" != "false" ]] && [[ "$vis" == "PRIVATE" ]]; then
+    public=false
+    printf "${color} private\t\t\t\t\n"
+  elif [[ "$public" != "true" ]] && [[ "$vis" == "PUBLIC" ]]; then
+    public=true
+    printf "${color} public\t\t\t\t\n"
+  fi
+
+  status="$(gh api /repos/$me/$name --jq '"\(.open_issues) 🚨 \(.forks) 🍴 \(.watchers) 👀 \(.stargazers_count) 🌟"')"
+  printf "\t${color}%s\t%s\t%s\t%s\n" "$name" "$desc" "$collabs" "$status"
+
+  # for single user .isPrivate, .isArchived since if private nothing else really matters, se non-archived first, since private is still active
+done< <(gh repo list -L 300 --json name,isPrivate,isArchived,visibility --jq 'sort_by(.isPrivate, .isArchived)[] | "\(.name) \(.visibility) \(.isArchived) \(.description)"') | column -t -s $'\t'
+
+
+echo -en "$(tput setaf 7)"
+
+
+
+
+#for each org
+# print out teams
+# print out members
+# print out repos ordered
+# print their teams + outside collaborators (have to match team + access)
+#
+# key comparison
