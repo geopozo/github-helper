@@ -3,28 +3,29 @@
 # Not possible to get pins yet
 
 # PERSONAL TODO
-# Get activity within the last week (changes to issues + prs)
-# See new branches
-# See new commits + stats
-# Read about projects (what is classic?)
+# Timeframes: 6 hours/day/week/month
+# Get activity within the last timeframe (changes to issues + prs) (per repo, per user)
+# See new branches within last timeframe
+# See new commits + stats within last timeframes
+# Read about projects (what is classic?) (track projects?)
 # Get language
-# Check for actions based on language
+  # Check for actions
 # Check for pre-commit (do pre-commit?)
 
-# TODO nobody can push to main branch without me
-# TODO who can accept pull requests into main branch?
-# TODO who can modify branches?
-# TODO who can run actions (gotta figure out actions)
-# TODO -- pull requests only
-# TODO -- approved pull requests and approved users
-# TODO -- daily/weekly/activity summary
-# GET PINS AND PROFILE
-#
-# # TODO check app access
-# check slack integration after this
+# Audit rulesets:
+  # TODO nobody can push to main branch without me
+  # TODO who can accept pull requests into main branch?
+  # TODO who can modify branches?
+  # TODO who can run actions (gotta figure out actions)
+  # Do readers should up as collaborators
+  # TODO -- pull requests only
+  # TODO -- approved pull requests and approved users
+  # TODO check app access
+  # check slack Integrations after this
 
+  # CREATE REPO
 
-# CREATE REPO
+# Create guide for using this
 
 gh auth status | grep -q "Logged in" || { echo "Not logged in" && exit 1; }
 
@@ -129,15 +130,15 @@ IFS="," read -a ACTIVITY <<< "$(flags_resolve "" "--activity")"
 #
 # get issue and PR activity
 ## 3 TODO: put in fn: gh api /repos/plotly/choreographer/issues --jq '.[] | "\(.updated_at) \(if .pull_request!=null then "PR" else "ISSUE" end) \(.title)"'
-## TODO: get branches made
-## TODO: stats on branches
+## TODO: get branches made w/in timeframe
+## TODO: stats on branches w/in timeframe
 ## function for day/week/month
 
 # get collaborators on repo:
 # # 1 TODO: extract
-# # TODO: does it show show can just read? need to test
+# # TODO: does it show show can just read? need to test. Specific permissions for specific repos. Read, Write, Maintain (don't really use this), Admin
 # #
-#
+
 
 # get members in org, members in each team, permission of team, etc
 # sets globals: org, repo, org_type, select
@@ -150,7 +151,8 @@ org_info() {
     select="sort_by(.isPrivate, .isArchived)[] "
     org_type="$(gh api /users/$org --jq '.type' | tr '[:upper:]' '[:lower:]')"
     if [[ "$org_type" == "organization" ]]; then
-      # WHAT IS TEAM PERMISSION PULL
+      true; # pass
+      # WHAT IS TEAM PERMISSION PULL (seen on these apis)
       # orginfo: default_repository_permission, #members_can_create_respositories, #two_factor_requirement_enabled on /orgs/NAME and /orgs/NAME/outside_collaborators
       # /org/NAME/rulesets[/rule-suites]? TODO what is it
       # get teams /orgs/ORG/teams # ./TEAM_SLUG/members/ ./TEAM_SLUG/projects #./TEAM_SLUG/repositories # ./OWNER/REPO
@@ -210,14 +212,3 @@ for identifier in "${SOLO[@]}"; do
     # for single user .isPrivate, .isArchived since if private nothing else really matters, set non-archived first, since private is still active
   done< <(gh repo list $org -L 300 --json name,isPrivate,isArchived,visibility --jq "$select") | column -t -s $'\t' # api has language and default branch
 done
-
-
-
-
-#for each org
-# print out teams
-# print out members
-# print out repos ordered
-# print their teams + outside collaborators (have to match team + access)
-#
-# key comparison
