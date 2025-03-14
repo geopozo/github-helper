@@ -1,32 +1,5 @@
 #!/bin/bash
 
-# Not possible to get pins yet
-
-# PERSONAL TODO
-# Timeframes: 6 hours/day/week/month
-# Get activity within the last timeframe (changes to issues + prs) (per repo, per user)
-# See new branches within last timeframe
-# See new commits + stats within last timeframes
-# Read about projects (what is classic?) (track projects?)
-# Get language
-  # Check for actions
-# Check for pre-commit (do pre-commit?)
-
-# Audit rulesets:
-  # TODO nobody can push to main branch without me
-  # TODO who can accept pull requests into main branch?
-  # TODO who can modify branches?
-  # TODO who can run actions (gotta figure out actions)
-  # Do readers should up as collaborators
-  # TODO -- pull requests only
-  # TODO -- approved pull requests and approved users
-  # TODO check app access
-  # check slack Integrations after this
-
-  # CREATE REPO
-
-# Create guide for using this
-
 gh auth status | grep -q "Logged in" || { echo "Not logged in" && exit 1; }
 
 set -e
@@ -151,12 +124,15 @@ org_info() {
     select="sort_by(.isPrivate, .isArchived)[] "
     org_type="$(gh api /users/$org --jq '.type' | tr '[:upper:]' '[:lower:]')"
     if [[ "$org_type" == "organization" ]]; then
-      true; # pass
-      # WHAT IS TEAM PERMISSION PULL (seen on these apis)
-      # orginfo: default_repository_permission, #members_can_create_respositories, #two_factor_requirement_enabled on /orgs/NAME and /orgs/NAME/outside_collaborators
+      basic_perms="$(gh api /orgs/geopozo --jq '"members have \(.default_repository_permission)\(if .members_can_create_repositories==true then "& create" else "" end) \(if .two_factor_requirement_enabled==true then "" else "but NO 2FA" end)"')"
+      outsiders="$(gh api /orgs/$org/outside_collaborators --jq '.[] | .login')"
+      org_invites="$(gh api /orgs/$org/invitations --jq '.[] | .login')"
+      teams="$(gh api /orgs/$org/teams --jq '.[] | "\(.slug)\t\(.permission)"')"
+      gh api orgs/$org/teams/$team_slug/members .login
+      gh api orgs/$org/teams/$team_slug/projects .name .permissions
+      gh api orgs/$org/teams/$team_slug/repositories .name .permissions
+
       # /org/NAME/rulesets[/rule-suites]? TODO what is it
-      # get teams /orgs/ORG/teams # ./TEAM_SLUG/members/ ./TEAM_SLUG/projects #./TEAM_SLUG/repositories # ./OWNER/REPO
-      # get membership of teams
     fi
   fi
   select="$select"' | "\(.name) \(.visibility) \(.isArchived) \(.description)"'
