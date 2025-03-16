@@ -7,9 +7,16 @@ import subprocess
 import sys
 import warnings
 
+import jq
 import orjson
 
 from ._cli_args import _get_cli_args
+
+## maybe add options for output (full or reduced, python, json, or console)
+## yeah so all functions return python object, so either iterate it or json it
+## maybe add unfiltered option as well
+
+current_user = ""  # global
 
 
 class GHError(RuntimeError):
@@ -24,6 +31,7 @@ class ScopesWarning(UserWarning):
     """Warning for when missing optional enhancing scope."""
 
 
+# untested
 def _check_scopes(scopes_had, scopes_needed, scopes_wanted):
     missing_scopes_needed = [
         scope for scope in scopes_needed if scope not in scopes_had
@@ -71,15 +79,20 @@ async def _gh_api(endpoint: str):
     return await _gh_call("gh", "api", endpoint)
 
 
+user_jq = jq.compile('"" { (.login) : .id } ')  # the "" silences quote linter
+
+
 async def get_user(*, cli_args=None):
     """Return username."""
     _ = cli_args
     retval, out, err = await _gh_api("/user")
     _check_retval(retval, err)
-    user = orjson.loads(out)["login"]
-    if cli_args:
-        print(user)
-    return user
+    # NOTE: I think using orjson would be faster, so that's what I do
+    return user_jq.input_text(out.decode()).first()
+
+
+orgs_jq = jq.compile('map({ (.login): "UNKNOWN" }) | add')
+role_jq = jq.compile('"".role')  # the "" silences quote linter
 
 
 async def get_orgs(*, cli_args=None):
@@ -87,7 +100,13 @@ async def get_orgs(*, cli_args=None):
     _ = cli_args
     retval, out, err = await _gh_api("/user/orgs")
     _check_retval(retval, err)
-    return out
+    orgs = orgs_jq.input_value(orjson.loads(out)).first()
+
+    for k in orgs:
+        retval, out, err = await _gh_api(f"/orgs/{k}/memberships/{current_user}")
+        _check_retval(retval, err)
+        orgs[k] = role_jq.input_value(orjson.loads(out)).first()
+    return orgs
 
 
 async def get_scopes(*, cli_args=None):
@@ -104,6 +123,7 @@ async def get_scopes(*, cli_args=None):
     return [scope.strip() for scope in match[1].decode().split(",")]
 
 
+# this one prints directly to maintain color
 async def check_auth(*, cli_args=None):
     """Return true if user is logged in."""
     retval, _, _ = await _gh_call(
@@ -122,14 +142,18 @@ def run_cli():
 
 async def _run_cli_async():
     cli_args = _get_cli_args()
+    global current_user  # noqa: PLW0603, no global
+    current_user = next(iter(await get_user(cli_args=cli_args)))
     # we don't handle any pre-command stuff yet
     match cli_args["command"]:
         case "check_auth":
+            # prints directly, not sure if I like it
             sys.exit(await check_auth(cli_args=cli_args))
         case "list_orgs":
-            print(await get_orgs(cli_args=cli_args))
+            for k, v in (await get_orgs(cli_args=cli_args)).items():
+                print(f"{k}, {v}")
         case "whoami":
-            await get_user(cli_args=cli_args)
+            print(await get_user(cli_args=cli_args))
         case "scopes":
             for scope in await get_scopes(cli_args=cli_args):
                 print(scope)
