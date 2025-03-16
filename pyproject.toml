@@ -20,10 +20,18 @@ authors = [
 maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
+dependencies = [
+    "colored>=2.3.0",
+    "logistro>=1.0.11",
+    "orjson>=3.10.15",
+]
 
 [project.urls]
 Homepage = "https://github.com/geopozo/github-helper"
 Repository = "https://github.com/geopozo/github-helper"
+
+[project.scripts]
+gh-status = "github_helper:run_cli"
 
 [dependency-groups]
 dev = [
