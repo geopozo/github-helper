@@ -22,20 +22,20 @@ def _get_cli_args():
 
     # i think this doesn't do order?
     check_auth_parser = subparsers.add_parser(
-        "check_auth",
+        "auth-status",
         description="Check that you are logged in.",
         help="Check that you are logged in. No arguments.",
     )
     _ = check_auth_parser  # add_argument, set_defaults, etc
 
     _ = subparsers.add_parser(
-        "whoami",
+        "user",
         description="Get current logged-in user.",
         help="Return username of current logged in user.",
     )
 
     _ = subparsers.add_parser(
-        "list_orgs",
+        "orgs",
         description="List orgs you're part of.",
         help="Return orgs of current logged in user.",
     )
@@ -44,6 +44,12 @@ def _get_cli_args():
         "scopes",
         description="Get list of current scopes.",
         help="Return scopes of current logged in user.",
+    )
+
+    _ = subparsers.add_parser(
+        "repos",
+        description="Show all repos.",
+        help="Return all repos of current logged in user.",
     )
     # could accept user
 

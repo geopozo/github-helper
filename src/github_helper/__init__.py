@@ -79,7 +79,7 @@ async def _gh_api(endpoint: str):
     return await _gh_call("gh", "api", endpoint)
 
 
-user_jq = jq.compile('"" { (.login) : .id } ')  # the "" silences quote linter
+user_jq = jq.compile(" { (.login) : .id } ")
 
 
 async def get_user(*, cli_args=None):
@@ -92,7 +92,7 @@ async def get_user(*, cli_args=None):
 
 
 orgs_jq = jq.compile('map({ (.login): "UNKNOWN" }) | add')
-role_jq = jq.compile('"".role')  # the "" silences quote linter
+role_jq = jq.compile(".role")  # the "" silences quote linter
 
 
 async def get_orgs(*, cli_args=None):
@@ -123,6 +123,10 @@ async def get_scopes(*, cli_args=None):
     return [scope.strip() for scope in match[1].decode().split(",")]
 
 
+async def get_repos(*, cli_args=None):
+    pass
+
+
 # this one prints directly to maintain color
 async def check_auth(*, cli_args=None):
     """Return true if user is logged in."""
@@ -146,16 +150,39 @@ async def _run_cli_async():
     current_user = next(iter(await get_user(cli_args=cli_args)))
     # we don't handle any pre-command stuff yet
     match cli_args["command"]:
-        case "check_auth":
+        case "auth-status":
             # prints directly, not sure if I like it
             sys.exit(await check_auth(cli_args=cli_args))
-        case "list_orgs":
+        case "orgs":
             for k, v in (await get_orgs(cli_args=cli_args)).items():
                 print(f"{k}, {v}")
-        case "whoami":
-            print(await get_user(cli_args=cli_args))
+        case "user":
+            print(next(iter(await get_user(cli_args=cli_args))))
         case "scopes":
             for scope in await get_scopes(cli_args=cli_args):
                 print(scope)
+        case "repos":
+            print(await get_repos(cli_args=cli_args))
         case _:
             print("No command supplied. See --help.")
+
+
+# print out repos and status of repos
+# repo (visibility) public (archived) private (archived)
+# your role on the repo?
+
+# get /user/repos # get third party by looking for own name plus orgs
+# get /users/{username}/repos #
+# get /orgs/{org}/repos #
+
+# lets just start by properly organizing the objects by name/etc
+# orgs # just what
+# private # just what
+# other { "who":
+#          "what":
+#          "permissions"
+#       }
+
+
+# do basic branch analysis
+# do basic rules
