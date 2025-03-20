@@ -75,8 +75,8 @@ async def _gh_call(*commands, direct=False) -> asyncio.subprocess.Process:
     return retval, stdout, stderr
 
 
-async def _gh_api(endpoint: str):
-    return await _gh_call("gh", "api", endpoint)
+async def _gh_api(endpoint: str, *, direct=False):
+    return await _gh_call("gh", "api", endpoint, direct=direct)
 
 
 user_jq = jq.compile(" { (.login) : .id } ")
