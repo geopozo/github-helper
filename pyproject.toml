@@ -25,6 +25,7 @@ dependencies = [
     "jq>=1.8.0",
     "logistro>=1.0.11",
     "orjson>=3.10.15",
+    "tabulate>=0.9.0",
 ]
 
 [project.urls]
