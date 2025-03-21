@@ -71,6 +71,7 @@ async def _gh_call(*commands, direct=False) -> asyncio.subprocess.Process:
         stderr=None if direct else subprocess.PIPE,
     )
     retval = await p.wait()
+    print(p.pid)
     stdout, stderr = await p.communicate()
     return retval, stdout, stderr
 
@@ -93,6 +94,7 @@ async def get_user(*, cli_args=None):
 
 orgs_jq = jq.compile('map({ (.login): "UNKNOWN" }) | add')
 role_jq = jq.compile(".role")  # the "" silences quote linter
+repos_jq = jq.compile(".full_name")
 
 
 async def get_orgs(*, cli_args=None):
@@ -124,7 +126,12 @@ async def get_scopes(*, cli_args=None):
 
 
 async def get_repos(*, cli_args=None):
-    pass
+    """Return repos for a user."""
+    _ = cli_args
+    retval, out, err = await _gh_api("user/repos")
+    _check_retval(retval, err)
+    repos = repos_jq.input_value(orjson.loads(out)).all()
+    return repos
 
 
 # this one prints directly to maintain color
