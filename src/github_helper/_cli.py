@@ -73,13 +73,13 @@ def _get_cli_args():
     return vars(basic_args)
 
 
-def _get_table(table, headers, tablefmt):
-    print(tabulate(table, headers=headers, tablefmt=tablefmt))
-
-
 def run_cli():
     """Run cli command based on arguments."""
     asyncio.run(_run_cli_async())
+
+
+def _get_table(table, headers, tablefmt):
+    print(tabulate(table, headers=headers, tablefmt=tablefmt))
 
 
 def check_flags(cli_args, info=None):
@@ -100,33 +100,30 @@ def check_flags(cli_args, info=None):
 
 async def _run_cli_async():
     cli_args = _get_cli_args()
-    global current_user  # noqa: PLW0603, no global
-    current_user = next(iter(await api.get_user(cli_args=cli_args)))
-    # we don't handle any pre-command stuff yet
+    gh = api.GHApi()
     match cli_args["command"]:
         case "auth-status":
             # prints directly, not sure if I like it
-            sys.exit(await api.check_auth(cli_args=cli_args))
+            sys.exit(await gh.check_auth(cli_args=cli_args))
         case "orgs":
-            for k, v in (await api.get_orgs(cli_args=cli_args)).items():
-                print(f"{k}, {v}")
+            check_flags(
+                cli_args,
+                info=await gh.get_orgs(),
+            )
         case "user":
             check_flags(
                 cli_args,
-                info=[{"user": next(iter(await api.get_user(cli_args=cli_args)))}],
+                info=[{"user": next(iter(await gh.get_user()))}],
             )
         case "scopes":
             check_flags(
                 cli_args,
-                info=[
-                    {"scope_name": scope}
-                    for scope in await api.get_scopes(cli_args=cli_args)
-                ],
+                info=[{"scope_name": scope} for scope in await gh.get_scopes()],
             )
         case "repos":
             check_flags(
                 cli_args,
-                info=await api.get_repos(cli_args=cli_args),
+                info=await gh.get_repos(),
             )
         case _:
             print("No command supplied. See --help.")
