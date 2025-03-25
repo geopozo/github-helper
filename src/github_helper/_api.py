@@ -73,10 +73,10 @@ class GHApi:
         )
         return retval
 
-    def _check_retval(self, retval, err):
+    def _check_retval(self, retval, err, **kwargs):
         if retval != 0:
             try:
-                raise GHError(str(err))  # noqa: TRY301
+                raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")  # noqa: TRY301
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
