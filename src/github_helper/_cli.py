@@ -78,24 +78,35 @@ def run_cli():
     asyncio.run(_run_cli_async())
 
 
-def _get_table(table, headers, tablefmt):
+def _print_table(table, headers, tablefmt):
+    """Print data in table format."""
+    if not table:
+        print("No data to display.", file=sys.stderr)
+        sys.exit(1)
+        return
     print(tabulate(table, headers=headers, tablefmt=tablefmt))
 
 
-def check_flags(cli_args, info=None):
-    """Check if any flags are set."""
+def _print_json(data, option=None):
+    """Print data in JSON format."""
+    if not data:
+        print("No data to display.", file=sys.stderr)
+        sys.exit(1)
+    print(orjson.dumps(data, option=option).decode())
+
+
+def format_data(data, cli_args=""):
+    """Format data based on the option provided."""
     if cli_args["json"] and cli_args["pretty"]:
-        raise ValueError("Cannot use both --json and --pretty.")
-
+        _print_json(data, option=orjson.OPT_INDENT_2)
+        return
     if cli_args["json"]:
-        print(orjson.dumps(info, option=orjson.OPT_INDENT_2).decode())
+        _print_json(data)
         return
-
     if cli_args["pretty"]:
-        _get_table(info, headers="keys", tablefmt="pretty")
+        _print_table(data, headers="keys", tablefmt="pretty")
         return
-
-    _get_table(info, headers="", tablefmt="plain")
+    _print_table(data, headers="", tablefmt="plain")
 
 
 async def _run_cli_async():
@@ -103,27 +114,17 @@ async def _run_cli_async():
     gh = api.GHApi()
     match cli_args["command"]:
         case "auth-status":
-            # prints directly, not sure if I like it
             sys.exit(await gh.check_auth(cli_args=cli_args))
         case "orgs":
-            check_flags(
-                cli_args,
-                info=await gh.get_orgs(),
-            )
+            format_data(await gh.get_orgs(), cli_args)
         case "user":
-            check_flags(
-                cli_args,
-                info=[{"user": next(iter(await gh.get_user()))}],
-            )
+            format_data([{"user": next(iter(await gh.get_user()))}], cli_args)
         case "scopes":
-            check_flags(
+            format_data(
+                [{"scope_name": scope} for scope in await gh.get_scopes()],
                 cli_args,
-                info=[{"scope_name": scope} for scope in await gh.get_scopes()],
             )
         case "repos":
-            check_flags(
-                cli_args,
-                info=await gh.get_repos(),
-            )
+            format_data(await gh.get_repos(), cli_args)
         case _:
             print("No command supplied. See --help.")
