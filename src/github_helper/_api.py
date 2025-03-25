@@ -120,8 +120,12 @@ class GHApi:
         self._check_retval(retval, err)
         match = scopes_re.search(out)
         if not match:
-            raise RuntimeError(
-                "get_scopes couldn't find scopes for some reason. Output:\n{out}",
+            raise GHError(
+                (
+                    "get_scopes couldn't find scopes for some reason. "
+                    "Output:\n"
+                    f"{out.decode()}"
+                ),
             )
         scopes = [scope.strip() for scope in match[1].decode().split(",")]
         return [{"scope_name": scope} for scope in scopes]
@@ -133,7 +137,7 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
         repos_jq = jq.compile(
-            "map({name: .name, visibility: .visibility, owner: .owner.login})"
+            "map({name: .name, visibility: .visibility, owner: .owner.login})",
         )
         repos = repos_jq.input_value(orjson.loads(out)).first()
         return repos
