@@ -1,8 +1,8 @@
+# ruff: noqa: T201
 import argparse
 import asyncio
 import sys
 
-# ruff: noqa: T201
 import logistro
 import orjson
 from tabulate import tabulate
