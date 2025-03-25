@@ -97,7 +97,7 @@ def _print_json(data, option=None):
     print(orjson.dumps(data, option=option).decode())
 
 
-def format_data(data, cli_args=""):
+def _format_data(data, cli_args=""):
     """Format data based on the option provided."""
     if cli_args["json"] and cli_args["pretty"]:
         _print_json(data, option=orjson.OPT_INDENT_2)
@@ -118,15 +118,12 @@ async def _run_cli_async():
         case "auth-status":
             sys.exit(await gh.check_auth(cli_args=cli_args))
         case "orgs":
-            format_data(await gh.get_orgs(), cli_args)
+            _format_data(await gh.get_orgs(), cli_args)
         case "user":
-            format_data([{"user": next(iter(await gh.get_user()))}], cli_args)
+            _format_data([{"user": await gh.get_user()}], cli_args)
         case "scopes":
-            format_data(
-                [{"scope_name": scope} for scope in await gh.get_scopes()],
-                cli_args,
-            )
+            _format_data(await gh.get_scopes(), cli_args)
         case "repos":
-            format_data(await gh.get_repos(), cli_args)
+            _format_data(await gh.get_repos(), cli_args)
         case _:
             print("No command supplied. See --help.")
