@@ -26,6 +26,18 @@ def _get_cli_args():
     )
 
     subparsers = parser.add_subparsers(dest="command")
+    parser.add_argument(
+        "-j",
+        "--json",
+        action="store_true",
+        help="Output data in JSON format.",
+    )
+    parser.add_argument(
+        "-p",
+        "--pretty",
+        action="store_true",
+        help="Pretty print the output (with or without json)",
+    )
 
     # i think this doesn't do order?
     check_auth_parser = subparsers.add_parser(
@@ -35,39 +47,29 @@ def _get_cli_args():
     )
     _ = check_auth_parser  # add_argument, set_defaults, etc
 
-    user_parser = subparsers.add_parser(
+    _ = subparsers.add_parser(
         "user",
         description="Get current logged-in user.",
         help="Return username of current logged in user.",
     )
-    user_parser.add_argument("-j", "--json", action="store_true")
-    user_parser.add_argument("-p", "--pretty", action="store_true")
 
-    orgs_parser = subparsers.add_parser(
+    _ = subparsers.add_parser(
         "orgs",
         description="List orgs you're part of.",
         help="Return orgs of current logged in user.",
     )
-    orgs_parser.add_argument("-j", "--json", action="store_true")
-    orgs_parser.add_argument("-p", "--pretty", action="store_true")
 
-    scopes_parser = subparsers.add_parser(
+    _ = subparsers.add_parser(
         "scopes",
         description="Get list of current scopes.",
         help="Return scopes of current logged in user.",
     )
-    scopes_parser.add_argument("-j", "--json", action="store_true")
-    scopes_parser.add_argument("-p", "--pretty", action="store_true")
 
-    repos_parser = subparsers.add_parser(
+    _ = subparsers.add_parser(
         "repos",
         description="Show all repos.",
         help="Return all repos of current logged in user.",
     )
-    repos_parser.add_argument("-j", "--json", action="store_true")
-    repos_parser.add_argument("-p", "--pretty", action="store_true")
-
-    # could accept user
 
     basic_args = parser.parse_args()
     return vars(basic_args)
