@@ -4,10 +4,12 @@ import re
 import warnings
 
 import jq
+import logistro
 import orjson
 
 from . import _gh_service as srv
 
+_logger = logistro.getLogger(__name__)
 ## maybe add options for output (full or reduced, python, json, or console)
 ## yeah so all functions return python object, so either iterate it or json it
 ## maybe add unfiltered option as well
