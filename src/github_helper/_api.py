@@ -82,29 +82,40 @@ class GHApi:
 
     async def get_orgs(self):
         """Return orgs for a user."""
-        retval, out, err = await srv.gh_api("/user/orgs")
-        self._check_retval(retval, err)
+        endpoint = "/user/orgs"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
         orgs_jq = jq.compile("map({ name: (.login) })")
         orgs = orgs_jq.input_value(orjson.loads(out)).first()
         role_jq = jq.compile(".role")
-        await self._initialize()
+        current_user = await self.get_user()
         for k in orgs:
-            endpoint = f"/orgs/{k["name"]}/memberships/{self.current_user}"
+            endpoint = f"orgs/{k["name"]}/memberships/{current_user}"
+            _logger.debug(f"Calling API: {endpoint}")
             retval, out, err = await srv.gh_api(endpoint)
-            self._check_retval(retval, err)
+            self._check_retval(retval, err, **k, endpoint=endpoint)
             k["role"] = role_jq.input_value(orjson.loads(out)).first()
         return orgs
 
     async def get_user(self):
         """Return username."""
-        retval, out, err = await srv.gh_api("/user")
-        self._check_retval(retval, err)
-        user_jq = jq.compile(" { (.login) : .id } ")
-        return user_jq.input_text(out.decode()).first()
+        if self.current_user:
+            return self.current_user
+        endpoint = "/user"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+        user_jq = jq.compile("{ (.login): .id }")
+        user_data = user_jq.input_text(out.decode()).first()
+        user_name = next(iter(user_data))
+        self.current_user = user_name
+        return user_name
 
     async def get_scopes(self):
         """Return array of scopes."""
         scopes_re = re.compile(rb"\n< X-Oauth-Scopes: (.*)\n")
+        # No hay un buen debug
         retval, out, err = await srv.gh_call("gh", "api", "/user", "--verbose")
         self._check_retval(retval, err)
         match = scopes_re.search(out)
@@ -112,20 +123,17 @@ class GHApi:
             raise RuntimeError(
                 "get_scopes couldn't find scopes for some reason. Output:\n{out}",
             )
-        return [scope.strip() for scope in match[1].decode().split(",")]
+        scopes = [scope.strip() for scope in match[1].decode().split(",")]
+        return [{"scope_name": scope} for scope in scopes]
 
     async def get_repos(self):
         """Return repos for a user."""
-        retval, out, err = await srv.gh_api("/user/repos")
-        self._check_retval(retval, err)
+        endpoint = "/user/repos"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
         repos_jq = jq.compile(
             "map({name: .name, visibility: .visibility, owner: .owner.login})"
         )
         repos = repos_jq.input_value(orjson.loads(out)).first()
         return repos
-
-    async def _initialize(self):
-        if self.current_user:
-            return
-        user_name = next(iter(await self.get_user()))
-        self.current_user = user_name
