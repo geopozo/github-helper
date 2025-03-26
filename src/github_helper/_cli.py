@@ -97,7 +97,9 @@ def _print_json(data, option=None):
     print(orjson.dumps(data, option=option).decode())
 
 
-def _format_data(data, cli_args=""):
+def _format_data(data, cli_args=None):
+    if not cli_args:
+        cli_args = {}
     """Format data based on the option provided."""
     if cli_args["json"] and cli_args["pretty"]:
         _print_json(data, option=orjson.OPT_INDENT_2)
