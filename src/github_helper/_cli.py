@@ -82,18 +82,11 @@ def run_cli():
 
 def _print_table(table, headers, tablefmt):
     """Print data in table format."""
-    if not table:
-        print("No data to display.", file=sys.stderr)
-        sys.exit(1)
-        return
     print(tabulate(table, headers=headers, tablefmt=tablefmt))
 
 
 def _print_json(data, option=None):
     """Print data in JSON format."""
-    if not data:
-        print("No data to display.", file=sys.stderr)
-        sys.exit(1)
     print(orjson.dumps(data, option=option).decode())
 
 
@@ -135,5 +128,12 @@ async def _run_cli_async():
             print("No command supplied.", file=sys.stderr)
             parser.print_help()
             sys.exit(1)
+
+    # Not going to work with "user"
+    # If the user is not part of any orgs, or has no repos, is
+    # that not still valid? Should we really be doing this?
+    if not data:
+        print("No data to display.", file=sys.stderr)
+        sys.exit(1)
 
     _format_data(data, cli_args["json"], cli_args["pretty"])
