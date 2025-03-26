@@ -72,7 +72,7 @@ def _get_cli_args():
     )
 
     basic_args = parser.parse_args()
-    return vars(basic_args)
+    return parser, vars(basic_args)
 
 
 def run_cli():
@@ -112,7 +112,7 @@ def _format_data(data, cli_args=""):
 
 
 async def _run_cli_async():
-    cli_args = _get_cli_args()
+    parser, cli_args = _get_cli_args()
     gh = api.GHApi()
     match cli_args["command"]:
         case "auth-status":
@@ -131,6 +131,8 @@ async def _run_cli_async():
         case "repos":
             data = await gh.get_repos()
         case _:
-            print("No command supplied. See --help.")
+            print("No command supplied.", file=sys.stderr)
+            parser.print_help()
+            sys.exit(1)
 
     _format_data(data, cli_args)
