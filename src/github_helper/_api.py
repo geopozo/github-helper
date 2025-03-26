@@ -76,8 +76,10 @@ class GHApi:
         self._check_retval(retval, err, endpoint=endpoint)
         orgs_jq = jq.compile("map({ name: (.login) })")
         orgs = orgs_jq.input_value(orjson.loads(out)).first()
-        role_jq = jq.compile(".role")
+
         current_user = await self.get_user()
+
+        role_jq = jq.compile(".role")
         for k in orgs:
             endpoint = f"orgs/{k['name']}/memberships/{current_user}"
             _logger.debug(f"Calling API: {endpoint}")
@@ -90,6 +92,7 @@ class GHApi:
         """Return username."""
         if self.current_user:
             return self.current_user
+
         endpoint = "/user"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
