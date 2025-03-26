@@ -72,7 +72,7 @@ def _get_cli_args():
     )
 
     basic_args = parser.parse_args()
-    return vars(basic_args)
+    return parser, vars(basic_args)
 
 
 def run_cli():
@@ -80,50 +80,56 @@ def run_cli():
     asyncio.run(_run_cli_async())
 
 
-def _print_table(table, headers, tablefmt):
-    """Print data in table format."""
-    if not table:
-        print("No data to display.", file=sys.stderr)
-        sys.exit(1)
-        return
-    print(tabulate(table, headers=headers, tablefmt=tablefmt))
-
-
-def _print_json(data, option=None):
-    """Print data in JSON format."""
-    if not data:
-        print("No data to display.", file=sys.stderr)
-        sys.exit(1)
-    print(orjson.dumps(data, option=option).decode())
-
-
-def _format_data(data, cli_args=""):
-    """Format data based on the option provided."""
-    if cli_args["json"] and cli_args["pretty"]:
-        _print_json(data, option=orjson.OPT_INDENT_2)
-        return
-    if cli_args["json"]:
-        _print_json(data)
-        return
-    if cli_args["pretty"]:
-        _print_table(data, headers="keys", tablefmt="pretty")
-        return
-    _print_table(data, headers="", tablefmt="plain")
-
-
 async def _run_cli_async():
-    cli_args = _get_cli_args()
+    parser, cli_args = _get_cli_args()
     gh = api.GHApi()
     match cli_args["command"]:
         case "auth-status":
+            # único (por ahora)
             sys.exit(await gh.check_auth(cli_args=cli_args))
         case "orgs":
-            _format_data(await gh.get_orgs(), cli_args)
+            data = await gh.get_orgs()
         case "user":
-            _format_data([{"user": await gh.get_user()}], cli_args)
+            data = [
+                {
+                    "user": await gh.get_user(),
+                },
+            ]
         case "scopes":
-            _format_data(await gh.get_scopes(), cli_args)
+            data = await gh.get_scopes()
         case "repos":
-            _format_data(await gh.get_repos(), cli_args)
+            data = await gh.get_repos()
         case _:
-            print("No command supplied. See --help.")
+            print("No command supplied.", file=sys.stderr)
+            parser.print_help()
+            sys.exit(1)
+
+    # Not going to work with "user"
+    # If the user is not part of any orgs, or has no repos, is
+    # that not still valid? Should we really be doing this?
+    if not data:
+        print("No data to display.", file=sys.stderr)
+        sys.exit(1)
+
+    _print_data(
+        data,
+        fmt_json=cli_args["json"],
+        fmt_pretty=cli_args["pretty"],
+    )
+
+
+# define after is ok in this case because they are right next to each other
+def _print_data(data, *, fmt_json, fmt_pretty):
+    """Format data based on the option provided."""
+    if fmt_json:
+        output = orjson.dumps(
+            data,
+            option=orjson.OPT_INDENT_2 if fmt_pretty else None,
+        ).decode()
+    else:
+        output = tabulate(
+            data,
+            headers="keys" if fmt_pretty else "",
+            tablefmt="pretty" if fmt_pretty else "plain",
+        )
+    print(output)

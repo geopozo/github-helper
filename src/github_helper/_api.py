@@ -10,9 +10,6 @@ import orjson
 from . import _gh_service as srv
 
 _logger = logistro.getLogger(__name__)
-## maybe add options for output (full or reduced, python, json, or console)
-## yeah so all functions return python object, so either iterate it or json it
-## maybe add unfiltered option as well
 
 
 class GHError(RuntimeError):
@@ -25,15 +22,6 @@ class ScopesError(RuntimeError):
 
 class ScopesWarning(UserWarning):
     """Warning for when missing optional enhancing scope."""
-
-
-# lets just start by properly organizing the objects by name/etc
-# orgs # just what
-# private # just what
-# other { "who":
-#          "what":
-#          "permissions"
-#       }
 
 
 class GHApi:
@@ -82,16 +70,18 @@ class GHApi:
 
     async def get_orgs(self):
         """Return orgs for a user."""
+        orgs_jq = jq.compile("map({ name: (.login) })")
         endpoint = "/user/orgs"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
-        orgs_jq = jq.compile("map({ name: (.login) })")
         orgs = orgs_jq.input_value(orjson.loads(out)).first()
-        role_jq = jq.compile(".role")
+
         current_user = await self.get_user()
+
+        role_jq = jq.compile(".role")
         for k in orgs:
-            endpoint = f"orgs/{k["name"]}/memberships/{current_user}"
+            endpoint = f"orgs/{k['name']}/memberships/{current_user}"
             _logger.debug(f"Calling API: {endpoint}")
             retval, out, err = await srv.gh_api(endpoint)
             self._check_retval(retval, err, **k, endpoint=endpoint)
@@ -100,13 +90,14 @@ class GHApi:
 
     async def get_user(self):
         """Return username."""
-        if self._current_user:
-            return self._current_user
+        if self.current_user:
+            return self.current_user
+
+        user_jq = jq.compile("{ (.login): .id }")
         endpoint = "/user"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
-        user_jq = jq.compile("{ (.login): .id }")
         user_data = user_jq.input_text(out.decode()).first()
         user_name = next(iter(user_data))
         self._current_user = user_name
@@ -115,7 +106,9 @@ class GHApi:
     async def get_scopes(self):
         """Return array of scopes."""
         scopes_re = re.compile(rb"\n< X-Oauth-Scopes: (.*)\n")
-        retval, out, err = await srv.gh_call("gh", "api", "/user", "--verbose")
+        cli_command = ["gh", "api", "/user", "--verbose"]
+        _logger.debug(f"Calling CLI command: {" ".join(cli_command)}")
+        retval, out, err = await srv.gh_call(*cli_command)
         self._check_retval(retval, err)
         match = scopes_re.search(out)
         if not match:
