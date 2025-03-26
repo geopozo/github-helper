@@ -89,11 +89,7 @@ async def _run_cli_async():
         case "orgs":
             data = await gh.get_orgs()
         case "user":
-            data = [
-                {
-                    "user": await gh.get_user(),
-                },
-            ]
+            data = await gh.get_user()
         case "scopes":
             data = await gh.get_scopes()
         case "repos":
