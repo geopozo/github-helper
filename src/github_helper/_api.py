@@ -108,7 +108,7 @@ class GHApi:
         scopes_re = re.compile(rb"\n< X-Oauth-Scopes: (.*)\n")
         cli_command = ["gh", "api", "/user", "--verbose"]
         _logger.debug(f"Calling CLI command: {" ".join(cli_command)}")
-        retval, out, err = await srv.gh_call(cli_command)
+        retval, out, err = await srv.gh_call(*cli_command)
         self._check_retval(retval, err)
         match = scopes_re.search(out)
         if not match:
