@@ -106,8 +106,9 @@ class GHApi:
     async def get_scopes(self):
         """Return array of scopes."""
         scopes_re = re.compile(rb"\n< X-Oauth-Scopes: (.*)\n")
-        # No hay un buen debug
-        retval, out, err = await srv.gh_call("gh", "api", "/user", "--verbose")
+        cli_command = ["gh", "api", "/user", "--verbose"]
+        _logger.debug(f"Calling CLI command: {" ".join(cli_command)}")
+        retval, out, err = await srv.gh_call(cli_command)
         self._check_retval(retval, err)
         match = scopes_re.search(out)
         if not match:
