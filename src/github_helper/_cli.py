@@ -80,29 +80,20 @@ def run_cli():
     asyncio.run(_run_cli_async())
 
 
-def _print_table(table, headers, tablefmt):
-    """Print data in table format."""
-    print(tabulate(table, headers=headers, tablefmt=tablefmt))
-
-
-def _print_json(data, option=None):
-    """Print data in JSON format."""
-    print(orjson.dumps(data, option=option).decode())
-
-
-def _format_data(data, fmt_json, fmt_pretty):
+def _print_data(data, fmt_json, fmt_pretty):
     """Format data based on the option provided."""
     if fmt_json:
-        _print_json(
+        output = orjson.dumps(
             data,
             option=orjson.OPT_INDENT_2 if fmt_pretty else None,
-        )
+        ).decode()
     else:
-        _print_table(
+        output = tabulate(
             data,
             headers="keys" if fmt_pretty else "",
             tablefmt="pretty" if fmt_pretty else "plain",
         )
+    print(output)
 
 
 async def _run_cli_async():
@@ -136,4 +127,4 @@ async def _run_cli_async():
         print("No data to display.", file=sys.stderr)
         sys.exit(1)
 
-    _format_data(data, cli_args["json"], cli_args["pretty"])
+    _print_data(data, cli_args["json"], cli_args["pretty"])
