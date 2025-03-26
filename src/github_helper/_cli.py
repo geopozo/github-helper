@@ -97,18 +97,19 @@ def _print_json(data, option=None):
     print(orjson.dumps(data, option=option).decode())
 
 
-def _format_data(data, cli_args=None):
-    if not cli_args:
-        cli_args = {}
+def _format_data(data, fmt_json, fmt_pretty):
     """Format data based on the option provided."""
-    if cli_args["json"] and cli_args["pretty"]:
-        _print_json(data, option=orjson.OPT_INDENT_2)
-    elif cli_args["json"]:
-        _print_json(data)
-    elif cli_args["pretty"]:
-        _print_table(data, headers="keys", tablefmt="pretty")
+    if fmt_json:
+        _print_json(
+            data,
+            option=orjson.OPT_INDENT_2 if fmt_pretty else None,
+        )
     else:
-        _print_table(data, headers="", tablefmt="plain")
+        _print_table(
+            data,
+            headers="keys" if fmt_pretty else "",
+            tablefmt="pretty" if fmt_pretty else "plain",
+        )
 
 
 async def _run_cli_async():
@@ -135,4 +136,4 @@ async def _run_cli_async():
             parser.print_help()
             sys.exit(1)
 
-    _format_data(data, cli_args)
+    _format_data(data, cli_args["json"], cli_args["pretty"])
