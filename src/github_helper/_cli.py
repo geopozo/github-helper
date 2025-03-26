@@ -70,6 +70,22 @@ def _get_cli_args():
         help="Return all repos of current logged in user.",
     )
 
+    # We need complete this command in the future
+    # We need an argument called --repo or maybe --name
+    _ = subparsers.add_parser(
+        "tags",
+        description="Show all tags from a repo",
+        help="Return all repos of a repo",
+    )
+
+    # We need complete this command in the future
+    # We need an argument called --repo or maybe --name
+    _ = subparsers.add_parser(
+        "releases",
+        description="Show all releases from a repo",
+        help="Return all releases of a repo",
+    )
+
     basic_args = parser.parse_args()
     return parser, vars(basic_args)
 
@@ -94,6 +110,10 @@ async def _run_cli_async():
             data = await gh.get_scopes()
         case "repos":
             data = await gh.get_repos()
+        case "tags":
+            data = await gh.get_tags()
+        case "releases":
+            data = await gh.get_releases()
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()

@@ -133,3 +133,11 @@ class GHApi:
         )
         repos = repos_jq.input_value(orjson.loads(out)).first()
         return repos
+
+    async def get_tags(self):
+        """Return tags for a repo."""
+        return []
+
+    async def get_releases(self):
+        """Return releases for a repo."""
+        return []
