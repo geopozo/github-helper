@@ -115,7 +115,6 @@ class GHApi:
     async def get_scopes(self):
         """Return array of scopes."""
         scopes_re = re.compile(rb"\n< X-Oauth-Scopes: (.*)\n")
-        # No hay un buen debug
         retval, out, err = await srv.gh_call("gh", "api", "/user", "--verbose")
         self._check_retval(retval, err)
         match = scopes_re.search(out)
