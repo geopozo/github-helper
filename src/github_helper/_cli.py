@@ -111,11 +111,15 @@ async def _run_cli_async():
         print("No data to display.", file=sys.stderr)
         sys.exit(1)
 
-    _print_data(data, cli_args["json"], cli_args["pretty"])
+    _print_data(
+        data,
+        fmt_json=cli_args["json"],
+        fmt_pretty=cli_args["pretty"],
+    )
 
 
 # define after is ok in this case because they are right next to each other
-def _print_data(data, fmt_json, fmt_pretty):
+def _print_data(data, *, fmt_json, fmt_pretty):
     """Format data based on the option provided."""
     if fmt_json:
         output = orjson.dumps(
