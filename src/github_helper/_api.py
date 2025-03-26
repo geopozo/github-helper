@@ -70,11 +70,11 @@ class GHApi:
 
     async def get_orgs(self):
         """Return orgs for a user."""
+        orgs_jq = jq.compile("map({ name: (.login) })")
         endpoint = "/user/orgs"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
-        orgs_jq = jq.compile("map({ name: (.login) })")
         orgs = orgs_jq.input_value(orjson.loads(out)).first()
 
         current_user = await self.get_user()
@@ -93,11 +93,11 @@ class GHApi:
         if self.current_user:
             return self.current_user
 
+        user_jq = jq.compile("{ (.login): .id }")
         endpoint = "/user"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
-        user_jq = jq.compile("{ (.login): .id }")
         user_data = user_jq.input_text(out.decode()).first()
         user_name = next(iter(user_data))
         self.current_user = user_name
