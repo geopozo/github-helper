@@ -77,11 +77,11 @@ class GHApi:
         self._check_retval(retval, err, endpoint=endpoint)
         orgs = orgs_jq.input_value(orjson.loads(out)).first()
 
-        current_user = await self.get_user()
+        _ = await self.get_user()
 
         role_jq = jq.compile(".role")
         for k in orgs:
-            endpoint = f"orgs/{k['name']}/memberships/{current_user}"
+            endpoint = f"orgs/{k['name']}/memberships/{self._current_user}"
             _logger.debug(f"Calling API: {endpoint}")
             retval, out, err = await srv.gh_api(endpoint)
             self._check_retval(retval, err, **k, endpoint=endpoint)
@@ -91,7 +91,7 @@ class GHApi:
     async def get_user(self):
         """Return username."""
         if self._current_user:
-            return self._current_user
+            return {"user": self._current_user}
 
         user_jq = jq.compile("{ (.login): .id }")
         endpoint = "/user"
@@ -101,13 +101,13 @@ class GHApi:
         user_data = user_jq.input_text(out.decode()).first()
         user_name = next(iter(user_data))
         self._current_user = user_name
-        return user_name
+        return {"user": user_name}
 
     async def get_scopes(self):
         """Return array of scopes."""
         scopes_re = re.compile(rb"\n< X-Oauth-Scopes: (.*)\n")
         cli_command = ["gh", "api", "/user", "--verbose"]
-        _logger.debug(f"Calling CLI command: {" ".join(cli_command)}")
+        _logger.debug(f"Calling CLI command: {' '.join(cli_command)}")
         retval, out, err = await srv.gh_call(*cli_command)
         self._check_retval(retval, err)
         match = scopes_re.search(out)
