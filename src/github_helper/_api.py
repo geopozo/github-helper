@@ -90,8 +90,8 @@ class GHApi:
 
     async def get_user(self):
         """Return username."""
-        if self.current_user:
-            return self.current_user
+        if self._current_user:
+            return self._current_user
 
         user_jq = jq.compile("{ (.login): .id }")
         endpoint = "/user"
