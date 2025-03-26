@@ -39,7 +39,6 @@ def _get_cli_args():
         help="Pretty print the output (with or without json)",
     )
 
-    # i think this doesn't do order?
     check_auth_parser = subparsers.add_parser(
         "auth-status",
         description="Check that you are logged in.",
@@ -104,9 +103,6 @@ async def _run_cli_async():
             parser.print_help()
             sys.exit(1)
 
-    # Not going to work with "user"
-    # If the user is not part of any orgs, or has no repos, is
-    # that not still valid? Should we really be doing this?
     if not data:
         print("No data to display.", file=sys.stderr)
         sys.exit(1)
@@ -118,7 +114,6 @@ async def _run_cli_async():
     )
 
 
-# define after is ok in this case because they are right next to each other
 def _print_data(data, *, fmt_json, fmt_pretty):
     """Format data based on the option provided."""
     if fmt_json:
