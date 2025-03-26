@@ -80,22 +80,6 @@ def run_cli():
     asyncio.run(_run_cli_async())
 
 
-def _print_data(data, fmt_json, fmt_pretty):
-    """Format data based on the option provided."""
-    if fmt_json:
-        output = orjson.dumps(
-            data,
-            option=orjson.OPT_INDENT_2 if fmt_pretty else None,
-        ).decode()
-    else:
-        output = tabulate(
-            data,
-            headers="keys" if fmt_pretty else "",
-            tablefmt="pretty" if fmt_pretty else "plain",
-        )
-    print(output)
-
-
 async def _run_cli_async():
     parser, cli_args = _get_cli_args()
     gh = api.GHApi()
@@ -128,3 +112,20 @@ async def _run_cli_async():
         sys.exit(1)
 
     _print_data(data, cli_args["json"], cli_args["pretty"])
+
+
+# define after is ok in this case because they are right next to each other
+def _print_data(data, fmt_json, fmt_pretty):
+    """Format data based on the option provided."""
+    if fmt_json:
+        output = orjson.dumps(
+            data,
+            option=orjson.OPT_INDENT_2 if fmt_pretty else None,
+        ).decode()
+    else:
+        output = tabulate(
+            data,
+            headers="keys" if fmt_pretty else "",
+            tablefmt="pretty" if fmt_pretty else "plain",
+        )
+    print(output)
