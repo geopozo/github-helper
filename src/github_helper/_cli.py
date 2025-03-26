@@ -122,6 +122,8 @@ def _print_data(data, *, fmt_json, fmt_pretty):
             option=orjson.OPT_INDENT_2 if fmt_pretty else None,
         ).decode()
     else:
+        if not isinstance(data, list):
+            data = [data]
         output = tabulate(
             data,
             headers="keys" if fmt_pretty else "",
