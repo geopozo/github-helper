@@ -101,14 +101,12 @@ def _format_data(data, cli_args=""):
     """Format data based on the option provided."""
     if cli_args["json"] and cli_args["pretty"]:
         _print_json(data, option=orjson.OPT_INDENT_2)
-        return
-    if cli_args["json"]:
+    elif cli_args["json"]:
         _print_json(data)
-        return
-    if cli_args["pretty"]:
+    elif cli_args["pretty"]:
         _print_table(data, headers="keys", tablefmt="pretty")
-        return
-    _print_table(data, headers="", tablefmt="plain")
+    else:
+        _print_table(data, headers="", tablefmt="plain")
 
 
 async def _run_cli_async():
