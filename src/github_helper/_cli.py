@@ -116,14 +116,21 @@ async def _run_cli_async():
     gh = api.GHApi()
     match cli_args["command"]:
         case "auth-status":
+            # único (por ahora)
             sys.exit(await gh.check_auth(cli_args=cli_args))
         case "orgs":
-            _format_data(await gh.get_orgs(), cli_args)
+            data = await gh.get_orgs()
         case "user":
-            _format_data([{"user": await gh.get_user()}], cli_args)
+            data = [
+                {
+                    "user": await gh.get_user(),
+                },
+            ]
         case "scopes":
-            _format_data(await gh.get_scopes(), cli_args)
+            data = await gh.get_scopes()
         case "repos":
-            _format_data(await gh.get_repos(), cli_args)
+            data = await gh.get_repos()
         case _:
             print("No command supplied. See --help.")
+
+    _format_data(data, cli_args)
