@@ -38,7 +38,7 @@ class ScopesWarning(UserWarning):
 
 class GHApi:
     def __init__(self):
-        self.current_user = ""
+        self._current_user = ""
 
     # untested
     def _check_scopes(self, scopes_had, scopes_needed, scopes_wanted):
@@ -100,8 +100,8 @@ class GHApi:
 
     async def get_user(self):
         """Return username."""
-        if self.current_user:
-            return self.current_user
+        if self._current_user:
+            return self._current_user
         endpoint = "/user"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
@@ -109,7 +109,7 @@ class GHApi:
         user_jq = jq.compile("{ (.login): .id }")
         user_data = user_jq.input_text(out.decode()).first()
         user_name = next(iter(user_data))
-        self.current_user = user_name
+        self._current_user = user_name
         return user_name
 
     async def get_scopes(self):
