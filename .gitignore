@@ -15,11 +15,6 @@ __pycache__
 src/js/build
 test-results*
 
-# builds
-src/py/integration_tests/renders/*
-src/py/integration_tests/*.log
-src/py/integration_tests/report*
-
 # avoid ignore .gitkeep
-!src/py/integration_tests/renders/.gitkeep
 node_modules/
+.github/copilot-instructions.md
