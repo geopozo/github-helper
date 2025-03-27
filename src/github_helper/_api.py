@@ -141,3 +141,6 @@ class GHApi:
     async def get_releases(self):
         """Return releases for a repo."""
         return []
+
+    async def audit_rulesets_repo(self, *, repo):
+        pass
