@@ -86,6 +86,13 @@ def _get_cli_args():
         help="Return all releases of a repo",
     )
 
+    audit_repo = subparsers.add_parser(
+        "audit-repo",
+        description="",
+        help="",
+    )
+    audit_repo.add_argument("-r", "--repo", help="")
+
     basic_args = parser.parse_args()
     return parser, vars(basic_args)
 
