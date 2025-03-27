@@ -80,12 +80,12 @@ class GHApi:
         _ = await self.get_user()
 
         role_jq = jq.compile(".role")
-        for k in orgs:
-            endpoint = f"orgs/{k['name']}/memberships/{self._current_user}"
+        for org in orgs:
+            endpoint = f"orgs/{org['name']}/memberships/{self._current_user}"
             _logger.debug(f"Calling API: {endpoint}")
             retval, out, err = await srv.gh_api(endpoint)
-            self._check_retval(retval, err, **k, endpoint=endpoint)
-            k["role"] = role_jq.input_value(orjson.loads(out)).first()
+            self._check_retval(retval, err, **org, endpoint=endpoint)
+            org["role"] = role_jq.input_value(orjson.loads(out)).first()
         return orgs
 
     async def get_user(self):
