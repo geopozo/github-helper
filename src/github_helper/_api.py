@@ -89,6 +89,23 @@ class GHApi:
         self._check_retval(retval, err, endpoint=endpoint)
         return orjson.loads(out)
 
+    async def _json_comparer(self, *, origin, target, excluded_keys):
+        differences = []
+        all_keys = set(origin.keys()).union(target.keys())
+
+        for key in all_keys:
+            if key in excluded_keys:
+                continue
+
+            origin_value = origin.get(key)
+            target_value = target.get(key)
+
+            if origin_value != target_value:
+                differences.append(
+                    {"name": key, "origin": origin_value, "target": target_value},
+                )
+        return differences if differences else {"is_equal": True}
+
     async def get_orgs(self):
         """Return orgs for a user."""
         orgs_jq = jq.compile("map({ name: (.login) })")
