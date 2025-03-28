@@ -27,6 +27,7 @@ class ScopesWarning(UserWarning):
 class GHApi:
     def __init__(self):
         self._current_user = ""
+        self._current_repo = ""
 
     # untested
     def _check_scopes(self, scopes_had, scopes_needed, scopes_wanted):
