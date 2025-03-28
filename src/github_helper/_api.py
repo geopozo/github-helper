@@ -181,4 +181,19 @@ class GHApi:
         return []
 
     async def audit_rulesets_repo(self, *, repo):
-        pass
+        if not repo:
+            raise GHError("Repo is required, please use --repo or -r")
+        self._current_repo = repo
+
+        _ = await self.get_user()
+        rulesets_jq = jq.compile("map({(.name): .id}) | add")
+        endpoint = f"repos/{self._current_user}/{self._current_repo}/rulesets"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+        rulesets = rulesets_jq.input_value(orjson.loads(out)).first()
+
+        if not rulesets:
+            return []
+
+        return []
