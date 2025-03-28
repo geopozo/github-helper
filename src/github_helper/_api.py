@@ -2,8 +2,10 @@
 
 import re
 import warnings
+from pathlib import Path
 
-import jq
+import aiofiles
+import jq  # type: ignore import_not_found
 import logistro
 import orjson
 
@@ -68,6 +70,16 @@ class GHApi:
                 raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")  # noqa: TRY301
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
+
+    async def _get_template(self, *, file_name):
+        if not file_name:
+            raise GHError("File name is required")
+
+        file_path = Path(__file__).resolve().parent / f"templates/{file_name}.json"
+
+        async with aiofiles.open(file_path) as f:
+            file = await f.read()
+        return orjson.loads(file)
 
     async def get_orgs(self):
         """Return orgs for a user."""
