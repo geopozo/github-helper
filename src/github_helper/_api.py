@@ -196,4 +196,23 @@ class GHApi:
         if not rulesets:
             return []
 
-        return []
+        excluded_keys = [
+            "id",
+            "source_type",
+            "source",
+            "node_id",
+            "created_at",
+            "updated_at",
+            "_links",
+        ]
+
+        for k, v in rulesets.items():
+            json_origin = await self._get_ruleset_by_id(_id=v)
+            json_target = await self._get_template(file_name=k)
+            result = await self._json_comparer(
+                origin=json_origin,
+                target=json_target,
+                excluded_keys=excluded_keys,
+            )
+
+        return result
