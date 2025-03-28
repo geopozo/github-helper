@@ -81,6 +81,14 @@ class GHApi:
             file = await f.read()
         return orjson.loads(file)
 
+    async def _get_ruleset_by_id(self, *, _id):
+        """Return releset for a user by Id."""
+        endpoint = f"repos/{self._current_user}/{self._current_repo}/rulesets/{_id}"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+        return orjson.loads(out)
+
     async def get_orgs(self):
         """Return orgs for a user."""
         orgs_jq = jq.compile("map({ name: (.login) })")
