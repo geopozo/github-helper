@@ -111,7 +111,7 @@ async def _run_cli_async():
             data = await gh.get_repos()
         case "tags":
             repo = cli_args["repo"]
-            data = await gh.get_tags(repo)
+            data = await gh.get_tags(repo=repo)
         case "releases":
             data = await gh.get_releases()
         case _:
