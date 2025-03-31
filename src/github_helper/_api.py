@@ -129,7 +129,17 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
         repos_jq = jq.compile(
-            "map({name: .name, visibility: .visibility, owner: .owner.login})",
+            "map({"
+            "name: .name,"
+            "visibility: .visibility,"
+            "archived: .archived,"
+            "owner: .owner.login"
+            "})"
+            " | sort_by(.name)"
+            " | sort_by(.archived)"
+            " | reverse"
+            " | sort_by(.visibility)"
+            " | reverse",
         )
         repos = repos_jq.input_value(orjson.loads(out)).first()
         return repos
