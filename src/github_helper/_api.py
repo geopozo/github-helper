@@ -140,22 +140,6 @@ class GHApi:
 
     async def get_releases(self, *, repo=None):
         """Return releases for a repo."""
-        if not repo:
-            # Check(Andrew): Review this message
-            raise GHError(
-                (
-                    "Repository name required.",
-                    "Please provide it with the --repo or -r flag.",
-                ),
-            )
-
-        _ = await self.get_user()
-
-        endpoint = f"repos/{self._current_user}/{repo}/releases"
-        _logger.debug(f"Calling API: {endpoint}")
-        retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
-
         releases_jq = jq.compile(
             r"map({"
             r"name: .name, "
@@ -163,5 +147,10 @@ class GHApi:
             r"published: (.draft | not)"
             r"})",
         )
+        _ = await self.get_user()
+        endpoint = f"repos/{self._current_user}/{repo}/releases"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
         return releases
