@@ -102,6 +102,7 @@ def run_cli():
 async def _run_cli_async():
     parser, cli_args = _get_cli_args()
     gh = api.GHApi()
+    repo = cli_args["repo"]
     match cli_args["command"]:
         case "auth-status":
             # único (por ahora)
@@ -115,7 +116,6 @@ async def _run_cli_async():
         case "repos":
             data = await gh.get_repos()
         case "tags":
-            repo = cli_args["repo"]
             data = await gh.get_tags(repo=repo)
         case "releases":
             data = await gh.get_releases()
