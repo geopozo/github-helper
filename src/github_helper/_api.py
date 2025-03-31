@@ -138,6 +138,14 @@ class GHApi:
         """Return tags for a repo."""
         return []
 
-    async def get_releases(self):
+    async def get_releases(self, *, repo=None):
         """Return releases for a repo."""
+        if not repo:
+            # Check(Andrew): Review this message
+            raise GHError(
+                (
+                    "Repository name required.",
+                    "Please provide it with the --repo or -r flag.",
+                ),
+            )
         return []
