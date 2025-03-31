@@ -137,12 +137,11 @@ class GHApi:
     async def get_tags(self, *, repo):
         """Return tags for a repo."""
         _ = await self.get_user()
-
+        tags_jq = jq.compile("map({name: .name})")
         endpoint = f"repos/{self._current_user}/{repo}/tags"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
-        tags_jq = jq.compile("map({name: .name})")
         tags = tags_jq.input_value(orjson.loads(out)).first()
         return tags
 
