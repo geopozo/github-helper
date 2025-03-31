@@ -75,7 +75,12 @@ def _get_cli_args():
         description="Show all tags from a repo",
         help="Return all repos of a repo",
     )
-    tags_parser.add_argument("-r", "--repo", help="Name of the repository")
+    tags_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required",
+        required=True,
+    )
 
     # We need complete this command in the future
     # We need an argument called --repo or maybe --name
