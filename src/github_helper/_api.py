@@ -163,7 +163,17 @@ class GHApi:
     async def get_repos(self):
         """Return repos for a user."""
         repos_jq = jq.compile(
-            "map({name: .name, visibility: .visibility, owner: .owner.login})",
+            r"map({"
+            r"name: .name,"
+            r"visibility: .visibility,"
+            r"archived: .archived,"
+            r"owner: .owner.login"
+            r"})"
+            r" | sort_by(.name)"
+            r" | sort_by(.archived)"
+            r" | reverse"
+            r" | sort_by(.visibility)"
+            r" | reverse",
         )
         endpoint = "/user/repos"
         _logger.debug(f"Calling API: {endpoint}")
