@@ -124,23 +124,23 @@ class GHApi:
 
     async def get_repos(self):
         """Return repos for a user."""
+        repos_jq = jq.compile(
+            r"map({"
+            r"name: .name,"
+            r"visibility: .visibility,"
+            r"archived: .archived,"
+            r"owner: .owner.login"
+            r"})"
+            r" | sort_by(.name)"
+            r" | sort_by(.archived)"
+            r" | reverse"
+            r" | sort_by(.visibility)"
+            r" | reverse",
+        )
         endpoint = "/user/repos"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
-        repos_jq = jq.compile(
-            "map({"
-            "name: .name,"
-            "visibility: .visibility,"
-            "archived: .archived,"
-            "owner: .owner.login"
-            "})"
-            " | sort_by(.name)"
-            " | sort_by(.archived)"
-            " | reverse"
-            " | sort_by(.visibility)"
-            " | reverse",
-        )
         repos = repos_jq.input_value(orjson.loads(out)).first()
         return repos
 
