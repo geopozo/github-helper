@@ -78,13 +78,12 @@ def _get_cli_args():
         help="Return all repos of a repo",
     )
 
-    # We need complete this command in the future
-    # We need an argument called --repo or maybe --name
-    _ = subparsers.add_parser(
+    releases_parser = subparsers.add_parser(
         "releases",
         description="Show all releases from a repo",
         help="Return all releases of a repo",
     )
+    releases_parser.add_argument("-r", "--repo", help="Name of the repository")
 
     basic_args = parser.parse_args()
     return parser, vars(basic_args)
