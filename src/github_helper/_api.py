@@ -184,6 +184,7 @@ class GHApi:
 
     async def get_releases(self, *, repo=None):
         """Return releases for a repo."""
+        _ = await self.get_user()
         releases_jq = jq.compile(
             r"map({"
             r"name: .name, "
@@ -191,7 +192,6 @@ class GHApi:
             r"published: (.draft | not)"
             r"})",
         )
-        _ = await self.get_user()
         endpoint = f"repos/{self._current_user}/{repo}/releases"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
