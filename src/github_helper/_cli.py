@@ -83,7 +83,12 @@ def _get_cli_args():
         description="Show all releases from a repo",
         help="Return all releases of a repo",
     )
-    releases_parser.add_argument("-r", "--repo", help="Name of the repository")
+    releases_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required",
+        required=True,
+    )
 
     basic_args = parser.parse_args()
     return parser, vars(basic_args)
