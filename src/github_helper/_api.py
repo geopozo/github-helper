@@ -10,21 +10,10 @@ import logistro
 import orjson
 
 from . import _gh_service as srv
+from ._gh_service import GHError, ScopesError, ScopesWarning
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
-
-
-class GHError(RuntimeError):
-    """Error type for `gh` CLI tool errors."""
-
-
-class ScopesError(RuntimeError):
-    """Error for when missing necessary scope."""
-
-
-class ScopesWarning(UserWarning):
-    """Warning for when missing optional enhancing scope."""
 
 
 class GHApi:
