@@ -91,7 +91,12 @@ def _get_cli_args():
         description="",
         help="",
     )
-    audit_repo.add_argument("-r", "--repo", help="")
+    audit_repo.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required",
+        required=True,
+    )
 
     basic_args = parser.parse_args()
     return parser, vars(basic_args)
