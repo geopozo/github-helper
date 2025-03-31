@@ -94,6 +94,18 @@ def _get_cli_args():
         required=True,
     )
 
+    audit_repo = subparsers.add_parser(
+        "audit-repo",
+        description="",
+        help="",
+    )
+    audit_repo.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required",
+        required=True,
+    )
+
     basic_args = parser.parse_args()
     return parser, vars(basic_args)
 
@@ -123,6 +135,8 @@ async def _run_cli_async():
             data = await gh.get_tags(repo=repo)
         case "releases":
             data = await gh.get_releases(repo=repo)
+        case "audit-repo":
+            data = await gh.audit_rulesets_repo(repo=repo)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()

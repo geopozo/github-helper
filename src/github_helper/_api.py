@@ -2,14 +2,17 @@
 
 import re
 import warnings
+from pathlib import Path
 
-import jq
+import aiofiles
+import jq  # type: ignore import_not_found
 import logistro
 import orjson
 
 from . import _gh_service as srv
 
 _logger = logistro.getLogger(__name__)
+_SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 class GHError(RuntimeError):
@@ -68,6 +71,41 @@ class GHApi:
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
+    async def _get_template(self, *, file_name):
+        if not file_name:
+            raise GHError("File name is required")
+
+        template_path = _SCRIPT_DIR / f"templates/{file_name}.json"
+
+        async with aiofiles.open(template_path) as f:
+            file = await f.read()
+        return orjson.loads(file)
+
+    async def _get_ruleset_by_id(self, *, _id, repo):
+        """Return releset for a user by Id."""
+        endpoint = f"repos/{self._current_user}/{repo}/rulesets/{_id}"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+        return orjson.loads(out)
+
+    async def _json_comparer(self, *, origin, target, excluded_keys):
+        differences = []
+        all_keys = set(origin.keys()).union(target.keys())
+
+        for key in all_keys:
+            if key in excluded_keys:
+                continue
+
+            origin_value = origin.get(key)
+            target_value = target.get(key)
+
+            if origin_value != target_value:
+                differences.append(
+                    {"name": key, "origin": origin_value, "target": target_value},
+                )
+        return differences if differences else {"is_equal": True}
+
     async def get_orgs(self):
         """Return orgs for a user."""
         orgs_jq = jq.compile("map({ name: (.login) })")
@@ -124,13 +162,13 @@ class GHApi:
 
     async def get_repos(self):
         """Return repos for a user."""
+        repos_jq = jq.compile(
+            "map({name: .name, visibility: .visibility, owner: .owner.login})",
+        )
         endpoint = "/user/repos"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
-        repos_jq = jq.compile(
-            "map({name: .name, visibility: .visibility, owner: .owner.login})",
-        )
         repos = repos_jq.input_value(orjson.loads(out)).first()
         return repos
 
@@ -161,3 +199,36 @@ class GHApi:
         self._check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
         return releases
+
+    async def audit_rulesets_repo(self, *, repo):
+        _ = await self.get_user()
+        rulesets_jq = jq.compile("map({(.name): .id}) | add")
+        endpoint = f"repos/{self._current_user}/{repo}/rulesets"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+        rulesets = rulesets_jq.input_value(orjson.loads(out)).first()
+
+        if not rulesets:
+            return []
+
+        excluded_keys = [
+            "id",
+            "source_type",
+            "source",
+            "node_id",
+            "created_at",
+            "updated_at",
+            "_links",
+        ]
+
+        for k, v in rulesets.items():
+            json_origin = await self._get_ruleset_by_id(_id=v, repo=repo)
+            json_target = await self._get_template(file_name=k)
+            result = await self._json_comparer(
+                origin=json_origin,
+                target=json_target,
+                excluded_keys=excluded_keys,
+            )
+
+        return result

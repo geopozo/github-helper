@@ -21,6 +21,7 @@ maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
 dependencies = [
+    "aiofiles>=24.1.0",
     "colored>=2.3.0",
     "jq>=1.8.0",
     "logistro>=1.0.11",
@@ -41,6 +42,7 @@ dev = [
     "pytest>=8.3.4",
     "mypy>=1.14.1",
     "poethepoet>=0.30.0",
+    "types-tabulate>=0.9.0.20241207",
 ]
 
 #docs = [
