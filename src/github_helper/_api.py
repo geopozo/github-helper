@@ -29,7 +29,6 @@ class ScopesWarning(UserWarning):
 class GHApi:
     def __init__(self):
         self._current_user = ""
-        self._current_repo = ""
 
     # untested
     def _check_scopes(self, scopes_had, scopes_needed, scopes_wanted):
@@ -81,9 +80,9 @@ class GHApi:
             file = await f.read()
         return orjson.loads(file)
 
-    async def _get_ruleset_by_id(self, *, _id):
+    async def _get_ruleset_by_id(self, *, _id, repo):
         """Return releset for a user by Id."""
-        endpoint = f"repos/{self._current_user}/{self._current_repo}/rulesets/{_id}"
+        endpoint = f"repos/{self._current_user}/{repo}/rulesets/{_id}"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
@@ -183,11 +182,10 @@ class GHApi:
     async def audit_rulesets_repo(self, *, repo):
         if not repo:
             raise GHError("Repo is required, please use --repo or -r")
-        self._current_repo = repo
 
         _ = await self.get_user()
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
-        endpoint = f"repos/{self._current_user}/{self._current_repo}/rulesets"
+        endpoint = f"repos/{self._current_user}/{repo}/rulesets"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
@@ -207,7 +205,7 @@ class GHApi:
         ]
 
         for k, v in rulesets.items():
-            json_origin = await self._get_ruleset_by_id(_id=v)
+            json_origin = await self._get_ruleset_by_id(_id=v, repo=repo)
             json_target = await self._get_template(file_name=k)
             result = await self._json_comparer(
                 origin=json_origin,
