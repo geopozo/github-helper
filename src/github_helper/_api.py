@@ -181,9 +181,6 @@ class GHApi:
         return []
 
     async def audit_rulesets_repo(self, *, repo):
-        if not repo:
-            raise GHError("Repo is required, please use --repo or -r")
-
         _ = await self.get_user()
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
         endpoint = f"repos/{self._current_user}/{repo}/rulesets"
