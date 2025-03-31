@@ -134,9 +134,16 @@ class GHApi:
         repos = repos_jq.input_value(orjson.loads(out)).first()
         return repos
 
-    async def get_tags(self):
+    async def get_tags(self, *, repo):
         """Return tags for a repo."""
-        return []
+        _ = await self.get_user()
+        tags_jq = jq.compile("map({name: .name})")
+        endpoint = f"repos/{self._current_user}/{repo}/tags"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+        tags = tags_jq.input_value(orjson.loads(out)).first()
+        return tags
 
     async def get_releases(self, *, repo=None):
         """Return releases for a repo."""

@@ -70,12 +70,16 @@ def _get_cli_args():
         help="Return all repos of current logged in user.",
     )
 
-    # We need complete this command in the future
-    # We need an argument called --repo or maybe --name
-    _ = subparsers.add_parser(
+    tags_parser = subparsers.add_parser(
         "tags",
         description="Show all tags from a repo",
         help="Return all repos of a repo",
+    )
+    tags_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required",
+        required=True,
     )
 
     releases_parser = subparsers.add_parser(
@@ -116,7 +120,7 @@ async def _run_cli_async():
         case "repos":
             data = await gh.get_repos()
         case "tags":
-            data = await gh.get_tags()
+            data = await gh.get_tags(repo=repo)
         case "releases":
             data = await gh.get_releases(repo=repo)
         case _:
