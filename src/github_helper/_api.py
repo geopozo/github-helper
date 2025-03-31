@@ -12,6 +12,7 @@ import orjson
 from . import _gh_service as srv
 
 _logger = logistro.getLogger(__name__)
+_SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 class GHError(RuntimeError):
@@ -74,9 +75,9 @@ class GHApi:
         if not file_name:
             raise GHError("File name is required")
 
-        file_path = Path(__file__).resolve().parent / f"templates/{file_name}.json"
+        template_path = _SCRIPT_DIR / f"templates/{file_name}.json"
 
-        async with aiofiles.open(file_path) as f:
+        async with aiofiles.open(template_path) as f:
             file = await f.read()
         return orjson.loads(file)
 
