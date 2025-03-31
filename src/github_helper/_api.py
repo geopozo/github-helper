@@ -148,4 +148,20 @@ class GHApi:
                     "Please provide it with the --repo or -r flag.",
                 ),
             )
-        return []
+
+        _ = await self.get_user()
+
+        endpoint = f"repos/{self._current_user}/{repo}/releases"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+
+        releases_jq = jq.compile(
+            r"map({"
+            r"name: .name, "
+            r"tag: .tag_name, "
+            r"published: (.draft | not)"
+            r"})",
+        )
+        releases = releases_jq.input_value(orjson.loads(out)).first()
+        return releases
