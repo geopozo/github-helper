@@ -60,7 +60,7 @@ class GHApi:
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
-    def _get_template_file(self, *, file_name):
+    def _get_template_path(self, *, file_name):
         return _SCRIPT_DIR / f"templates/{file_name}"
 
     async def _load_json_file(self, *, path):
@@ -78,7 +78,7 @@ class GHApi:
         if Path(path).is_dir():
             raise GHError("File name required")
 
-        template_path = self._get_template_file(file_name=path)
+        template_path = self._get_template_path(file_name=path)
         return await self._load_json_file(path=template_path)
 
     async def _get_ruleset_by_id(self, *, _id, owner, repo):
