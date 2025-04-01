@@ -210,10 +210,50 @@ class GHApi:
         releases = releases_jq.input_value(orjson.loads(out)).first()
         return releases
 
+    def _get_repo_full_name(self, *, repo):
+        parts = repo.split("/")
+        if len(parts) > 1:
+            owner = parts[0]
+            repo = parts[1]
+        else:
+            owner = self._current_user
+        return owner, repo
+
+    def _validate_config_keys(self, *, keys):
+        allowed_keys = {"repo", "include", "exclude"}
+        if keys - allowed_keys:
+            raise TypeError("Only 'repo', 'include' and 'exclude' keys are allowed.")
+
+    def _get_rulesets_files(self, *, config, repo_name):
+        rulesets_files = set()
+        for r in config:
+            self._validate_config_keys(keys=r.keys())
+
+            if "repo" not in r:
+                continue
+            if "include" in r:
+                if not isinstance(r["include"], list):
+                    raise TypeError("'include' must be a list")
+                if r["repo"] == "*" or r["repo"] == repo_name:
+                    rulesets_files = rulesets_files | set(r["include"])
+            if "exclude" in r:
+                if not isinstance(r["exclude"], list):
+                    raise TypeError("'exclude' must be a list")
+                if r["repo"] == repo_name:
+                    rulesets_files = rulesets_files - set(r["exclude"])
+        return rulesets_files
+
     async def audit_rulesets_repo(self, *, repo):
-        _ = await self.get_user()
+        default_file = "audit-config.json"
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
-        endpoint = f"repos/{self._current_user}/{repo}/rulesets"
+        config_file = self._get_template_path(file_name=default_file)
+        config_json = await self._load_json_file(path=config_file)
+        _ = await self.get_user()
+        owner, repo = self._get_repo_full_name(repo=repo)
+        repo_name = f"{owner}/{repo}"
+        files_names = self._get_rulesets_files(config=config_json, repo_name=repo_name)
+
+        endpoint = f"repos/{owner}/{repo}/rulesets"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
@@ -231,14 +271,23 @@ class GHApi:
             "updated_at",
             "_links",
         ]
+        result = [
+            {"parent": m, "status": "missing", "differences": []}
+            for m in files_names
+            if m not in rulesets
+        ]
 
         for k, v in rulesets.items():
-            json_origin = await self._get_ruleset_by_id(_id=v, repo=repo)
-            json_target = await self._get_template(file_name=k)
-            result = await self._json_comparer(
+            json_file = f"{k}.json"
+            if k not in files_names:
+                result.append({"parent": k, "status": "additional", "differences": []})
+                continue
+            json_origin = await self._get_ruleset_by_id(_id=v, owner=owner, repo=repo)
+            json_target = await self._get_target_ruleset(path=json_file)
+            differences = await self._json_comparer(
                 origin=json_origin,
                 target=json_target,
                 excluded_keys=excluded_keys,
             )
-
+            result.append({"parent": k, "status": "found", "differences": differences})
         return result
