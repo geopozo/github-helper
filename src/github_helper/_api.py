@@ -60,13 +60,14 @@ class GHApi:
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
-    async def _get_template(self, *, file_name):
-        if not file_name:
-            raise GHError("File name is required")
+    def _get_template_file(self, *, file_name):
+        return _SCRIPT_DIR / f"templates/{file_name}"
 
-        template_path = _SCRIPT_DIR / f"templates/{file_name}.json"
+    async def _load_json_file(self, *, path):
+        if not Path(path).is_file():
+            raise GHError(f"{path} not exist")
 
-        async with aiofiles.open(template_path) as f:
+        async with aiofiles.open(path) as f:
             file = await f.read()
         return orjson.loads(file)
 
