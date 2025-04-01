@@ -182,7 +182,7 @@ class GHApi:
         tags = tags_jq.input_value(orjson.loads(out)).first()
         return tags
 
-    async def get_releases(self, *, repo=None):
+    async def get_releases(self, *, repo):
         """Return releases for a repo."""
         _ = await self.get_user()
         releases_jq = jq.compile(
