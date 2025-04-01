@@ -71,9 +71,19 @@ class GHApi:
             file = await f.read()
         return orjson.loads(file)
 
-    async def _get_ruleset_by_id(self, *, _id, repo):
+    async def _get_target_ruleset(self, *, path):
+        if Path(path).is_file():
+            return await self._load_json_file(path=path)
+
+        if Path(path).is_dir():
+            raise GHError("File name required")
+
+        template_path = self._get_template_file(file_name=path)
+        return await self._load_json_file(path=template_path)
+
+    async def _get_ruleset_by_id(self, *, _id, owner, repo):
         """Return releset for a user by Id."""
-        endpoint = f"repos/{self._current_user}/{repo}/rulesets/{_id}"
+        endpoint = f"repos/{owner}/{repo}/rulesets/{_id}"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
