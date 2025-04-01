@@ -2,17 +2,17 @@
     {
         "repo": "*",
         "include": [
-            "main.json",
-            "verify-tag.json"
+            "main",
+            "verify-tag"
         ]
     },
     {
         "repo": "ayjayt/mi_repo2",
         "include": [
-            "extra.json"
+            "extra"
         ],
         "exclude": [
-            "verify-tag.json"
+            "verify-tag"
         ]
     }
 ]
