@@ -271,23 +271,30 @@ class GHApi:
         if keys - VALID_KEYS:
             raise TypeError(f"Only keys {VALID_KEYS} are allowed.")
 
-    def _get_rulesets_files(self, *, config, repo_name):
-        rulesets_files = set()
-        for r in config:
-            self._validate_config_keys(keys=r.keys())
+    # abusas el *
 
-            if "repo" not in r:
-                continue
-            if "include" in r:
-                if not isinstance(r["include"], list):
+    def _get_rulesets_files(self, *, configs, repo_name):
+        rulesets_files = set()
+        for cfg in configs: # config es algo pero no es plural?
+            # y que es r?
+            self._validate_config_keys(keys=cfg.keys())
+
+            if "repo" not in cfg:
+                continue # error entonces
+                # o talvez usamos estrategia parecida para tener un
+                # "VALID_KEYS" y "MANDATORY KEYS"
+            if "include" in cfg:
+                if not isinstance(cfg["include"], list):
                     raise TypeError("'include' must be a list")
-                if r["repo"] == "*" or r["repo"] == repo_name:
-                    rulesets_files = rulesets_files | set(r["include"])
-            if "exclude" in r:
-                if not isinstance(r["exclude"], list):
+                 # no haces glob correcto
+                 # usas fnmatch porfa. un paquete.
+                if cfg["repo"] == "*" or cfg["repo"] == repo_name:
+                    rulesets_files = rulesets_files | set(cfg["include"])
+            if "exclude" in cfg:
+                if not isinstance(cfg["exclude"], list):
                     raise TypeError("'exclude' must be a list")
-                if r["repo"] == repo_name:
-                    rulesets_files = rulesets_files - set(r["exclude"])
+                if cfg["repo"] == repo_name: # te faltan un buen match
+                    rulesets_files = rulesets_files - set(cfg["exclude"])
         return rulesets_files
 
     async def audit_rulesets_repo(self, *, repo):
