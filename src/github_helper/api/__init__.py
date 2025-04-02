@@ -64,7 +64,7 @@ class GHApi:
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
-    async def _load_json_file(self, *, path):
+    async def _load_json(self, *, path):
         if not Path(path).is_file():
             raise GHError(f"{path} not exist")
 
@@ -74,13 +74,13 @@ class GHApi:
 
     async def _get_target_ruleset(self, *, path):
         if Path(path).is_file():
-            return await self._load_json_file(path=path)
+            return await self._load_json(path=path)
 
         if Path(path).is_dir():
             raise GHError("File name required")
 
         template_path = _TEMPLATE_PATH / path
-        return await self._load_json_file(path=template_path)
+        return await self._load_json(path=template_path)
 
     async def _get_ruleset_by_id(self, *, _id, owner, repo):
         """Return releset for a user by Id."""
@@ -256,7 +256,7 @@ class GHApi:
         default_file = "audit-config.json"
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
         config_file = _TEMPLATE_PATH / default_file
-        config_json = await self._load_json_file(path=config_file)
+        config_json = await self._load_json(path=config_file)
         _ = await self.get_user()
         owner, repo = self._get_repo_full_name(repo=repo)
         repo_name = f"{owner}/{repo}"
