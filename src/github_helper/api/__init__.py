@@ -106,9 +106,20 @@ class GHApi:
 
     # también, es también un "load", no un "get", creo, "load_target_ruleset"
 
-    async def _get_ruleset_by_id(self, *, _id, owner, repo):
-        """Return releset for a user by Id."""
-        endpoint = f"repos/{owner}/{repo}/rulesets/{_id}"
+    # el orden de las funciones es raro
+    # no estoy seguro que necesitamos otra función para esto pero realmente
+    # es necesario, el orden de los argumentos en la firma es raro, y porqué
+    # es un argumento privado?
+    # y este debe estar mas cerca donde se usa, no arriba de comparer
+    # se usa _ en argumentos para indicar que no vas a usar el argumentos.
+
+    # también, usamos el nombre
+    # get_algo_por_algo cuando tenemos OTRAS maneras de conseguir la misma cosa
+    # get_eso_por_algo_diferente
+    # pero en este caso, siempre necesitamos id, sí o no?
+    async def _get_ruleset(self, *, owner, repo, ruleset_id):
+        """Return ruleset for a user by ruleset id."""
+        endpoint = f"repos/{owner}/{repo}/rulesets/{ruleset_id}"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
