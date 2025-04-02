@@ -4,13 +4,13 @@ import re
 import warnings
 from pathlib import Path
 
-import aiofiles
 import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
 
 from github_helper import _gh_service as srv
 from github_helper._gh_service import GHError, ScopesError, ScopesWarning
+from github_helper._utils import load_json
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -64,23 +64,15 @@ class GHApi:
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
-    async def _load_json(self, *, path):
-        if not Path(path).is_file():
-            raise GHError(f"{path} not exist")
-
-        async with aiofiles.open(path) as f:
-            file = await f.read()
-        return orjson.loads(file)
-
     async def _get_target_ruleset(self, *, path):
         if Path(path).is_file():
-            return await self._load_json(path=path)
+            return await load_json(path=path)
 
         if Path(path).is_dir():
             raise GHError("File name required")
 
         template_path = _TEMPLATE_PATH / path
-        return await self._load_json(path=template_path)
+        return await load_json(path=template_path)
 
     async def _get_ruleset_by_id(self, *, _id, owner, repo):
         """Return releset for a user by Id."""
@@ -256,7 +248,7 @@ class GHApi:
         default_file = "audit-config.json"
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
         config_file = _TEMPLATE_PATH / default_file
-        config_json = await self._load_json(path=config_file)
+        config_json = await load_json(path=config_file)
         _ = await self.get_user()
         owner, repo = self._get_repo_full_name(repo=repo)
         repo_name = f"{owner}/{repo}"
