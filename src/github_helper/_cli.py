@@ -174,3 +174,5 @@ def _print_data(data, *, fmt_json, fmt_pretty):
             tablefmt="pretty" if fmt_pretty else "plain",
         )
     print(output)
+
+    # TODO(DAVID): Por qué no hay adaptador?
