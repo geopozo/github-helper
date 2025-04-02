@@ -7,7 +7,7 @@ import logistro
 import orjson
 from tabulate import tabulate
 
-from . import _api as api
+from . import api
 
 
 def _get_cli_args():
