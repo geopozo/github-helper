@@ -308,7 +308,16 @@ class GHApi:
         """
         default_file = "audit-config.json"
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
-        config_file = self._get_template_path(file_name=default_file)
+        config_file = self._get_template_path(file_name=DEFAULT_CONFIG)
+        # entonces, todavia no hay bandera, no hay logica para procesar la bandera
+        # probable mejor decir config_template?
+        # y que es config_file?
+
+        # los nombres acá me enredan, es algo del idioma tal vez?
+
+        # yo termino mi revision acá, reviso todo despues.
+
+
         config_json = await self._load_json_file(path=config_file)
         _ = await self.get_user()
         owner, repo = self._get_repo_full_name(repo=repo)
