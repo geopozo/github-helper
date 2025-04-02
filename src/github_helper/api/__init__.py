@@ -64,6 +64,13 @@ class GHApi:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
     def _get_template_path(self, *, file_name):
+        # no es mejor crear otro constante
+        # _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
+        # y cuando quiere usarlo, solo tienes que escribir:
+        #
+        # path = _TEMPLATE_PATH / file_name
+        # en vez de esta función definida
+        # y una llamada de _get_template_path
         return _SCRIPT_DIR / f"templates/{file_name}"
 
     async def _load_json_file(self, *, path):
