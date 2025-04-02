@@ -246,19 +246,30 @@ class GHApi:
         releases = releases_jq.input_value(orjson.loads(out)).first()
         return releases
 
-    def _get_repo_full_name(self, *, repo):
-        parts = repo.split("/")
+    # una buena utilidad
+    # _split_full_name,
+    # para mis utilidades que tienen que ser motodos, las pongo
+    # más ariba en la clase, antes de __init__
+    def _split_full_name(self, *, full_name):
+        parts = full_name.split("/")
         if len(parts) > 1:
             owner = parts[0]
             repo = parts[1]
         else:
             owner = self._current_user
         return owner, repo
+    # otro implementación:
+    def _split_full_name(self, full_name):
+        if "/" in full_name:
+            return full_name.split("/")
+        else:
+            return self._current_user, full_name
 
+    # es necesario ser función separada?
     def _validate_config_keys(self, *, keys):
-        allowed_keys = {"repo", "include", "exclude"}
-        if keys - allowed_keys:
-            raise TypeError("Only 'repo', 'include' and 'exclude' keys are allowed.")
+        VALID_KEYS = {"repo", "include", "exclude"} # noqa: N806 local constant.
+        if keys - VALID_KEYS:
+            raise TypeError(f"Only keys {VALID_KEYS} are allowed.")
 
     def _get_rulesets_files(self, *, config, repo_name):
         rulesets_files = set()
