@@ -73,13 +73,15 @@ class GHApi:
         # y una llamada de _get_template_path
         return _SCRIPT_DIR / f"templates/{file_name}"
 
-    async def _load_json_file(self, *, path):
+    async def _load_json_file(self, *, path): # y por qué necesitamos *?
         if not Path(path).is_file():
             raise GHError(f"{path} not exist")
 
         async with aiofiles.open(path) as f:
             file = await f.read()
         return orjson.loads(file)
+    # tal vez mejor en un module de utilidades?
+    # _load_json(self, path) está bien
 
     async def _get_target_ruleset(self, *, path):
         if Path(path).is_file():
