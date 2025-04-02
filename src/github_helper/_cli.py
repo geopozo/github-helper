@@ -36,7 +36,7 @@ def _get_cli_args():
         "-p",
         "--pretty",
         action="store_true",
-        help="Pretty print the output (with or without json)",
+        help="Pretty print the output (with or without json).",
     )
 
     check_auth_parser = subparsers.add_parser(
@@ -72,37 +72,37 @@ def _get_cli_args():
 
     tags_parser = subparsers.add_parser(
         "tags",
-        description="Show all tags from a repo",
-        help="Return all repos of a repo",
+        description="Show all tags from a repo.",
+        help="Return all repos of a repo.",
     )
     tags_parser.add_argument(
         "-r",
         "--repo",
-        help="Name of repository required",
+        help="Name of repository required.",
         required=True,
     )
 
     releases_parser = subparsers.add_parser(
         "releases",
-        description="Show all releases from a repo",
-        help="Return all releases of a repo",
+        description="Show all releases from a repo.",
+        help="Return all releases of a repo.",
     )
     releases_parser.add_argument(
         "-r",
         "--repo",
-        help="Name of repository required",
+        help="Name of repository required.",
         required=True,
     )
 
     audit_repo = subparsers.add_parser(
         "audit-repo",
         description="",
-        help="",
+        help="Audit repo rulesets against template.",
     )
     audit_repo.add_argument(
         "-r",
         "--repo",
-        help="Name of repository required",
+        help="Name of repository required.",
         required=True,
     )
 
