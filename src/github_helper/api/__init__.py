@@ -20,14 +20,11 @@ _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 class GHApi:
     """Provides access to status functions ontop of gh program."""
 
-    def _split_full_name(self, *, full_name):
-        parts = full_name.split("/")
-        if len(parts) > 1:
-            owner = parts[0]
-            full_name = parts[1]
+    def _split_full_name(self, full_name):
+        if "/" in full_name:
+            return full_name.split("/")
         else:
-            owner = self._current_user
-        return owner, full_name
+            return self._current_user, full_name
 
     def __init__(self):
         """Initializize a new GHApi, takes no arguments."""
