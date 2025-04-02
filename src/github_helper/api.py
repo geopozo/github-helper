@@ -17,7 +17,10 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 
 
 class GHApi:
+    """Provides access to status functions ontop of gh program."""
+
     def __init__(self):
+        """Initializize a new GHApi, takes no arguments."""
         self._current_user = ""
 
     # untested
@@ -244,6 +247,14 @@ class GHApi:
         return rulesets_files
 
     async def audit_rulesets_repo(self, *, repo):
+        """
+        Verify that repos have the proper branch/tag protections or find differences.
+
+        Args:
+            repo: the name of the repo to verify. Can be "owner/repo" or just
+            "repo" and owner is assumed to be the current user.
+
+        """
         default_file = "audit-config.json"
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
         config_file = self._get_template_path(file_name=default_file)
