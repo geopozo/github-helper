@@ -64,7 +64,7 @@ class GHApi:
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
-    async def _get_target_ruleset(self, *, path):
+    async def _load_target_ruleset(self, *, path):
         if Path(path).is_file():
             return await load_json(path=path)
 
@@ -284,7 +284,7 @@ class GHApi:
                 result.append({"parent": k, "status": "additional", "differences": []})
                 continue
             json_origin = await self._get_ruleset_by_id(_id=v, owner=owner, repo=repo)
-            json_target = await self._get_target_ruleset(path=json_file)
+            json_target = await self._load_target_ruleset(path=json_file)
             differences = await self._json_comparer(
                 origin=json_origin,
                 target=json_target,
