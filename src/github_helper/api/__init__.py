@@ -209,23 +209,23 @@ class GHApi:
         if keys - valid_keys:
             raise TypeError(f"Only keys {valid_keys} are allowed.")
 
-    def _get_rulesets_files(self, *, config, repo_name):
+    def _get_rulesets_files(self, *, configs, repo_name):
         rulesets_files = set()
-        for r in config:
-            self._validate_config_keys(keys=r.keys())
+        for cfg in configs:
+            self._validate_config_keys(keys=cfg.keys())
 
-            if "repo" not in r:
+            if "repo" not in cfg:
                 continue
-            if "include" in r:
-                if not isinstance(r["include"], list):
+            if "include" in cfg:
+                if not isinstance(cfg["include"], list):
                     raise TypeError("'include' must be a list")
-                if r["repo"] == "*" or r["repo"] == repo_name:
-                    rulesets_files = rulesets_files | set(r["include"])
-            if "exclude" in r:
-                if not isinstance(r["exclude"], list):
+                if cfg["repo"] == "*" or cfg["repo"] == repo_name:
+                    rulesets_files = rulesets_files | set(cfg["include"])
+            if "exclude" in cfg:
+                if not isinstance(cfg["exclude"], list):
                     raise TypeError("'exclude' must be a list")
-                if r["repo"] == repo_name:
-                    rulesets_files = rulesets_files - set(r["exclude"])
+                if cfg["repo"] == repo_name:
+                    rulesets_files = rulesets_files - set(cfg["exclude"])
         return rulesets_files
 
     async def _get_ruleset(self, *, ruleset_id, owner, repo):
@@ -252,7 +252,7 @@ class GHApi:
         _ = await self.get_user()
         owner, repo = self._split_full_name(full_name=repo)
         repo_name = f"{owner}/{repo}"
-        files_names = self._get_rulesets_files(config=config_json, repo_name=repo_name)
+        files_names = self._get_rulesets_files(configs=config_json, repo_name=repo_name)
 
         endpoint = f"repos/{owner}/{repo}/rulesets"
         _logger.debug(f"Calling API: {endpoint}")
