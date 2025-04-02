@@ -74,14 +74,6 @@ class GHApi:
         template_path = _TEMPLATE_PATH / path
         return await load_json(path=template_path)
 
-    async def _get_ruleset(self, *, ruleset_id, owner, repo):
-        """Return releset for a user by Id."""
-        endpoint = f"repos/{owner}/{repo}/rulesets/{ruleset_id}"
-        _logger.debug(f"Calling API: {endpoint}")
-        retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
-        return orjson.loads(out)
-
     async def _json_comparer(self, *, origin, target, excluded_keys):
         differences = []
         all_keys = set(origin.keys()).union(target.keys())
@@ -235,6 +227,14 @@ class GHApi:
                 if r["repo"] == repo_name:
                     rulesets_files = rulesets_files - set(r["exclude"])
         return rulesets_files
+
+    async def _get_ruleset(self, *, ruleset_id, owner, repo):
+        """Return releset for a user by Id."""
+        endpoint = f"repos/{owner}/{repo}/rulesets/{ruleset_id}"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+        return orjson.loads(out)
 
     async def audit_rulesets_repo(self, *, repo):
         """
