@@ -145,6 +145,11 @@ async def _run_cli_async():
     if not data:
         print("No data to display.", file=sys.stderr)
         sys.exit(1)
+        # TODO(DAVID): Este no es el único memento en que debemos salir con
+        # error (valor 1). Si la audiotria tiene datos que muestra incumplimiento
+        # con la auditoria, debe salir con uno despues de ejecutarse.
+        # talvez, cada api debe devolver dos valores:
+        # eg. data, err = await gh.audith_rulesets_repo(repo=repo)
 
     _print_data(
         data,
