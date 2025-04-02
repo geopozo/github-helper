@@ -195,7 +195,7 @@ class GHApi:
         releases = releases_jq.input_value(orjson.loads(out)).first()
         return releases
 
-    def _get_repo_full_name(self, *, repo):
+    def _split_full_name(self, *, repo):
         parts = repo.split("/")
         if len(parts) > 1:
             owner = parts[0]
@@ -250,7 +250,7 @@ class GHApi:
         config_file = _TEMPLATE_PATH / default_file
         config_json = await load_json(path=config_file)
         _ = await self.get_user()
-        owner, repo = self._get_repo_full_name(repo=repo)
+        owner, repo = self._split_full_name(repo=repo)
         repo_name = f"{owner}/{repo}"
         files_names = self._get_rulesets_files(config=config_json, repo_name=repo_name)
 
