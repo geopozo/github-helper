@@ -5,7 +5,7 @@ import warnings
 from pathlib import Path
 
 import aiofiles
-import jq  # type: ignore import_not_found
+import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
 

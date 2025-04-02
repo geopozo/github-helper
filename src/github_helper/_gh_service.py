@@ -14,7 +14,7 @@ class ScopesWarning(UserWarning):
     """Warning for when missing optional enhancing scope."""
 
 
-async def gh_call(*commands, direct=False) -> asyncio.subprocess.Process:
+async def gh_call(*commands, direct=False) -> tuple[int, bytes, bytes]:
     p = await asyncio.create_subprocess_exec(
         *commands,
         stdout=None if direct else subprocess.PIPE,
