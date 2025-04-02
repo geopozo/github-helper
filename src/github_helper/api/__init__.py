@@ -205,9 +205,9 @@ class GHApi:
         return releases
 
     def _validate_config_keys(self, *, keys):
-        allowed_keys = {"repo", "include", "exclude"}
-        if keys - allowed_keys:
-            raise TypeError("Only 'repo', 'include' and 'exclude' keys are allowed.")
+        valid_keys = {"repo", "include", "exclude"}
+        if keys - valid_keys:
+            raise TypeError(f"Only keys {valid_keys} are allowed.")
 
     def _get_rulesets_files(self, *, config, repo_name):
         rulesets_files = set()
