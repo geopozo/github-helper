@@ -92,6 +92,19 @@ class GHApi:
 
         template_path = self._get_template_path(file_name=path)
         return await self._load_json_file(path=template_path)
+    # no me gusta, la cosa es, bueno, esta es una función interna, no se necesitan
+    # tantos checkeos.
+    # si vamos a aceptar un path del usuario, tenemos que crear una buena logica
+    # 1. si nos pasara un archivo
+    # 2. si no nos pasara nada (predeterminado?)
+    # 3. si nos pasar un directorio (buscamos archivo especifico o grupo)?
+    # pero si dado que esta me parece solo una función interna, una utilidad, no
+    # entiendo por qué la necesitamos.
+    #
+    # debes mostrarme la CLI diseñada y que quieres presentar el usuario, porque sí,
+    # me parece que habría banderas para cambiar que configuración/plantilla se cargan.
+
+    # también, es también un "load", no un "get", creo, "load_target_ruleset"
 
     async def _get_ruleset_by_id(self, *, _id, owner, repo):
         """Return releset for a user by Id."""
