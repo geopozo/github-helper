@@ -20,6 +20,15 @@ _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 class GHApi:
     """Provides access to status functions ontop of gh program."""
 
+    def _split_full_name(self, *, full_name):
+        parts = full_name.split("/")
+        if len(parts) > 1:
+            owner = parts[0]
+            full_name = parts[1]
+        else:
+            owner = self._current_user
+        return owner, full_name
+
     def __init__(self):
         """Initializize a new GHApi, takes no arguments."""
         self._current_user = ""
@@ -194,15 +203,6 @@ class GHApi:
         self._check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
         return releases
-
-    def _split_full_name(self, *, full_name):
-        parts = full_name.split("/")
-        if len(parts) > 1:
-            owner = parts[0]
-            full_name = parts[1]
-        else:
-            owner = self._current_user
-        return owner, full_name
 
     def _validate_config_keys(self, *, keys):
         allowed_keys = {"repo", "include", "exclude"}
