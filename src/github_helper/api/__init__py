@@ -14,6 +14,7 @@ from github_helper._gh_service import GHError, ScopesError, ScopesWarning
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
+_TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
 
 class GHApi:
