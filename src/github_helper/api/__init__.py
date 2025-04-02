@@ -244,8 +244,8 @@ class GHApi:
         """
         default_file = "audit-config.json"
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
-        config_file = _TEMPLATE_PATH / default_file
-        config_json = await load_json(path=config_file)
+        config_template = _TEMPLATE_PATH / default_file
+        config_json = await load_json(path=config_template)
         _ = await self.get_user()
         owner, repo = self._split_full_name(full_name=repo)
         repo_name = f"{owner}/{repo}"
