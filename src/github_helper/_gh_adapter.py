@@ -19,3 +19,11 @@ class GHAdapter:
         if self._json or self._pretty:
             return [{"scope_name": scope} for scope in scopes_data]
         return [scopes_data]
+
+    def transform_repos_data(self, repos_data):
+        if self._json or self._pretty:
+            return repos_data
+        return [
+            [repo["name"], repo["visibility"], repo["archived"], repo["owner"]]
+            for repo in repos_data
+        ]
