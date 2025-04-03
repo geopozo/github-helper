@@ -19,7 +19,7 @@ async def gh_call(*commands, direct=False) -> tuple[int, bytes, bytes]:
         *commands,
         stdout=None if direct else subprocess.PIPE,
         stderr=None if direct else subprocess.PIPE,
-        limit=102400,
+        limit=10240000,
     )
     retval = await p.wait()
     stdout, stderr = await p.communicate()
