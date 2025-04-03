@@ -7,6 +7,8 @@ import logistro
 import orjson
 from tabulate import tabulate
 
+from github_helper._gh_adapter import GHAdapter
+
 from . import api
 
 
@@ -123,9 +125,12 @@ def run_cli():
 
 async def _run_cli_async():
     parser, cli_args = _get_cli_args()
-    gh = api.GHApi()
     repo = cli_args.get("repo", None)
     paginate = cli_args.get("paginate", None)
+    json = cli_args.get("json", None)
+    pretty = cli_args.get("pretty", None)
+    gh = api.GHApi()
+    adpt = GHAdapter(json, pretty)
     match cli_args["command"]:
         case "auth-status":
             # único (por ahora)
@@ -134,6 +139,7 @@ async def _run_cli_async():
             data, sadness = await gh.get_orgs()
         case "user":
             data, sadness = await gh.get_user()
+            data = adpt.transform_user_data(data)
         case "scopes":
             data, sadness = await gh.get_scopes()
         case "repos":
@@ -152,11 +158,7 @@ async def _run_cli_async():
     if not data:
         print("No data to display.", file=sys.stderr)
 
-    _print_data(
-        data,
-        fmt_json=cli_args["json"],
-        fmt_pretty=cli_args["pretty"],
-    )
+    _print_data(data, fmt_json=json, fmt_pretty=pretty)
     sys.exit(sadness)
 
 

@@ -131,9 +131,8 @@ class GHApi:
         user_data = user_jq.input_text(out.decode()).first()
         user_name = next(iter(user_data))
         self._current_user = user_name
-        data = {"user": user_name}
         sadness = int(not user_data)
-        return data, sadness
+        return user_name, sadness
 
     async def get_scopes(self):
         """Return array of scopes."""
