@@ -24,6 +24,7 @@ dependencies = [
     "aiofiles>=24.1.0",
     "colored>=2.3.0",
     "jq>=1.8.0",
+    "jsondiff>=2.2.1",
     "logistro>=1.0.11",
     "orjson>=3.10.15",
     "tabulate>=0.9.0",
