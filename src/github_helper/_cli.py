@@ -131,19 +131,19 @@ async def _run_cli_async():
             # único (por ahora)
             sys.exit(await gh.check_auth(cli_args=cli_args))
         case "orgs":
-            data = await gh.get_orgs()
+            data, sadness = await gh.get_orgs()
         case "user":
-            data = await gh.get_user()
+            data, sadness = await gh.get_user()
         case "scopes":
-            data = await gh.get_scopes()
+            data, sadness = await gh.get_scopes()
         case "repos":
-            data = await gh.get_repos(paginate=paginate)
+            data, sadness = await gh.get_repos(paginate=paginate)
         case "tags":
-            data = await gh.get_tags(repo)
+            data, sadness = await gh.get_tags(repo)
         case "releases":
-            data = await gh.get_releases(repo)
+            data, sadness = await gh.get_releases(repo)
         case "audit-repo":
-            data = await gh.audit_rulesets_repo(repo)
+            data, sadness = await gh.audit_rulesets_repo(repo)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()
@@ -151,13 +151,13 @@ async def _run_cli_async():
 
     if not data:
         print("No data to display.", file=sys.stderr)
-        sys.exit(1)
 
     _print_data(
         data,
         fmt_json=cli_args["json"],
         fmt_pretty=cli_args["pretty"],
     )
+    sys.exit(sadness)
 
 
 def _print_data(data, *, fmt_json, fmt_pretty):
