@@ -32,3 +32,11 @@ class GHAdapter:
         if self._json or self._pretty:
             return tags_data
         return [[tag["name"]] for tag in tags_data]
+
+    def transform_releases_data(self, releases_data):
+        if self._json or self._pretty:
+            return releases_data
+        return [
+            [release["name"], release["tag"], release["published"]]
+            for release in releases_data
+        ]
