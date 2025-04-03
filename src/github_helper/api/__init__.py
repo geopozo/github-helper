@@ -184,7 +184,8 @@ class GHApi:
         """Return tags for a repo."""
         _ = await self.get_user()
         tags_jq = jq.compile("map({name: .name})")
-        endpoint = f"repos/{self._current_user}/{repo}/tags"
+        owner, repo = self._split_full_name(full_name=repo)
+        endpoint = f"repos/{owner}/{repo}/tags"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
@@ -202,7 +203,8 @@ class GHApi:
             r"published: (.draft | not)"
             r"})",
         )
-        endpoint = f"repos/{self._current_user}/{repo}/releases"
+        owner, repo = self._split_full_name(full_name=repo)
+        endpoint = f"repos/{owner}/{repo}/releases"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
