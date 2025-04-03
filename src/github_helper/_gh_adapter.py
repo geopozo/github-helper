@@ -5,6 +5,11 @@ class GHAdapter:
         self._json = json
         self._pretty = pretty
 
+    def transform_orgs_data(self, orgs_data):
+        if self._json or self._pretty:
+            return orgs_data
+        return [[org["name"], org["role"]] for org in orgs_data]
+
     def transform_user_data(self, user_data):
         if self._json or self._pretty:
             return {"user": user_data}
