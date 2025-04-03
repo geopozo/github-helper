@@ -64,10 +64,16 @@ def _get_cli_args():
         help="Return scopes of current logged in user.",
     )
 
-    _ = subparsers.add_parser(
+    repos_parser = subparsers.add_parser(
         "repos",
         description="Show all repos.",
         help="Return all repos of current logged in user.",
+    )
+    repos_parser.add_argument(
+        "-pg",
+        "--paginate",
+        help="Get all repos",
+        action="store_true",
     )
 
     tags_parser = subparsers.add_parser(
