@@ -281,7 +281,7 @@ class GHApi:
             "_links",
         ]
         result = [
-            {"parent": m, "status": "missing", "differences": []}
+            {"parent": m, "status": "missing", "differences": ""}
             for m in files_names
             if m not in rulesets
         ]
@@ -289,7 +289,7 @@ class GHApi:
         for k, ruleset_id in rulesets.items():
             json_file = f"{k}.json"
             if k not in files_names:
-                result.append({"parent": k, "status": "additional", "differences": []})
+                result.append({"parent": k, "status": "additional", "differences": ""})
                 continue
             json_origin = await self._get_ruleset(owner, repo, ruleset_id)
             json_target = await self._load_target_ruleset(json_file)
@@ -299,5 +299,5 @@ class GHApi:
                 excluded_keys,
             )
             result.append({"parent": k, "status": "found", "differences": differences})
-        sadness = int(result)
+        sadness = len(result)
         return result, sadness
