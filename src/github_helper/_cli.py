@@ -178,6 +178,6 @@ def _print_data(data, *, fmt_json, fmt_pretty):
         output = tabulate(
             data,
             headers="keys" if fmt_pretty else "",
-            tablefmt="pretty" if fmt_pretty else "plain",
+            tablefmt="psql" if fmt_pretty else "plain",
         )
     print(output)
