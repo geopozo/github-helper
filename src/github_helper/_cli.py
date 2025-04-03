@@ -139,11 +139,11 @@ async def _run_cli_async():
         case "repos":
             data = await gh.get_repos(paginate)
         case "tags":
-            data = await gh.get_tags(repo=repo)
+            data = await gh.get_tags(repo)
         case "releases":
-            data = await gh.get_releases(repo=repo)
+            data = await gh.get_releases(repo)
         case "audit-repo":
-            data = await gh.audit_rulesets_repo(repo=repo)
+            data = await gh.audit_rulesets_repo(repo)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()

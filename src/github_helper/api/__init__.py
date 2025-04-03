@@ -176,7 +176,7 @@ class GHApi:
         repos = repos_jq.input_value(orjson.loads(out)).first()
         return repos
 
-    async def get_tags(self, *, repo):
+    async def get_tags(self, repo):
         """Return tags for a repo."""
         _ = await self.get_user()
         tags_jq = jq.compile("map({name: .name})")
@@ -187,7 +187,7 @@ class GHApi:
         tags = tags_jq.input_value(orjson.loads(out)).first()
         return tags
 
-    async def get_releases(self, *, repo):
+    async def get_releases(self, repo):
         """Return releases for a repo."""
         _ = await self.get_user()
         releases_jq = jq.compile(
@@ -236,7 +236,7 @@ class GHApi:
         self._check_retval(retval, err, endpoint=endpoint)
         return orjson.loads(out)
 
-    async def audit_rulesets_repo(self, *, repo):
+    async def audit_rulesets_repo(self, repo):
         """
         Verify that repos have the proper branch/tag protections or find differences.
 
