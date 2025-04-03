@@ -70,7 +70,7 @@ class GHApi:
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
 
-    async def _load_target_ruleset(self, *, path):
+    async def _load_target_ruleset(self, path):
         if Path(path).is_file():
             return await load_json(path=path)
 
@@ -80,7 +80,7 @@ class GHApi:
         template_path = _TEMPLATE_PATH / path
         return await load_json(path=template_path)
 
-    async def _json_comparer(self, *, origin, target, excluded_keys):
+    async def _json_comparer(self, origin, target, excluded_keys):
         differences = []
         all_keys = set(origin.keys()).union(target.keys())
 
@@ -204,15 +204,15 @@ class GHApi:
         releases = releases_jq.input_value(orjson.loads(out)).first()
         return releases
 
-    def _validate_config_keys(self, *, keys):
+    def _validate_config_keys(self, keys):
         valid_keys = {"repo", "include", "exclude"}
         if keys - valid_keys:
             raise TypeError(f"Only keys {valid_keys} are allowed.")
 
-    def _get_rulesets_files(self, *, configs, repo_name):
+    def _get_rulesets_files(self, configs, repo_name):
         rulesets_files = set()
         for cfg in configs:
-            self._validate_config_keys(keys=cfg.keys())
+            self._validate_config_keys(cfg.keys())
 
             if "repo" not in cfg:
                 continue
@@ -228,7 +228,7 @@ class GHApi:
                     rulesets_files = rulesets_files - set(cfg["exclude"])
         return rulesets_files
 
-    async def _get_ruleset(self, *, ruleset_id, owner, repo):
+    async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""
         endpoint = f"repos/{owner}/{repo}/rulesets/{ruleset_id}"
         _logger.debug(f"Calling API: {endpoint}")
@@ -252,7 +252,7 @@ class GHApi:
         _ = await self.get_user()
         owner, repo = self._split_full_name(full_name=repo)
         repo_name = f"{owner}/{repo}"
-        files_names = self._get_rulesets_files(configs=config_json, repo_name=repo_name)
+        files_names = self._get_rulesets_files(config_json, repo_name)
 
         endpoint = f"repos/{owner}/{repo}/rulesets"
         _logger.debug(f"Calling API: {endpoint}")
@@ -278,17 +278,17 @@ class GHApi:
             if m not in rulesets
         ]
 
-        for k, v in rulesets.items():
+        for k, ruleset_id in rulesets.items():
             json_file = f"{k}.json"
             if k not in files_names:
                 result.append({"parent": k, "status": "additional", "differences": []})
                 continue
-            json_origin = await self._get_ruleset(owner=owner, repo=repo, ruleset_id=v)
-            json_target = await self._load_target_ruleset(path=json_file)
+            json_origin = await self._get_ruleset(owner, repo, ruleset_id)
+            json_target = await self._load_target_ruleset(json_file)
             differences = await self._json_comparer(
-                origin=json_origin,
-                target=json_target,
-                excluded_keys=excluded_keys,
+                json_origin,
+                json_target,
+                excluded_keys,
             )
             result.append({"parent": k, "status": "found", "differences": differences})
         return result
