@@ -137,6 +137,7 @@ async def _run_cli_async():
             sys.exit(await gh.check_auth(cli_args=cli_args))
         case "orgs":
             data, sadness = await gh.get_orgs()
+            data = adpt.transform_orgs_data(data)
         case "user":
             data, sadness = await gh.get_user()
             data = adpt.transform_user_data(data)
