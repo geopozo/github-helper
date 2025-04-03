@@ -115,7 +115,8 @@ class GHApi:
             retval, out, err = await srv.gh_api(endpoint)
             self._check_retval(retval, err, **org, endpoint=endpoint)
             org["role"] = role_jq.input_value(orjson.loads(out)).first()
-        return orgs
+        sadness = int(not orgs)
+        return orgs, sadness
 
     async def get_user(self):
         """Return username."""
@@ -130,7 +131,9 @@ class GHApi:
         user_data = user_jq.input_text(out.decode()).first()
         user_name = next(iter(user_data))
         self._current_user = user_name
-        return {"user": user_name}
+        data = {"user": user_name}
+        sadness = int(not user_data)
+        return data, sadness
 
     async def get_scopes(self):
         """Return array of scopes."""
@@ -149,7 +152,9 @@ class GHApi:
                 ),
             )
         scopes = [scope.strip() for scope in match[1].decode().split(",")]
-        return [{"scope_name": scope} for scope in scopes]
+        data = [{"scope_name": scope} for scope in scopes]
+        sadness = int(not data)
+        return data, sadness
 
     async def get_repos(self, *, paginate):
         """Return repos for a user."""
@@ -174,7 +179,8 @@ class GHApi:
         retval, out, err = await srv.gh_call(*args)
         self._check_retval(retval, err, endpoint=endpoint)
         repos = repos_jq.input_value(orjson.loads(out)).first()
-        return repos
+        sadness = int(not repos)
+        return repos, sadness
 
     async def get_tags(self, repo):
         """Return tags for a repo."""
@@ -185,7 +191,8 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
         tags = tags_jq.input_value(orjson.loads(out)).first()
-        return tags
+        sadness = int(not tags)
+        return tags, sadness
 
     async def get_releases(self, repo):
         """Return releases for a repo."""
@@ -202,7 +209,8 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
-        return releases
+        sadness = int(not releases)
+        return releases, sadness
 
     def _validate_config_keys(self, keys):
         valid_keys = {"repo", "include", "exclude"}
@@ -291,4 +299,5 @@ class GHApi:
                 excluded_keys,
             )
             result.append({"parent": k, "status": "found", "differences": differences})
-        return result
+        sadness = int(result)
+        return result, sadness
