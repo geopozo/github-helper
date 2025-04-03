@@ -151,9 +151,8 @@ class GHApi:
                 ),
             )
         scopes = [scope.strip() for scope in match[1].decode().split(",")]
-        data = [{"scope_name": scope} for scope in scopes]
-        sadness = int(not data)
-        return data, sadness
+        sadness = int(not scopes)
+        return scopes, sadness
 
     async def get_repos(self, *, paginate):
         """Return repos for a user."""

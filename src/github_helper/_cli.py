@@ -142,6 +142,7 @@ async def _run_cli_async():
             data = adpt.transform_user_data(data)
         case "scopes":
             data, sadness = await gh.get_scopes()
+            data = adpt.transform_scopes_data(data)
         case "repos":
             data, sadness = await gh.get_repos(paginate=paginate)
         case "tags":

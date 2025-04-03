@@ -13,4 +13,4 @@ class GHAdapter:
     def transform_scopes_data(self, scopes_data):
         if self._json or self._pretty:
             return [{"scope_name": scope} for scope in scopes_data]
-        return scopes_data
+        return [scopes_data]
