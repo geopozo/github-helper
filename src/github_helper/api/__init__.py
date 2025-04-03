@@ -151,7 +151,7 @@ class GHApi:
         scopes = [scope.strip() for scope in match[1].decode().split(",")]
         return [{"scope_name": scope} for scope in scopes]
 
-    async def get_repos(self, paginate):
+    async def get_repos(self, *, paginate):
         """Return repos for a user."""
         repos_jq = jq.compile(
             r"map({"

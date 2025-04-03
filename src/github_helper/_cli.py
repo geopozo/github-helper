@@ -137,7 +137,7 @@ async def _run_cli_async():
         case "scopes":
             data = await gh.get_scopes()
         case "repos":
-            data = await gh.get_repos(paginate)
+            data = await gh.get_repos(paginate=paginate)
         case "tags":
             data = await gh.get_tags(repo)
         case "releases":
