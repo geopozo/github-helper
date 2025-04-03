@@ -27,3 +27,8 @@ class GHAdapter:
             [repo["name"], repo["visibility"], repo["archived"], repo["owner"]]
             for repo in repos_data
         ]
+
+    def transform_tags_data(self, tags_data):
+        if self._json or self._pretty:
+            return tags_data
+        return [[tag["name"]] for tag in tags_data]
