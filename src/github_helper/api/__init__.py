@@ -141,7 +141,8 @@ class GHApi:
             r" | sort_by(.archived)"
             r" | reverse"
             r" | sort_by(.visibility)"
-            r" | reverse",
+            r" | reverse"
+            r" | sort_by(.owner)",
         )
         endpoint = "/user/repos"
         _logger.debug(f"Calling API: {endpoint}")
