@@ -244,7 +244,7 @@ class GHApi:
         self._check_retval(retval, err, endpoint=endpoint)
         return orjson.loads(out)
 
-    async def audit_rulesets_repo(self, repo):
+    async def audit_rulesets(self, repo):
         """
         Verify that repos have the proper branch/tag protections or find differences.
 
