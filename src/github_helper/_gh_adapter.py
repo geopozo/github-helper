@@ -27,7 +27,7 @@ class GHAdapter:
             [
                 repo["name"][:24],
                 repo["visibility"],
-                f"archived: {repo['archived']}",
+                "archived" if repo["archived"] else "active",
                 repo["owner"],
             ]
             for repo in repos_data
