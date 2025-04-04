@@ -11,6 +11,7 @@ import orjson
 from github_helper import _gh_service as srv
 from github_helper._gh_service import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
+from github_helper.api import _audit
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -69,33 +70,6 @@ class GHApi:
                 raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")  # noqa: TRY301
             except GHError as e:
                 raise e.with_traceback(e.__traceback__.tb_next) from None
-
-    async def _load_target_ruleset(self, path):
-        if Path(path).is_file():
-            return await load_json(path=path)
-
-        if Path(path).is_dir():
-            raise GHError("File name required")
-
-        template_path = _TEMPLATE_PATH / path
-        return await load_json(path=template_path)
-
-    async def _json_comparer(self, origin, target, excluded_keys):
-        differences = []
-        all_keys = set(origin.keys()).union(target.keys())
-
-        for key in all_keys:
-            if key in excluded_keys:
-                continue
-
-            origin_value = origin.get(key)
-            target_value = target.get(key)
-
-            if origin_value != target_value:
-                differences.append(
-                    {"name": key, "origin": origin_value, "target": target_value},
-                )
-        return differences if differences else {"is_equal": True}
 
     async def get_orgs(self):
         """Return orgs for a user."""
@@ -212,30 +186,6 @@ class GHApi:
         sadness = int(not releases)
         return releases, sadness
 
-    def _validate_config_keys(self, keys):
-        valid_keys = {"repo", "include", "exclude"}
-        if keys - valid_keys:
-            raise TypeError(f"Only keys {valid_keys} are allowed.")
-
-    def _get_rulesets_files(self, configs, repo_name):
-        rulesets_files = set()
-        for cfg in configs:
-            self._validate_config_keys(cfg.keys())
-
-            if "repo" not in cfg:
-                continue
-            if "include" in cfg:
-                if not isinstance(cfg["include"], list):
-                    raise TypeError("'include' must be a list")
-                if cfg["repo"] == "*" or cfg["repo"] == repo_name:
-                    rulesets_files = rulesets_files | set(cfg["include"])
-            if "exclude" in cfg:
-                if not isinstance(cfg["exclude"], list):
-                    raise TypeError("'exclude' must be a list")
-                if cfg["repo"] == repo_name:
-                    rulesets_files = rulesets_files - set(cfg["exclude"])
-        return rulesets_files
-
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""
         endpoint = f"repos/{owner}/{repo}/rulesets/{ruleset_id}"
@@ -253,22 +203,24 @@ class GHApi:
             "repo" and owner is assumed to be the current user.
 
         """
-        default_file = "audit-config.json"
         rulesets_jq = jq.compile("map({(.name): .id}) | add")
-        config_template = _TEMPLATE_PATH / default_file
-        config_json = await load_json(path=config_template)
+        config_path = _TEMPLATE_PATH / "audit-config.json"
+        config = await load_json(config_path)
         _ = await self.get_user()
-        owner, repo = self._split_full_name(full_name=repo)
-        repo_name = f"{owner}/{repo}"
-        files_names = self._get_rulesets_files(config_json, repo_name)
+        owner, repo = self._split_full_name(repo)
+        repo_full_name = f"{owner}/{repo}"
+        required_ruleset_templates = _audit.get_required_rulesets(
+            config,
+            repo_full_name,
+        )
 
         endpoint = f"repos/{owner}/{repo}/rulesets"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         self._check_retval(retval, err, endpoint=endpoint)
-        rulesets = rulesets_jq.input_value(orjson.loads(out)).first()
+        active_rulesets = rulesets_jq.input_value(orjson.loads(out)).first()
 
-        if not rulesets:
+        if not active_rulesets:
             return []
 
         excluded_keys = [
@@ -279,25 +231,32 @@ class GHApi:
             "created_at",
             "updated_at",
             "_links",
+            "target",
         ]
         result = [
-            {"parent": m, "status": "missing", "differences": ""}
-            for m in files_names
-            if m not in rulesets
+            {"template": t, "status": "missing ruleset"}
+            for t in required_ruleset_templates
+            if t not in active_rulesets
         ]
 
-        for k, ruleset_id in rulesets.items():
-            json_file = f"{k}.json"
-            if k not in files_names:
-                result.append({"parent": k, "status": "additional", "differences": ""})
+        for template, ruleset_id in active_rulesets.items():
+            json_file = f"{template}.json"
+            if template not in required_ruleset_templates:
+                result.append({"template": template, "status": "additional ruleset"})
                 continue
-            json_origin = await self._get_ruleset(owner, repo, ruleset_id)
-            json_target = await self._load_target_ruleset(json_file)
-            differences = await self._json_comparer(
-                json_origin,
-                json_target,
-                excluded_keys,
+            current_rulset = await self._get_ruleset(owner, repo, ruleset_id)
+            expected_ruleset = await _audit.load_template_ruleset(json_file)
+            _audit.remove_excluded_keys(current_rulset, excluded_keys)
+            _audit.remove_excluded_keys(expected_ruleset, excluded_keys)
+
+            diffs = []
+            diffs = await _audit.json_diff(
+                current_rulset,
+                expected_ruleset,
+                diffs,
             )
-            result.append({"parent": k, "status": "found", "differences": differences})
+            for diff in diffs:
+                diff["template"] = template
+            result = result + diffs
         sadness = len(result)
         return result, sadness
