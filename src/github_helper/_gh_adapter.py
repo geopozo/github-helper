@@ -5,17 +5,17 @@ from tabulate import tabulate
 class GHAdapter:
     """Allows the CLI to transform the data as required."""
 
-    def _to_json_string(self, data, *, indent=None):
+    def _to_json_string(self, data):
         return orjson.dumps(
             data,
-            option=orjson.OPT_INDENT_2 if indent else None,
+            option=orjson.OPT_INDENT_2 if self._pretty else None,
         ).decode()
 
-    def _to_table(self, data, *, pretty=None):
+    def _to_table(self, data):
         return tabulate(
             data,
-            headers="keys" if pretty else "",
-            tablefmt="psql" if pretty else "plain",
+            headers="keys" if self._pretty else "",
+            tablefmt="psql" if self._pretty else "plain",
         )
 
     def __init__(self, json, pretty):
