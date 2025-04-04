@@ -155,10 +155,10 @@ class GHApi:
         sadness = int(not repos)
         return repos, sadness
 
-    async def get_tags(self, repo):
+    async def get_tagged_versions(self, repo):
         """Return tags for a repo."""
         _ = await self.get_user()
-        tags_jq = jq.compile("map({name: .name})")
+        tags_jq = jq.compile("map({version: .name})")
         owner, repo = self._split_full_name(full_name=repo)
         endpoint = f"repos/{owner}/{repo}/tags"
         _logger.debug(f"Calling API: {endpoint}")

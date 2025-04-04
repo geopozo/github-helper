@@ -146,7 +146,7 @@ async def _run_cli_async():
             data, sadness = await gh.get_repos(paginate=paginate)
             data = adpt.transform_repos_data(data)
         case "tags":
-            data, sadness = await gh.get_tags(repo)
+            data, sadness = await gh.get_tagged_versions(repo)
             data = adpt.transform_tags_data(data)
         case "releases":
             data, sadness = await gh.get_releases(repo)
