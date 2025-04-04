@@ -48,17 +48,23 @@ class GHAdapter:
         return self._to_table([scopes_data])
 
     def transform_repos_data(self, repos_data):
-        if self._json or self._pretty:
-            return repos_data
-        return [
+        if self._json:
+            return self._to_json_string(repos_data)
+        if self._pretty:
+            for repo in repos_data:
+                repo["name"] = repo["name"][:24]
+            return self._to_table(repos_data)
+        return self._to_table(
             [
-                repo["name"][:24],
-                repo["visibility"],
-                "archived" if repo["archived"] else "active",
-                repo["owner"],
-            ]
-            for repo in repos_data
-        ]
+                [
+                    repo["name"][:24],
+                    repo["visibility"],
+                    "archived" if repo["archived"] else "active",
+                    repo["owner"],
+                ]
+                for repo in repos_data
+            ],
+        )
 
     def transform_tags_data(self, tags_data):
         if self._json or self._pretty:
