@@ -11,7 +11,7 @@ class GHAdapter:
             option=orjson.OPT_INDENT_2 if indent else None,
         ).decode()
 
-    def _to_table(self, data, pretty=None):
+    def _to_table(self, data, *, pretty=None):
         return tabulate(
             data,
             headers="keys" if pretty else "",
