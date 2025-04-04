@@ -30,9 +30,11 @@ class GHAdapter:
         return self._to_table(orgs_data)
 
     def transform_user_data(self, user_data):
-        if self._json or self._pretty:
-            return {"user": user_data}
-        return [[user_data]]
+        if self._json:
+            return self._to_json_string({"user": user_data})
+        if self._pretty:
+            return self._to_table([{"user": user_data}])
+        return user_data
 
     def transform_scopes_data(self, scopes_data):
         if self._json or self._pretty:
