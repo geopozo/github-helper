@@ -4,8 +4,6 @@ import asyncio
 import sys
 
 import logistro
-import orjson
-from tabulate import tabulate
 
 from github_helper._gh_adapter import GHAdapter
 
@@ -164,23 +162,5 @@ async def _run_cli_async():
     if not data:
         print("No data to display.", file=sys.stderr)
 
-    _print_data(data, fmt_json=json, fmt_pretty=pretty)
+    print(data)
     sys.exit(sadness)
-
-
-def _print_data(data, *, fmt_json, fmt_pretty):
-    """Format data based on the option provided."""
-    if fmt_json:
-        output = orjson.dumps(
-            data,
-            option=orjson.OPT_INDENT_2 if fmt_pretty else None,
-        ).decode()
-    else:
-        if not isinstance(data, list):
-            data = [data]
-        output = tabulate(
-            data,
-            headers="keys" if fmt_pretty else "",
-            tablefmt="psql" if fmt_pretty else "plain",
-        )
-    print(output)
