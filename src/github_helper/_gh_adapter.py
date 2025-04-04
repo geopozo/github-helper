@@ -87,9 +87,8 @@ class GHAdapter:
         )
 
     def transform_audit_rulesets_data(self, audit_rulesets_data):
-        if self._json or self._pretty:
-            return audit_rulesets_data
-        return [
-            [audit_ruleset["template"], audit_ruleset["status"]]
-            for audit_ruleset in audit_rulesets_data
-        ]
+        if self._json:
+            return self._to_json_string(audit_rulesets_data)
+        for rule in audit_rulesets_data:
+            rule["template"] = rule["template"][:24]
+        return self._to_table(audit_rulesets_data)
