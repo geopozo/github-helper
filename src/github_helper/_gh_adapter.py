@@ -69,9 +69,7 @@ class GHAdapter:
     def transform_tags_data(self, tags_data):
         if self._json:
             return self._to_json_string(tags_data)
-        if self._pretty:
-            return self._to_table(tags_data)
-        return self._to_table([[tag["version"]] for tag in tags_data])
+        return self._to_table(tags_data)
 
     def transform_releases_data(self, releases_data):
         if self._json or self._pretty:
