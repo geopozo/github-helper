@@ -72,16 +72,19 @@ class GHAdapter:
         return self._to_table(tags_data)
 
     def transform_releases_data(self, releases_data):
-        if self._json or self._pretty:
-            return releases_data
-        return [
+        if self._json:
+            return self._to_json_string(releases_data)
+        if self._pretty:
+            return self._to_table(releases_data)
+        return self._to_table(
             [
-                release["name"],
-                release["tag"],
-                "published" if release["published"] else "unpublished",
-            ]
-            for release in releases_data
-        ]
+                [
+                    release["tag"],
+                    "published" if release["published"] else "unpublished",
+                ]
+                for release in releases_data
+            ],
+        )
 
     def transform_audit_rulesets_data(self, audit_rulesets_data):
         if self._json or self._pretty:
