@@ -155,6 +155,7 @@ async def _run_cli_async():
             data = adpt.transform_releases_data(data)
         case "audit-repo":
             data, sadness = await gh.audit_rulesets(repo)
+            data = adpt.transform_audit_rulesets_data(data)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()
