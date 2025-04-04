@@ -42,7 +42,11 @@ class GHAdapter:
         if self._json or self._pretty:
             return releases_data
         return [
-            [release["name"], release["tag"], release["published"]]
+            [
+                release["name"],
+                release["tag"],
+                "published" if release["published"] else "unpublished",
+            ]
             for release in releases_data
         ]
 
