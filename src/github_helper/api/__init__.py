@@ -172,11 +172,7 @@ class GHApi:
         """Return releases for a repo."""
         _ = await self.get_user()
         releases_jq = jq.compile(
-            r"map({"
-            r"name: .name, "
-            r"tag: .tag_name, "
-            r"published: (.draft | not)"
-            r"})",
+            r"map({" r"tag: .tag_name, " r"published: (.draft | not)" r"})",
         )
         owner, repo = self._split_full_name(full_name=repo)
         endpoint = f"repos/{owner}/{repo}/releases"
