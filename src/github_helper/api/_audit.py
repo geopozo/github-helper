@@ -60,7 +60,7 @@ async def json_diff(original, target, diffs):
         for diff_key in json_diffs:
             if diff_key == "$delete":
                 for i in json_diffs[diff_key]:
-                    diffs.append({"status": f"additional key: {i}"})
+                    diffs.append({"status": f"add'l. key: {i}"})
             else:
                 diffs.append({"status": diff_key})
     return diffs
