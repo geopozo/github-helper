@@ -24,7 +24,12 @@ class GHAdapter:
         if self._json or self._pretty:
             return repos_data
         return [
-            [repo["name"], repo["visibility"], repo["archived"], repo["owner"]]
+            [
+                repo["name"],
+                repo["visibility"],
+                f"archived: {repo['archived']}",
+                repo["owner"],
+            ]
             for repo in repos_data
         ]
 
