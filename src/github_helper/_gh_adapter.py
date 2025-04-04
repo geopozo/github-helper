@@ -25,7 +25,7 @@ class GHAdapter:
             return repos_data
         return [
             [
-                repo["name"],
+                repo["name"][:24],
                 repo["visibility"],
                 f"archived: {repo['archived']}",
                 repo["owner"],
