@@ -40,3 +40,11 @@ class GHAdapter:
             [release["name"], release["tag"], release["published"]]
             for release in releases_data
         ]
+
+    def transform_audit_rulesets_data(self, audit_rulesets_data):
+        if self._json or self._pretty:
+            return audit_rulesets_data
+        return [
+            [audit_ruleset["template"], audit_ruleset["status"]]
+            for audit_ruleset in audit_rulesets_data
+        ]
