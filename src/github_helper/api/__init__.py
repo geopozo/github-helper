@@ -128,8 +128,19 @@ class GHApi:
         sadness = int(not scopes)
         return scopes, sadness
 
+    async def _get_collaborators(self, owner, repo):
+        """Return collaborators for a repo."""
+        collabs_jq = jq.compile(f'map(select(.login != "{owner}") | .login)')
+        endpoint = f"repos/{owner}/{repo}/collaborators"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        self._check_retval(retval, err, endpoint=endpoint)
+        collabs = collabs_jq.input_value(orjson.loads(out)).first()
+        return collabs
+
     async def get_repos(self, *, paginate):
         """Return repos for a user."""
+        _ = await self.get_user()
         repos_jq = jq.compile(
             r"map({"
             r"name: .name,"
@@ -152,6 +163,12 @@ class GHApi:
         retval, out, err = await srv.gh_call(*args)
         self._check_retval(retval, err, endpoint=endpoint)
         repos = repos_jq.input_value(orjson.loads(out)).first()
+        for repo in repos:
+            collabs = await self._get_collaborators(
+                self._current_user,
+                repo["name"],
+            )
+            repo["collaborators"] = collabs
         sadness = int(not repos)
         return repos, sadness
 
