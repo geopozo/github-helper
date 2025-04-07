@@ -9,19 +9,23 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
 
-def _validate_config_keys(keys):
-    valid_keys = {"repo", "include", "exclude"}
-    if keys - valid_keys:
-        raise TypeError(f"Only keys {valid_keys} are allowed.")
-
-
 def get_required_rulesets(configs, repo_full_name):
     rulesets_files = set()
-    for cfg in configs:
-        _validate_config_keys(cfg.keys())
 
-        if "repo" not in cfg:
-            continue
+    required = {"repo"}
+    valid = required | {"include", "exclude"}
+
+    for cfg in configs:
+        missing, invalid = (required - cfg.keys(), cfg.keys() - valid)
+        if missing or invalid:
+            raise ValueError(
+                f"Ruleset json not structured properly. Missing keys: {missing}."
+                if missing
+                else f" Invalid keys: {invalid}."
+                if invalid
+                else "",
+            )
+
         if "include" in cfg:
             if not isinstance(cfg["include"], list):
                 raise TypeError("'include' must be a list")
