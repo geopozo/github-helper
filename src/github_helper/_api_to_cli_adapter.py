@@ -53,20 +53,22 @@ class GHAdapter:
     def transform_repos_data(self, repos_data):
         if self._json:
             return self._to_json_string(repos_data)
-        return self._to_table(
+
+        data = [
             [
-                [
-                    repo["name"][:24],
-                    repo["visibility"],
-                    "archived" if repo["archived"] else "active",
-                    repo["owner"],
-                    ",".join(
-                        [s[:6] for s in repo["collaborators"]],
-                    ),
-                ]
-                for repo in repos_data
-            ],
-        )
+                f"https://github.com/{repo['owner']}/{repo['name']}",
+                (
+                    f"{'f-' if repo['fork'] else ''}{repo['visibility']}"
+                    f"{'-ar' if repo['archived'] else ''}"
+                ),
+                ",".join(
+                    [s[:6] for s in repo["collaborators"]],
+                ),
+                f"{','.join(repo['topics'])}",
+            ]
+            for repo in repos_data
+        ]
+        return self._to_table(data, ("repo", "type", "people", "topics"))
 
     def transform_tags_data(self, tags_data):
         if self._json:

@@ -125,9 +125,9 @@ def run_cli():
 async def _run_cli_async():
     parser, cli_args = _get_cli_args()
     repo = cli_args.get("repo", None)
-    paginate = cli_args.get("paginate", None)
     json = cli_args.get("json", None)
     pretty = cli_args.get("pretty", None)
+    paginate = cli_args.get("paginate", None)
     gh = api.GHApi()
     adpt = GHAdapter(json, pretty)
     match cli_args["command"]:
