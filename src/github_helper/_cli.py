@@ -25,7 +25,6 @@ def _get_cli_args():
         description=description,
     )
 
-    subparsers = parser.add_subparsers(dest="command")
     parser.add_argument(
         "-j",
         "--json",
@@ -38,6 +37,8 @@ def _get_cli_args():
         action="store_true",
         help="Pretty print the output (with or without json).",
     )
+
+    subparsers = parser.add_subparsers(dest="command")
 
     check_auth_parser = subparsers.add_parser(
         "auth-status",
