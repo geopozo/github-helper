@@ -14,10 +14,10 @@ class GHAdapter:
             option=orjson.OPT_INDENT_2 if self._pretty else None,
         ).decode()
 
-    def _to_table(self, data):
+    def _to_table(self, data, headers="keys"):
         return tabulate(
             data,
-            headers="keys" if self._pretty else "",
+            headers=headers if self._pretty else "",
             tablefmt="psql" if self._pretty else "plain",
         )
 
