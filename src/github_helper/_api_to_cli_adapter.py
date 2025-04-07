@@ -53,13 +53,6 @@ class GHAdapter:
     def transform_repos_data(self, repos_data):
         if self._json:
             return self._to_json_string(repos_data)
-        if self._pretty:
-            for repo in repos_data:
-                repo["name"] = repo["name"][:24]
-                repo["collaborators"] = ",".join(
-                    [s[:6] for s in repo["collaborators"]],
-                )
-            return self._to_table(repos_data)
         return self._to_table(
             [
                 [
