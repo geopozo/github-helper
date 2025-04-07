@@ -1,5 +1,6 @@
 """A CLI dashboard for github status."""
 
+import asyncio
 import re
 import warnings
 from pathlib import Path
@@ -160,12 +161,24 @@ class GHApi:
         retval, out, err = await srv.gh_call(*args)
         self._check_retval(retval, err, endpoint=endpoint)
         repos = repos_jq.input_value(orjson.loads(out)).first()
-        for repo in repos:
-            collabs = await self._get_collaborators(
-                self._current_user,
-                repo["name"],
-            )
-            repo["collaborators"] = collabs
+
+        async def query_repo(repo):
+            try:
+                collabs = await self._get_collaborators(
+                    self._current_user,
+                    repo["name"],
+                )
+                _logger.debug2(f"Adding collabs: {collabs}")
+                repo["collaborators"] = collabs
+            except GHError as e:
+                if "HTTP 404" in e.args[0]:
+                    repo["collaborators"] = ["(404)"]
+
+        await asyncio.gather(
+            *[query_repo(repo) for repo in repos],
+            return_exceptions=True,
+        )
+
         sadness = int(not repos)
         return repos, sadness
 
