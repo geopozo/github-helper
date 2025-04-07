@@ -1,6 +1,10 @@
 import asyncio
 import subprocess
 
+import logistro
+
+_logger = logistro.getLogger(__name__)
+
 
 class GHError(RuntimeError):
     """Error type for `gh` CLI tool errors."""
@@ -28,3 +32,13 @@ async def gh_call(*commands, direct=False) -> tuple[int, bytes, bytes]:
 
 async def gh_api(endpoint: str, *, direct: bool = False) -> tuple[int, bytes, bytes]:
     return await gh_call("gh", "api", endpoint, direct=direct)
+
+
+async def gh_graphql(query: str) -> tuple[int, bytes, bytes]:
+    return await gh_call(
+        "gh",
+        "api",
+        "graphql",
+        "--raw-field",
+        f"query={query}",
+    )

@@ -58,6 +58,7 @@ class GHAdapter:
             [
                 f"https://github.com/{repo['owner']}/{repo['name']}",
                 (
+                    f'{"*" if repo["pinned"] else ""}'
                     f"{'f-' if repo['fork'] else ''}{repo['visibility']}"
                     f"{'-ar' if repo['archived'] else ''}"
                 ),

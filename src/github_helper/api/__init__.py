@@ -155,7 +155,7 @@ class GHApi:
             r"visibility: .visibility,"
             r"archived: .archived,"
             r"owner: .owner.login,"
-            r"owner-type: .owner.type,"
+            r"owner_type: .owner.type,"
             r"topics: .topics,"
             r"fork: .fork"
             r"})"
@@ -176,6 +176,38 @@ class GHApi:
         repos_json = orjson.loads(out)
         _log_one_json(repos_json)
         repos = repos_jq.input_value(repos_json).first()
+
+        pins = {}
+        for t, o in {(repo["owner_type"].lower(), repo["owner"]) for repo in repos}:
+            retval, out, err = await srv.gh_graphql(
+                query=""  # noqa: UP031 %-format
+                """{
+  %s(login: "%s") {
+    pinnedItems(first: 6, types: [REPOSITORY]) {
+      nodes {
+        ... on Repository {
+          nameWithOwner
+          url
+        }
+      }
+    }
+  }
+}""" % (t, o),
+            )
+
+            self._check_retval(retval, err)
+            pins_raw = orjson.loads(out)
+            _log_one_json(pins_raw)
+            pins_jq = jq.compile(
+                ".data.organization.pinnedItems.nodes[]?.nameWithOwner "
+                '| sub("^[^/]+/"; "") // empty',
+            )
+            pins[o] = pins_jq.input_value(pins_raw).all() if pins_raw else []
+
+        for repo in repos:
+            repo["pinned"] = (
+                repo["owner"] in pins and repo["name"] in pins[repo["owner"]]
+            )
 
         async def query_repo(repo):
             try:
