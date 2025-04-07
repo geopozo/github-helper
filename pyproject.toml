@@ -35,7 +35,7 @@ Homepage = "https://github.com/geopozo/github-helper"
 Repository = "https://github.com/geopozo/github-helper"
 
 [project.scripts]
-gh-status = "github_helper._cli:run_cli"
+gh-helper = "github_helper._cli:run_cli"
 
 [dependency-groups]
 dev = [
