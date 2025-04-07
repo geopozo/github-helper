@@ -66,10 +66,7 @@ class GHApi:
 
     def _check_retval(self, retval, err, **kwargs):
         if retval != 0:
-            try:
-                raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")  # noqa: TRY301
-            except GHError as e:
-                raise e.with_traceback(e.__traceback__.tb_next) from None
+            raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")
 
     async def get_orgs(self):
         """Return orgs for a user."""
