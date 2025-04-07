@@ -19,6 +19,16 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
 
+def _log_one_json(obj):
+    obj = obj[0] if isinstance(obj, list) else obj
+    if _logger.getEffectiveLevel() <= logistro.DEBUG2:
+        raw = orjson.dumps(
+            obj,
+            option=orjson.OPT_INDENT_2,
+        ).decode()
+        _logger.debug2(f"gh result:\n {raw!s}")
+
+
 class GHApi:
     """Provides access to status functions ontop of gh program."""
 
@@ -163,7 +173,9 @@ class GHApi:
             args.append("--paginate")
         retval, out, err = await srv.gh_call(*args)
         self._check_retval(retval, err, endpoint=endpoint)
-        repos = repos_jq.input_value(orjson.loads(out)).first()
+        repos_json = orjson.loads(out)
+        _log_one_json(repos_json)
+        repos = repos_jq.input_value(repos_json).first()
 
         async def query_repo(repo):
             try:
