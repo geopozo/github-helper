@@ -2,6 +2,8 @@ import logistro
 import orjson
 from tabulate import tabulate
 
+import github_helper._api_to_html_adapter as html_adapter
+
 _logger = logistro.getLogger(__name__)
 
 
@@ -50,7 +52,10 @@ class GHAdapter:
             )
         return self._to_table([scopes_data])
 
-    def transform_repos_data(self, repos_data):
+    async def transform_repos_data(self, repos_data):
+        if True or hasattr(self, "_html") and self._html:
+            return await html_adapter.repos(repos_data)
+
         if self._json:
             return self._to_json_string(repos_data)
 
@@ -69,6 +74,7 @@ class GHAdapter:
             ]
             for repo in repos_data
         ]
+
         return self._to_table(data, ("repo", "type", "people", "topics"))
 
     def transform_tags_data(self, tags_data):
