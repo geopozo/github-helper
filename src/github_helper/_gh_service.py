@@ -16,14 +16,14 @@ class ScopesWarning(UserWarning):
 
 
 async def gh_call(*commands) -> tuple[int, bytes, bytes]:
-    subprocess_output_limit = 10240000
+    pipe_buffer = 10240000
     new_env = os.environ.copy()
     new_env.update(CLICOLOR_FORCE="1")
     p = await asyncio.create_subprocess_exec(
         *commands,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        limit=subprocess_output_limit,
+        limit=pipe_buffer,
         env=new_env,
     )
     retval = await p.wait()
