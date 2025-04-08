@@ -18,7 +18,7 @@ class ScopesWarning(UserWarning):
 async def gh_call(*commands) -> tuple[int, bytes, bytes]:
     pipe_buffer = 10240000
     new_env = os.environ.copy()
-    new_env.update(CLICOLOR_FORCE="1")
+    # new_env.update(CLICOLOR_FORCE="1") Bueno para auth pero no funciona para json
     p = await asyncio.create_subprocess_exec(
         *commands,
         stdout=subprocess.PIPE,
