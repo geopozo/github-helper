@@ -1,3 +1,5 @@
+import urllib.parse
+
 import logistro
 import orjson
 from tabulate import tabulate
@@ -23,9 +25,11 @@ class GHAdapter:
             tablefmt="psql" if self._pretty else "plain",
         )
 
-    def __init__(self, json, pretty):
+    def __init__(self, *, json, pretty, html, **kwargs):
         self._json = json
         self._pretty = pretty
+        self._html = html
+        self._url = kwargs.get("url", False)
 
     def transform_orgs_data(self, orgs_data):
         if self._json:
@@ -53,8 +57,12 @@ class GHAdapter:
         return self._to_table([scopes_data])
 
     async def transform_repos_data(self, repos_data):
-        if True or hasattr(self, "_html") and self._html:
-            return await html_adapter.repos(repos_data)
+        if self._html:
+            generated_html = str(await html_adapter.repos(repos_data))
+            if not self._url:
+                return generated_html
+            encoded = urllib.parse.quote(generated_html)
+            return f"data:text/html;charset=utf-8,{encoded}"
 
         if self._json:
             return self._to_json_string(repos_data)

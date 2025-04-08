@@ -26,16 +26,24 @@ def _get_cli_args():
     )
 
     parser.add_argument(
-        "-j",
         "--json",
         action="store_true",
         help="Output data in JSON format.",
     )
     parser.add_argument(
-        "-p",
         "--pretty",
         action="store_true",
         help="Pretty print the output (with or without json).",
+    )
+    parser.add_argument(
+        "--html",
+        action="store_true",
+        help="Output as HTML.",
+    )
+    parser.add_argument(
+        "--url",
+        action="store_true",
+        help="Output HTML as data-url for use like `firefox $(uv run gh-helper...)`.",
     )
 
     subparsers = parser.add_subparsers(dest="command")
@@ -126,10 +134,15 @@ async def _run_cli_async():
     parser, cli_args = _get_cli_args()
     repo = cli_args.get("repo", None)
     json = cli_args.get("json", None)
-    pretty = cli_args.get("pretty", None)
+    pretty = cli_args.get(
+        "pretty",
+        None,
+    )  # usando None como predetermiando para un booleano me queda raro
+    html = cli_args.get("html", False)
+    url = cli_args.get("url", False)
     paginate = cli_args.get("paginate", None)
     gh = api.GHApi()
-    adpt = GHAdapter(json, pretty)
+    adpt = GHAdapter(json=json, pretty=pretty, html=html, url=url)
     match cli_args["command"]:
         case "auth-status":
             # único (por ahora)
