@@ -55,15 +55,15 @@ class GHApi:
                 "Try gh `auth refresh --scopes SCOPE,...`",
             )
 
-    async def check_auth(self, *, cli_args=None):
+    async def check_auth(self):
         """Return true if user is logged in."""
-        retval, _, _ = await srv.gh_call(
+        retval, out, err = await srv.gh_call(
             "gh",
             "auth",
             "status",
-            direct=bool(cli_args),
         )
-        return retval
+        srv.check_retval(retval, err, command="gh auth status")
+        return out.decode(), retval
 
     async def get_orgs(self):
         """Return orgs for a user."""
