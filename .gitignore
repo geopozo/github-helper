@@ -17,4 +17,3 @@ test-results*
 
 # avoid ignore .gitkeep
 node_modules/
-.github/copilot-instructions.md

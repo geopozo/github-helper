@@ -1,0 +1,18 @@
+[
+    {
+        "repo": "*",
+        "include": [
+            "main",
+            "verify-tag"
+        ]
+    },
+    {
+        "repo": "ayjayt/mi_repo2",
+        "include": [
+            "extra"
+        ],
+        "exclude": [
+            "verify-tag"
+        ]
+    }
+]

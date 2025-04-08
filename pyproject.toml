@@ -13,7 +13,7 @@ name = "github-helper"
 description = "A tool for quickly looking at status of all repos."
 dynamic = ["version"]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 authors = [
   {name = "Andrew Pikul", email="ajpikul@gmail.com"},
   ]
@@ -21,8 +21,10 @@ maintainers = [
   {name = "Andrew Pikul", email = "ajpikul@gmail.com"},
 ]
 dependencies = [
+    "aiofiles>=24.1.0",
     "colored>=2.3.0",
     "jq>=1.8.0",
+    "jsondiff>=2.2.1",
     "logistro>=1.0.11",
     "orjson>=3.10.15",
     "tabulate>=0.9.0",
@@ -33,7 +35,7 @@ Homepage = "https://github.com/geopozo/github-helper"
 Repository = "https://github.com/geopozo/github-helper"
 
 [project.scripts]
-gh-status = "github_helper._cli:run_cli"
+gh-helper = "github_helper._cli:run_cli"
 
 [dependency-groups]
 dev = [
@@ -41,6 +43,8 @@ dev = [
     "pytest>=8.3.4",
     "mypy>=1.14.1",
     "poethepoet>=0.30.0",
+    "types-tabulate>=0.9.0.20241207",
+    "types-aiofiles>=24.1.0.20250326",
 ]
 
 #docs = [

@@ -4,10 +4,10 @@ import asyncio
 import sys
 
 import logistro
-import orjson
-from tabulate import tabulate
 
-from . import _api as api
+from github_helper._gh_adapter import GHAdapter
+
+from . import api
 
 
 def _get_cli_args():
@@ -36,7 +36,7 @@ def _get_cli_args():
         "-p",
         "--pretty",
         action="store_true",
-        help="Pretty print the output (with or without json)",
+        help="Pretty print the output (with or without json).",
     )
 
     check_auth_parser = subparsers.add_parser(
@@ -64,26 +64,52 @@ def _get_cli_args():
         help="Return scopes of current logged in user.",
     )
 
-    _ = subparsers.add_parser(
+    repos_parser = subparsers.add_parser(
         "repos",
         description="Show all repos.",
         help="Return all repos of current logged in user.",
     )
-
-    # We need complete this command in the future
-    # We need an argument called --repo or maybe --name
-    _ = subparsers.add_parser(
-        "tags",
-        description="Show all tags from a repo",
-        help="Return all repos of a repo",
+    repos_parser.add_argument(
+        "-p",
+        "--paginate",
+        help="Get all repos",
+        action="store_true",
     )
 
-    # We need complete this command in the future
-    # We need an argument called --repo or maybe --name
-    _ = subparsers.add_parser(
+    tags_parser = subparsers.add_parser(
+        "tags",
+        description="Show all tags from a repo.",
+        help="Return all repos of a repo.",
+    )
+    tags_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
+    )
+
+    releases_parser = subparsers.add_parser(
         "releases",
-        description="Show all releases from a repo",
-        help="Return all releases of a repo",
+        description="Show all releases from a repo.",
+        help="Return all releases of a repo.",
+    )
+    releases_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
+    )
+
+    audit_repo = subparsers.add_parser(
+        "audit-repo",
+        description="",
+        help="Audit repo rulesets against template.",
+    )
+    audit_repo.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
     )
 
     basic_args = parser.parse_args()
@@ -97,23 +123,36 @@ def run_cli():
 
 async def _run_cli_async():
     parser, cli_args = _get_cli_args()
+    repo = cli_args.get("repo", None)
+    paginate = cli_args.get("paginate", None)
+    json = cli_args.get("json", None)
+    pretty = cli_args.get("pretty", None)
     gh = api.GHApi()
+    adpt = GHAdapter(json, pretty)
     match cli_args["command"]:
         case "auth-status":
-            # único (por ahora)
-            sys.exit(await gh.check_auth(cli_args=cli_args))
+            data, sadness = await gh.check_auth()
         case "orgs":
-            data = await gh.get_orgs()
+            data, sadness = await gh.get_orgs()
+            data = adpt.transform_orgs_data(data)
         case "user":
-            data = await gh.get_user()
+            data, sadness = await gh.get_user()
+            data = adpt.transform_user_data(data)
         case "scopes":
-            data = await gh.get_scopes()
+            data, sadness = await gh.get_scopes()
+            data = adpt.transform_scopes_data(data)
         case "repos":
-            data = await gh.get_repos()
+            data, sadness = await gh.get_repos(paginate=paginate)
+            data = adpt.transform_repos_data(data)
         case "tags":
-            data = await gh.get_tags()
+            data, sadness = await gh.get_tagged_versions(repo)
+            data = adpt.transform_tags_data(data)
         case "releases":
-            data = await gh.get_releases()
+            data, sadness = await gh.get_releases(repo)
+            data = adpt.transform_releases_data(data)
+        case "audit-repo":
+            data, sadness = await gh.audit_rulesets(repo)
+            data = adpt.transform_audit_rulesets_data(data)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()
@@ -121,28 +160,6 @@ async def _run_cli_async():
 
     if not data:
         print("No data to display.", file=sys.stderr)
-        sys.exit(1)
 
-    _print_data(
-        data,
-        fmt_json=cli_args["json"],
-        fmt_pretty=cli_args["pretty"],
-    )
-
-
-def _print_data(data, *, fmt_json, fmt_pretty):
-    """Format data based on the option provided."""
-    if fmt_json:
-        output = orjson.dumps(
-            data,
-            option=orjson.OPT_INDENT_2 if fmt_pretty else None,
-        ).decode()
-    else:
-        if not isinstance(data, list):
-            data = [data]
-        output = tabulate(
-            data,
-            headers="keys" if fmt_pretty else "",
-            tablefmt="pretty" if fmt_pretty else "plain",
-        )
-    print(output)
+    print(data)
+    sys.exit(sadness)
