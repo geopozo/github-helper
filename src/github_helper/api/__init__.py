@@ -203,7 +203,6 @@ class GHApi:
 
             self._check_retval(retval, err)
             pins_raw = orjson.loads(out)
-            _log_one_json(pins_raw)
             pins_jq = jq.compile(
                 ".data.organization.pinnedItems.nodes[]?.nameWithOwner "
                 '| sub("^[^/]+/"; "") // empty',
@@ -221,7 +220,7 @@ class GHApi:
                     self._current_user,
                     repo["name"],
                 )
-                _logger.debug2(f"Adding collabs: {collabs}")
+                _logger.debug2(f"Adding collabs to {repo['name']}: {collabs}")
                 repo["collaborators"] = collabs
             except GHError as e:
                 if "HTTP 404" in e.args[0]:
