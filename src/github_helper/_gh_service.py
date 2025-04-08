@@ -28,3 +28,8 @@ async def gh_call(*commands, direct=False) -> tuple[int, bytes, bytes]:
 
 async def gh_api(endpoint: str, *, direct: bool = False) -> tuple[int, bytes, bytes]:
     return await gh_call("gh", "api", endpoint, direct=direct)
+
+
+def check_retval(retval, err, **kwargs):
+    if retval != 0:
+        raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")
