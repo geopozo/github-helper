@@ -1,5 +1,6 @@
 """A CLI dashboard for github status."""
 
+import asyncio
 import re
 import warnings
 from pathlib import Path
@@ -54,22 +55,15 @@ class GHApi:
                 "Try gh `auth refresh --scopes SCOPE,...`",
             )
 
-    async def check_auth(self, *, cli_args=None):
+    async def check_auth(self):
         """Return true if user is logged in."""
-        retval, _, _ = await srv.gh_call(
+        retval, out, err = await srv.gh_call(
             "gh",
             "auth",
             "status",
-            direct=bool(cli_args),
         )
-        return retval
-
-    def _check_retval(self, retval, err, **kwargs):
-        if retval != 0:
-            try:
-                raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")  # noqa: TRY301
-            except GHError as e:
-                raise e.with_traceback(e.__traceback__.tb_next) from None
+        srv.check_retval(retval, err, command="gh auth status")
+        return out.decode(), retval
 
     async def get_orgs(self):
         """Return orgs for a user."""
@@ -77,7 +71,7 @@ class GHApi:
         endpoint = "/user/orgs"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
         orgs = orgs_jq.input_value(orjson.loads(out)).first()
 
         _ = await self.get_user()
@@ -87,7 +81,7 @@ class GHApi:
             endpoint = f"orgs/{org['name']}/memberships/{self._current_user}"
             _logger.debug(f"Calling API: {endpoint}")
             retval, out, err = await srv.gh_api(endpoint)
-            self._check_retval(retval, err, **org, endpoint=endpoint)
+            srv.check_retval(retval, err, **org, endpoint=endpoint)
             org["role"] = role_jq.input_value(orjson.loads(out)).first()
         sadness = int(not orgs)
         return orgs, sadness
@@ -101,7 +95,7 @@ class GHApi:
         endpoint = "/user"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
         user_data = user_jq.input_text(out.decode()).first()
         user_name = next(iter(user_data))
         self._current_user = user_name
@@ -114,7 +108,7 @@ class GHApi:
         cli_command = ["gh", "api", "/user", "--verbose"]
         _logger.debug(f"Calling CLI command: {' '.join(cli_command)}")
         retval, out, err = await srv.gh_call(*cli_command)
-        self._check_retval(retval, err)
+        srv.check_retval(retval, err)
         match = scopes_re.search(out)
         if not match:
             raise GHError(
@@ -134,7 +128,7 @@ class GHApi:
         endpoint = f"repos/{owner}/{repo}/collaborators"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
         collabs = collabs_jq.input_value(orjson.loads(out)).first()
         return collabs
 
@@ -161,14 +155,26 @@ class GHApi:
         if paginate:
             args.append("--paginate")
         retval, out, err = await srv.gh_call(*args)
-        self._check_retval(retval, err, endpoint=endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
         repos = repos_jq.input_value(orjson.loads(out)).first()
-        for repo in repos:
-            collabs = await self._get_collaborators(
-                self._current_user,
-                repo["name"],
-            )
-            repo["collaborators"] = collabs
+
+        async def query_repo(repo):
+            try:
+                collabs = await self._get_collaborators(
+                    self._current_user,
+                    repo["name"],
+                )
+                _logger.debug2(f"Adding collabs: {collabs}")
+                repo["collaborators"] = collabs
+            except GHError as e:
+                if "HTTP 404" in e.args[0]:
+                    repo["collaborators"] = ["(404)"]
+
+        await asyncio.gather(
+            *[query_repo(repo) for repo in repos],
+            return_exceptions=True,
+        )
+
         sadness = int(not repos)
         return repos, sadness
 
@@ -180,7 +186,7 @@ class GHApi:
         endpoint = f"repos/{owner}/{repo}/tags"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
         tags = tags_jq.input_value(orjson.loads(out)).first()
         sadness = int(not tags)
         return tags, sadness
@@ -195,7 +201,7 @@ class GHApi:
         endpoint = f"repos/{owner}/{repo}/releases"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
         sadness = int(not releases)
         return releases, sadness
@@ -205,7 +211,7 @@ class GHApi:
         endpoint = f"repos/{owner}/{repo}/rulesets/{ruleset_id}"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
         return orjson.loads(out)
 
     async def audit_rulesets(self, repo):
@@ -231,7 +237,7 @@ class GHApi:
         endpoint = f"repos/{owner}/{repo}/rulesets"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
-        self._check_retval(retval, err, endpoint=endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
         active_rulesets = rulesets_jq.input_value(orjson.loads(out)).first()
 
         if not active_rulesets:

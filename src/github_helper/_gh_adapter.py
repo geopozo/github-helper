@@ -1,5 +1,8 @@
+import logistro
 import orjson
 from tabulate import tabulate
+
+_logger = logistro.getLogger(__name__)
 
 
 class GHAdapter:
