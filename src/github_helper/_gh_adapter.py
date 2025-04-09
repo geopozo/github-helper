@@ -57,7 +57,7 @@ class GHAdapter:
             for repo in repos_data:
                 repo["name"] = repo["name"][:24]
                 repo["collaborators"] = ",".join(
-                    [s[:6] for s in repo["collaborators"]],
+                    [str(s)[:6] for s in repo["collaborators"]],
                 )
             return self._to_table(repos_data)
         return self._to_table(
@@ -68,7 +68,7 @@ class GHAdapter:
                     "archived" if repo["archived"] else "active",
                     repo["owner"],
                     ",".join(
-                        [s[:6] for s in repo["collaborators"]],
+                        [str(s)[:6] for s in repo["collaborators"]],
                     ),
                 ]
                 for repo in repos_data
