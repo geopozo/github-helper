@@ -1,6 +1,9 @@
+import json
+
 import logistro
-import orjson
 from tabulate import tabulate
+
+from github_helper._utils import AutoEncoder
 
 _logger = logistro.getLogger(__name__)
 
@@ -9,10 +12,11 @@ class GHAdapter:
     """Allows the CLI to transform the data as required."""
 
     def _to_json_string(self, data):
-        return orjson.dumps(
+        return json.dumps(
             data,
-            option=orjson.OPT_INDENT_2 if self._pretty else None,
-        ).decode()
+            indent=2 if self._pretty else 0,
+            cls=AutoEncoder,
+        )
 
     def _to_table(self, data):
         return tabulate(
