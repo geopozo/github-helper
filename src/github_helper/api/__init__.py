@@ -171,12 +171,9 @@ class GHApi:
                 if match:
                     repo["collaborators"] = [f"({match.group(1)})"]
                 else:
-                    repo["collaborators"] = [str(e)]
+                    repo["collaborators"] = [e]
 
-        await asyncio.gather(
-            *[query_repo(repo) for repo in repos],
-            return_exceptions=True,
-        )
+        await asyncio.gather(*[query_repo(repo) for repo in repos])
 
         sadness = int(not repos)
         return repos, sadness
