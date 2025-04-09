@@ -167,8 +167,11 @@ class GHApi:
                 _logger.debug2(f"Adding collabs: {collabs}")
                 repo["collaborators"] = collabs
             except GHError as e:
-                if "HTTP 404" in e.args[0]:
-                    repo["collaborators"] = ["(404)"]
+                match = re.search(r"HTTP (4\d{2})", e.args[0])
+                if match:
+                    repo["collaborators"] = [f"({match.group(1)})"]
+                else:
+                    repo["collaborators"] = [str(e)]
 
         await asyncio.gather(
             *[query_repo(repo) for repo in repos],
