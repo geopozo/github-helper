@@ -161,7 +161,7 @@ class GHApi:
         async def query_repo(repo):
             try:
                 collabs = await self._get_collaborators(
-                    self._current_user,
+                    repo["owner"],
                     repo["name"],
                 )
                 _logger.debug2(f"Adding collabs: {collabs}")
