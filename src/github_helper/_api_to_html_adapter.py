@@ -73,6 +73,7 @@ class RepoRow:
                 html.a(
                     "🔧",
                     href=f"{github_com}/{repo['owner']}/{repo['name']}/settings/access",
+                    target="_blank",
                 ),
                 *[
                     html.a(s, href=f"{github_com}/{s}") if s != "(404)" else s
@@ -81,6 +82,11 @@ class RepoRow:
                 class_="collaborators",
             ),
             html.td(
+                html.a(
+                    "🔧",
+                    href=f"{github_com}/{repo['owner']}/{repo['name']}",
+                    target="_blank",
+                ),
                 *[html.span(s, class_=f"topic {s}") for s in repo["topics"]],
                 class_="topics",
             ),
@@ -101,6 +107,25 @@ async def repos(repos_data):
     _logger.debug("Building table.")
     table = html.table(repo_rows(repos_data))
     _logger.debug("Building page.")
+    script = html.script(
+        html.SafeStr("""
+  const publicCheckbox = document.getElementById('toggle-public');
+  const privateCheckbox = document.getElementById('toggle-private');
+
+  function toggleRows() {
+    document.querySelectorAll('tr.public').forEach(row => {
+      row.style.display = publicCheckbox.checked ? '' : 'none';
+    });
+    document.querySelectorAll('tr.private').forEach(row => {
+      row.style.display = privateCheckbox.checked ? '' : 'none';
+    });
+  }
+
+  publicCheckbox.addEventListener('change', toggleRows);
+  privateCheckbox.addEventListener('change', toggleRows);
+  toggleRows();
+"""),
+    )
     page = (
         html.DOCTYPE.html,
         html.html(
@@ -108,7 +133,28 @@ async def repos(repos_data):
                 html.style(style),
             ),
             html.body(
+                html.div(
+                    html.label(
+                        html.input_(
+                            type_="checkbox",
+                            id_="toggle-public",
+                            checked=True,
+                        ),
+                        " Show Public",
+                    ),
+                    html.label(
+                        html.input_(
+                            type_="checkbox",
+                            id_="toggle-private",
+                            checked=True,
+                            style="margin-left:1rem;",
+                        ),
+                        " Show Private",
+                    ),
+                    style="margin-bottom: 1rem;",
+                ),
                 table,
+                script,
             ),
         ),
     )
