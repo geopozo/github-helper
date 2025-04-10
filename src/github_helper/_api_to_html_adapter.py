@@ -42,11 +42,11 @@ tr.even { background-color: #f0f0f0; }
 tr.odd { background-color: #ffffff; }
 
 tr.repo-row.private {
-    font-weight: 250;
+    font-weight: 350;
 }
 
-tr.repo-row.private {
-    font-weight: 550;
+tr.repo-row.public {
+    font-weight: 500;
 }
 
 tr.repo-row.archived td{
@@ -166,20 +166,27 @@ async def repos(repos_data):
         ),
         html.script(
             html.SafeStr("""
- const input = document.getElementById('owner-filter');
-
-  input.addEventListener('input', () => {
-    const filter = input.value.toLowerCase();
+ const ownerInput = document.getElementById('owner-filter');
+ const repoInput = document.getElementById('repo-filter');
+ filterAll = () => {
+    console.log("Filtering All.")
+    const ownerFilter = ownerInput.value.toLowerCase();
+    const repoFilter = repoInput.value.toLowerCase();
     const rows = document.querySelectorAll('table tbody tr');
 
     rows.forEach(row => {
-      const match = [...row.querySelectorAll('td.owner')].some(td =>
-        td.textContent.toLowerCase().includes(filter)
+      const matchOwner = [...row.querySelectorAll('td.owner')].some(td =>
+        td.textContent.toLowerCase().includes(ownerFilter)
       );
-      row.style.display = match ? '' : 'none';
+      const matchRepo = [...row.querySelectorAll('td.repo')].some(td =>
+        td.textContent.toLowerCase().includes(repoFilter)
+      );
+      row.style.display = matchOwner && matchRepo ? '' : 'none';
     });
-    updateVisibleRowClasses()
-  });
+    updateVisibleRowClasses();
+  };
+  ownerInput.addEventListener('input', filterAll);
+  repoInput.addEventListener('input', filterAll);
   """),
         ),
     ]
@@ -219,13 +226,22 @@ async def repos(repos_data):
                     ),
                     html.br(),
                     html.label(
+                        " Owner",
                         html.input_(
                             type_="text",
                             id_="owner-filter",
                             name="owner-filter",
                             placeholder="Owner",
                         ),
-                        "Owner",
+                    ),
+                    html.label(
+                        " Repo",
+                        html.input_(
+                            type_="text",
+                            id_="repo-filter",
+                            name="repo-filter",
+                            placeholder="Repo",
+                        ),
                     ),
                     style="margin-bottom: 1rem;",
                 ),
