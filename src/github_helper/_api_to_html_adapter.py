@@ -37,9 +37,22 @@ body {
 table {
   width: max-content;
 }
-tr.repo-row:nth-child(even) {
-  background-color: #f0f0f0;
+
+tr.even { background-color: #f0f0f0; }
+tr.odd { background-color: #ffffff; }
+
+tr.repo-row.private {
+    font-weight: 250;
 }
+
+tr.repo-row.private {
+    font-weight: 550;
+}
+
+tr.repo-row.archived td{
+   background-color: rgba(255, 0, 0, 0.04);
+}
+
 """
 
 
@@ -107,25 +120,69 @@ async def repos(repos_data):
     _logger.debug("Building table.")
     table = html.table(repo_rows(repos_data))
     _logger.debug("Building page.")
-    script = html.script(
-        html.SafeStr("""
+    scripts = [
+        html.script(
+            html.SafeStr("""
+    function updateVisibleRowClasses() {
+        const rows = [...document.querySelectorAll('table tbody tr')];
+        let visibleIndex = 0;
+
+        rows.forEach(row => {
+          row.classList.remove('odd', 'even');
+
+          if (row.style.display !== 'none') {
+            row.classList.add(visibleIndex % 2 === 0 ? 'even' : 'odd');
+            visibleIndex++;
+          }
+    });
+  }"""),
+        ),
+        html.script(
+            html.SafeStr("""
   const publicCheckbox = document.getElementById('toggle-public');
   const privateCheckbox = document.getElementById('toggle-private');
+  const archivedCheckbox = document.getElementById('toggle-archive');
 
   function toggleRows() {
     document.querySelectorAll('tr.public').forEach(row => {
       row.style.display = publicCheckbox.checked ? '' : 'none';
+      updateVisibleRowClasses()
     });
     document.querySelectorAll('tr.private').forEach(row => {
       row.style.display = privateCheckbox.checked ? '' : 'none';
+      updateVisibleRowClasses()
+    });
+    document.querySelectorAll('tr.archived').forEach(row => {
+      row.style.display = archivedCheckbox.checked ? '' : 'none';
+      updateVisibleRowClasses()
     });
   }
 
   publicCheckbox.addEventListener('change', toggleRows);
   privateCheckbox.addEventListener('change', toggleRows);
+  archivedCheckbox.addEventListener('change', toggleRows);
   toggleRows();
 """),
-    )
+        ),
+        html.script(
+            html.SafeStr("""
+ const input = document.getElementById('owner-filter');
+
+  input.addEventListener('input', () => {
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelectorAll('table tbody tr');
+
+    rows.forEach(row => {
+      const match = [...row.querySelectorAll('td')].some(td =>
+        td.textContent.toLowerCase().includes(filter)
+      );
+      row.style.display = match ? '' : 'none';
+    });
+    updateVisibleRowClasses()
+  });
+  """),
+        ),
+    ]
     page = (
         html.DOCTYPE.html,
         html.html(
@@ -151,10 +208,29 @@ async def repos(repos_data):
                         ),
                         " Show Private",
                     ),
+                    html.label(
+                        html.input_(
+                            type_="checkbox",
+                            id_="toggle-archive",
+                            checked=True,
+                            style="margin-left:1rem;",
+                        ),
+                        " Show Archived",
+                    ),
+                    html.br(),
+                    html.label(
+                        html.input_(
+                            type_="text",
+                            id_="owner-filter",
+                            name="owner-filter",
+                            placeholder="Owner",
+                        ),
+                        "Owner",
+                    ),
                     style="margin-bottom: 1rem;",
                 ),
                 table,
-                script,
+                *scripts,
             ),
         ),
     )
