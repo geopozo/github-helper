@@ -1,6 +1,9 @@
+import json
+
 import logistro
-import orjson
 from tabulate import tabulate
+
+from github_helper._utils import AutoEncoder
 
 _logger = logistro.getLogger(__name__)
 
@@ -9,10 +12,11 @@ class GHAdapter:
     """Allows the CLI to transform the data as required."""
 
     def _to_json_string(self, data):
-        return orjson.dumps(
+        return json.dumps(
             data,
-            option=orjson.OPT_INDENT_2 if self._pretty else None,
-        ).decode()
+            indent=2 if self._pretty else 0,
+            cls=AutoEncoder,
+        )
 
     def _to_table(self, data):
         return tabulate(
@@ -57,7 +61,7 @@ class GHAdapter:
             for repo in repos_data:
                 repo["name"] = repo["name"][:24]
                 repo["collaborators"] = ",".join(
-                    [s[:6] for s in repo["collaborators"]],
+                    [str(s)[:6] for s in repo["collaborators"]],
                 )
             return self._to_table(repos_data)
         return self._to_table(
@@ -68,7 +72,7 @@ class GHAdapter:
                     "archived" if repo["archived"] else "active",
                     repo["owner"],
                     ",".join(
-                        [s[:6] for s in repo["collaborators"]],
+                        [str(s)[:6] for s in repo["collaborators"]],
                     ),
                 ]
                 for repo in repos_data

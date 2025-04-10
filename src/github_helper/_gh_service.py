@@ -2,16 +2,18 @@ import asyncio
 import os
 import subprocess
 
+from github_helper._utils import ErrorSerializer
 
-class GHError(RuntimeError):
+
+class GHError(RuntimeError, ErrorSerializer):
     """Error type for `gh` CLI tool errors."""
 
 
-class ScopesError(RuntimeError):
+class ScopesError(RuntimeError, ErrorSerializer):
     """Error for when missing necessary scope."""
 
 
-class ScopesWarning(UserWarning):
+class ScopesWarning(UserWarning, ErrorSerializer):
     """Warning for when missing optional enhancing scope."""
 
 
