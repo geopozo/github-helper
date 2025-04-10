@@ -173,7 +173,7 @@ async def repos(repos_data):
     const rows = document.querySelectorAll('table tbody tr');
 
     rows.forEach(row => {
-      const match = [...row.querySelectorAll('td')].some(td =>
+      const match = [...row.querySelectorAll('td.owner')].some(td =>
         td.textContent.toLowerCase().includes(filter)
       );
       row.style.display = match ? '' : 'none';
