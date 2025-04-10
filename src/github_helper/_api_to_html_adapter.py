@@ -142,33 +142,9 @@ async def repos(repos_data):
   const publicCheckbox = document.getElementById('toggle-public');
   const privateCheckbox = document.getElementById('toggle-private');
   const archivedCheckbox = document.getElementById('toggle-archive');
-
-  function toggleRows() {
-    document.querySelectorAll('tr.public').forEach(row => {
-      row.style.display = publicCheckbox.checked ? '' : 'none';
-      updateVisibleRowClasses()
-    });
-    document.querySelectorAll('tr.private').forEach(row => {
-      row.style.display = privateCheckbox.checked ? '' : 'none';
-      updateVisibleRowClasses()
-    });
-    document.querySelectorAll('tr.archived').forEach(row => {
-      row.style.display = archivedCheckbox.checked ? '' : 'none';
-      updateVisibleRowClasses()
-    });
-  }
-
-  publicCheckbox.addEventListener('change', toggleRows);
-  privateCheckbox.addEventListener('change', toggleRows);
-  archivedCheckbox.addEventListener('change', toggleRows);
-  toggleRows();
-"""),
-        ),
-        html.script(
-            html.SafeStr("""
- const ownerInput = document.getElementById('owner-filter');
- const repoInput = document.getElementById('repo-filter');
- filterAll = () => {
+  const ownerInput = document.getElementById('owner-filter');
+  const repoInput = document.getElementById('repo-filter');
+  function filterAll() {
     console.log("Filtering All.")
     const ownerFilter = ownerInput.value.toLowerCase();
     const repoFilter = repoInput.value.toLowerCase();
@@ -181,12 +157,21 @@ async def repos(repos_data):
       const matchRepo = [...row.querySelectorAll('td.repo')].some(td =>
         td.textContent.toLowerCase().includes(repoFilter)
       );
-      row.style.display = matchOwner && matchRepo ? '' : 'none';
+      archived = !(!archivedCheckbox.checked && row.classList.contains('archived'))
+      private  = !(!privateCheckbox.checked && row.classList.contains('private'))
+      public   = !(!publicCheckbox.checked && row.classList.contains('public'))
+
+      toDisplay = matchOwner && matchRepo && archived && private && public
+      row.style.display = toDisplay ? '' : 'none';
     });
     updateVisibleRowClasses();
-  };
+  }
+  publicCheckbox.addEventListener('change', filterAll);
+  privateCheckbox.addEventListener('change', filterAll);
+  archivedCheckbox.addEventListener('change', filterAll);
   ownerInput.addEventListener('input', filterAll);
   repoInput.addEventListener('input', filterAll);
+  filterAll();
   """),
         ),
     ]

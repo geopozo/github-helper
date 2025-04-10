@@ -145,8 +145,7 @@ async def _run_cli_async():
     adpt = GHAdapter(json=json, pretty=pretty, html=html, url=url)
     match cli_args["command"]:
         case "auth-status":
-            # único (por ahora)
-            sys.exit(await gh.check_auth(cli_args=cli_args))
+            data, sadness = await gh.check_auth()
         case "orgs":
             data, sadness = await gh.get_orgs()
             data = adpt.transform_orgs_data(data)

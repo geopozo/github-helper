@@ -1,37 +1,44 @@
 import asyncio
+import os
 import subprocess
 
 import logistro
 
+from github_helper._utils import ErrorSerializer
+
 _logger = logistro.getLogger(__name__)
 
 
-class GHError(RuntimeError):
+class GHError(RuntimeError, ErrorSerializer):
     """Error type for `gh` CLI tool errors."""
 
 
-class ScopesError(RuntimeError):
+class ScopesError(RuntimeError, ErrorSerializer):
     """Error for when missing necessary scope."""
 
 
-class ScopesWarning(UserWarning):
+class ScopesWarning(UserWarning, ErrorSerializer):
     """Warning for when missing optional enhancing scope."""
 
 
-async def gh_call(*commands, direct=False) -> tuple[int, bytes, bytes]:
+async def gh_call(*commands) -> tuple[int, bytes, bytes]:
+    pipe_buffer = 10240000
+    new_env = os.environ.copy()
+    # new_env.update(CLICOLOR_FORCE="1") Bueno para auth pero no funciona para json
     p = await asyncio.create_subprocess_exec(
         *commands,
-        stdout=None if direct else subprocess.PIPE,
-        stderr=None if direct else subprocess.PIPE,
-        limit=10240000,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        limit=pipe_buffer,
+        env=new_env,
     )
     retval = await p.wait()
     stdout, stderr = await p.communicate()
     return retval, stdout, stderr
 
 
-async def gh_api(endpoint: str, *, direct: bool = False) -> tuple[int, bytes, bytes]:
-    return await gh_call("gh", "api", endpoint, direct=direct)
+async def gh_api(endpoint: str) -> tuple[int, bytes, bytes]:
+    return await gh_call("gh", "api", endpoint)
 
 
 async def gh_graphql(query: str) -> tuple[int, bytes, bytes]:
@@ -42,3 +49,8 @@ async def gh_graphql(query: str) -> tuple[int, bytes, bytes]:
         "--raw-field",
         f"query={query}",
     )
+
+
+def check_retval(retval, err, **kwargs):
+    if retval != 0:
+        raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")
