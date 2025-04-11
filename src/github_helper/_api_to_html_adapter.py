@@ -154,7 +154,7 @@ async def repos(repos_data):
   }"""),
         ),
         html.script(
-            html.SafeStr("""
+            html.SafeStr(r"""
   const publicCheckbox = document.getElementById('toggle-public');
   const privateCheckbox = document.getElementById('toggle-private');
   const archivedCheckbox = document.getElementById('toggle-archive');
