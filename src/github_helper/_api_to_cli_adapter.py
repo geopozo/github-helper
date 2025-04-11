@@ -38,11 +38,16 @@ class GHAdapter:
             tablefmt="psql" if self._pretty else "plain",
         )
 
-    def __init__(self, *, json, pretty, html, **kwargs):
-        self._json = json
-        self._pretty = pretty
-        self._html = html
-        self._url = kwargs.get("url", False)
+    def __init__(self, **args: dict):
+        valid_args = {"command", "json", "pretty", "html", "url"}
+        if args.keys() - valid_args:
+            raise ValueError("Additional args coming in from cli")
+        self._command = args.pop("command")
+        self._json = args.get("json", False)
+        self._pretty = args.get("pretty", False)
+        self._html = args.get("html", False)
+        self._url = args.get("url", False)
+        self._check_options(args)
 
     def transform_orgs_data(self, orgs_data):
         if self._json:
