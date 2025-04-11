@@ -13,6 +13,17 @@ _logger = logistro.getLogger(__name__)
 class GHAdapter:
     """Allows the CLI to transform the data as required."""
 
+    def _check_options(self, formatters):
+        formats = {k for k, v in formatters.items() if v}
+        invalid_formats = {"html", "url"} & formats
+        if (self._command == "auth-status" and formats) or (
+            self._command != "repos" and invalid_formats
+        ):
+            raise NotImplementedError(
+                f"{', '.join(invalid_formats)} not valid flags for {self._command}",
+            )
+        return True
+
     def _to_json_string(self, data):
         return json.dumps(
             data,
