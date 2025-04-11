@@ -132,18 +132,14 @@ def run_cli():
 
 async def _run_cli_async():
     parser, cli_args = _get_cli_args()
-    repo = cli_args.get("repo", None)
-    json = cli_args.get("json", None)
-    pretty = cli_args.get(
-        "pretty",
-        None,
-    )  # usando None como predetermiando para un booleano me queda raro
-    html = cli_args.get("html", False)
-    url = cli_args.get("url", False)
-    paginate = cli_args.get("paginate", None)
+    repo = cli_args.pop("repo", None)
+    paginate = cli_args.pop("paginate", False)
+    command = cli_args.pop("command", None)
+    cli_args.pop("log")
+    cli_args.pop("human")
     gh = api.GHApi()
-    adpt = GHAdapter(json=json, pretty=pretty, html=html, url=url)
-    match cli_args["command"]:
+    adpt = GHAdapter(**cli_args, command=command)
+    match command:
         case "auth-status":
             data, sadness = await gh.check_auth()
         case "orgs":
