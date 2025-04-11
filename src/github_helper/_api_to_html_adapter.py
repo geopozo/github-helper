@@ -60,6 +60,9 @@ tr.repo-row.archived td{
    background-color: rgba(255, 0, 0, 0.04);
 }
 
+#controls {
+    width:max-content;
+}
 """
 
 
@@ -130,9 +133,10 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
 
 async def repos(repos_data):
     _logger.debug("Building table.")
-    table = html.table(repo_rows(repos_data))
+    table = html.table(repo_rows(repos_data), class_="mx-auto")
     _logger.debug("Building page.")
     scripts = [
+        html.script(src="https://cdn.tailwindcss.com"),
         html.script(
             html.SafeStr("""
     function updateVisibleRowClasses() {
@@ -241,6 +245,8 @@ async def repos(repos_data):
                         ),
                     ),
                     style="margin-bottom: 1rem;",
+                    class_="mx-auto",
+                    id_="controls",
                 ),
                 table,
                 *scripts,
