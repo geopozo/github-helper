@@ -8,7 +8,14 @@ _logger = logistro.getLogger(__name__)
 
 github_com = r"https://www.github.com"
 style = """
-span.topic {
+
+a.collaborator:link,
+a.collaborator:hover,
+a.collaborator:visited,
+a.collaborator:focus,
+a.collaborator:active,
+span.topic
+{
   border: 1px solid black;
   padding: 0rem .5rem;
   border-radius: 10px;
@@ -60,6 +67,9 @@ tr.repo-row.archived td{
 class RepoRow:
     repo: MutableMapping
 
+    def _error_printer(self, s):
+        return html.span(str(type(s).__name__), title=str(s))
+
     async def htmy(self, context: Context) -> Component:  # noqa: ARG002
         repo = self.repo
         _logger.debug(f"Building html row for {repo['name']}")
@@ -89,7 +99,9 @@ class RepoRow:
                     target="_blank",
                 ),
                 *[
-                    html.a(s, href=f"{github_com}/{s}") if s != "(404)" else s
+                    self._error_printer(s)
+                    if isinstance(s, Exception)
+                    else html.a(s, href=f"{github_com}/{s}", class_="collaborator")
                     for s in repo["collaborators"]
                 ],
                 class_="collaborators",
