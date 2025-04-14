@@ -19,6 +19,16 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
 
+def _log_one_json(obj):
+    obj = obj[0] if isinstance(obj, list) else obj
+    if _logger.getEffectiveLevel() <= logistro.DEBUG2:
+        raw = orjson.dumps(
+            obj,
+            option=orjson.OPT_INDENT_2,
+        ).decode()
+        _logger.debug2(f"gh result:\n {raw!s}")
+
+
 class GHApi:
     """Provides access to status functions ontop of gh program."""
 
@@ -140,7 +150,16 @@ class GHApi:
             r"name: .name,"
             r"visibility: .visibility,"
             r"archived: .archived,"
-            r"owner: .owner.login"
+            r"owner: .owner.login,"
+            r"owner_type: .owner.type,"
+            r"topics: .topics,"
+            r"fork: .fork,"
+            r"description: .description,"
+            r"stargazers: .stargazers_count,"
+            r"watchers: .watchers_count,"
+            r"forks: .forks_count,"
+            r"open_issues: .open_issues_count,"
+            r"license: .license"
             r"})"
             r" | sort_by(.name)"
             r" | sort_by(.archived)"
@@ -156,7 +175,41 @@ class GHApi:
             args.append("--paginate")
         retval, out, err = await srv.gh_call(*args)
         srv.check_retval(retval, err, endpoint=endpoint)
-        repos = repos_jq.input_value(orjson.loads(out)).first()
+        repos_json = orjson.loads(out)
+        _log_one_json(repos_json)
+        repos = repos_jq.input_value(repos_json).first()
+
+        pins_query = """
+{
+  %s(login: "%s") {
+    pinnedItems(first: 6, types: [REPOSITORY]) {
+      nodes {
+        ... on Repository {
+          nameWithOwner
+          url
+        }
+      }
+    }
+  }
+}"""
+        pins_jq = jq.compile(
+            ".data.organization.pinnedItems.nodes[]?.nameWithOwner "
+            '| sub("^[^/]+/"; "") // empty',
+        )
+        pins = {}
+        for t, o in {(repo["owner_type"].lower(), repo["owner"]) for repo in repos}:
+            retval, out, err = await srv.gh_graphql(
+                query=pins_query % (t, o),
+            )
+
+            srv.check_retval(retval, err)
+            pins_raw = orjson.loads(out)
+            pins[o] = pins_jq.input_value(pins_raw).all() if pins_raw else []
+
+        for repo in repos:
+            repo["pinned"] = (
+                repo["owner"] in pins and repo["name"] in pins[repo["owner"]]
+            )
 
         async def query_repo(repo):
             try:
@@ -164,7 +217,7 @@ class GHApi:
                     repo["owner"],
                     repo["name"],
                 )
-                _logger.debug2(f"Adding collabs: {collabs}")
+                _logger.debug2(f"Adding collabs to {repo['name']}: {collabs}")
                 repo["collaborators"] = collabs
             except GHError as e:
                 match = re.search(r"HTTP (4\d{2})", e.args[0])

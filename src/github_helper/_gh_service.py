@@ -2,7 +2,11 @@ import asyncio
 import os
 import subprocess
 
+import logistro
+
 from github_helper._utils import ErrorSerializer
+
+_logger = logistro.getLogger(__name__)
 
 
 class GHError(RuntimeError, ErrorSerializer):
@@ -35,6 +39,16 @@ async def gh_call(*commands) -> tuple[int, bytes, bytes]:
 
 async def gh_api(endpoint: str) -> tuple[int, bytes, bytes]:
     return await gh_call("gh", "api", endpoint)
+
+
+async def gh_graphql(query: str) -> tuple[int, bytes, bytes]:
+    return await gh_call(
+        "gh",
+        "api",
+        "graphql",
+        "--raw-field",
+        f"query={query}",
+    )
 
 
 def check_retval(retval, err, **kwargs):
