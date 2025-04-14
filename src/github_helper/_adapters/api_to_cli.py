@@ -4,7 +4,7 @@ import urllib.parse
 import logistro
 from tabulate import tabulate
 
-import github_helper._api_to_html_adapter as html_adapter
+import github_helper._adapters.api_to_html as html_adapter
 from github_helper._utils import AutoEncoder
 
 _logger = logistro.getLogger(__name__)
