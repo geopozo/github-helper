@@ -6,7 +6,7 @@ import sys
 
 import logistro
 
-from github_helper._api_to_cli_adapter import GHAdapter
+from github_helper._adapters import GHAdapter
 
 from . import api
 
