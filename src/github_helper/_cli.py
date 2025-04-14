@@ -132,41 +132,37 @@ def run_cli():
 
 async def _run_cli_async():
     parser, cli_args = _get_cli_args()
-    repo = cli_args.get("repo", None)
-    json = cli_args.get("json", None)
-    pretty = cli_args.get(
-        "pretty",
-        None,
-    )  # usando None como predetermiando para un booleano me queda raro
-    html = cli_args.get("html", False)
-    url = cli_args.get("url", False)
-    paginate = cli_args.get("paginate", None)
+    repo = cli_args.pop("repo", None)
+    paginate = cli_args.pop("paginate", False)
+    command = cli_args.pop("command", None)
+    cli_args.pop("log")
+    cli_args.pop("human")
     gh = api.GHApi()
-    adpt = GHAdapter(json=json, pretty=pretty, html=html, url=url)
-    match cli_args["command"]:
+    adpt = GHAdapter(**cli_args, command=command)
+    match command:
         case "auth-status":
             data, sadness = await gh.check_auth()
         case "orgs":
             data, sadness = await gh.get_orgs()
-            data = adpt.transform_orgs_data(data)
+            data = await adpt.transform_orgs_data(data)
         case "user":
             data, sadness = await gh.get_user()
-            data = adpt.transform_user_data(data)
+            data = await adpt.transform_user_data(data)
         case "scopes":
             data, sadness = await gh.get_scopes()
-            data = adpt.transform_scopes_data(data)
+            data = await adpt.transform_scopes_data(data)
         case "repos":
             data, sadness = await gh.get_repos(paginate=paginate)
             data = await adpt.transform_repos_data(data)
         case "tags":
             data, sadness = await gh.get_tagged_versions(repo)
-            data = adpt.transform_tags_data(data)
+            data = await adpt.transform_tags_data(data)
         case "releases":
             data, sadness = await gh.get_releases(repo)
-            data = adpt.transform_releases_data(data)
+            data = await adpt.transform_releases_data(data)
         case "audit-repo":
             data, sadness = await gh.audit_rulesets(repo)
-            data = adpt.transform_audit_rulesets_data(data)
+            data = await adpt.transform_audit_rulesets_data(data)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()

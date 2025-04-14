@@ -185,17 +185,17 @@ class GHApi:
             retval, out, err = await srv.gh_graphql(
                 query=""  # noqa: UP031 %-format
                 """{
-  %s(login: "%s") {
-    pinnedItems(first: 6, types: [REPOSITORY]) {
-      nodes {
-        ... on Repository {
-          nameWithOwner
-          url
-        }
-      }
-    }
-  }
-}""" % (t, o),
+                    %s(login: "%s") {
+                        pinnedItems(first: 6, types: [REPOSITORY]) {
+                        nodes {
+                                ... on Repository {
+                                nameWithOwner
+                                url
+                                }
+                            }
+                        }
+                    }
+                }""" % (t, o),
             )
 
             srv.check_retval(retval, err)
