@@ -126,7 +126,7 @@ def _get_cli_args():
     return parser, vars(basic_args)
 
 
-def gc_run(fn, *args, **kwargs):
+def _gc_run(fn, *args, **kwargs):
     async def new_fn():
         gc.collect()
         ret = await fn
@@ -138,7 +138,7 @@ def gc_run(fn, *args, **kwargs):
 
 def run_cli():
     """Run cli command based on arguments."""
-    gc_run(_run_cli_async())
+    _gc_run(_run_cli_async())
 
 
 async def _run_cli_async():
