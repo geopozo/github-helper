@@ -1,6 +1,7 @@
 # ruff: noqa: T201
 import argparse
 import asyncio
+import gc
 import sys
 
 import logistro
@@ -125,9 +126,19 @@ def _get_cli_args():
     return parser, vars(basic_args)
 
 
+def _gc_run(fn, *args, **kwargs):
+    async def new_fn():
+        gc.collect()
+        ret = await fn
+        gc.collect()
+        return ret
+
+    return asyncio.run(new_fn(), *args, **kwargs)
+
+
 def run_cli():
     """Run cli command based on arguments."""
-    asyncio.run(_run_cli_async())
+    _gc_run(_run_cli_async())
 
 
 async def _run_cli_async():
