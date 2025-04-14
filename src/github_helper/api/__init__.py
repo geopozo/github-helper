@@ -179,7 +179,8 @@ class GHApi:
         _log_one_json(repos_json)
         repos = repos_jq.input_value(repos_json).first()
 
-        pins_query = """{
+        pins_query = """
+{
   %s(login: "%s") {
     pinnedItems(first: 6, types: [REPOSITORY]) {
       nodes {
