@@ -127,6 +127,8 @@ def _get_cli_args():
 
 
 def _gc_run(fn, *args, **kwargs):
+    """Run asyncio corrutines with garbage collection."""
+
     async def new_fn():
         gc.collect()
         ret = await fn
