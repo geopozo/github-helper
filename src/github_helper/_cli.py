@@ -138,7 +138,7 @@ def gc_run(fn, *args, **kwargs):
 
 def run_cli():
     """Run cli command based on arguments."""
-    asyncio.run(_run_cli_async())
+    gc_run(_run_cli_async())
 
 
 async def _run_cli_async():
