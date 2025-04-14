@@ -71,7 +71,7 @@ class GHAdapter:
 
         data = [
             [
-                f"https://github.com/{repo['owner']}/{repo['name']}",
+                f"{repo['owner']}/{repo['name']}",
                 (
                     f"{'*' if repo['pinned'] else ''}"
                     f"{'f-' if repo['fork'] else ''}{repo['visibility']}"
