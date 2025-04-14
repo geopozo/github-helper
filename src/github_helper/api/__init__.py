@@ -174,17 +174,12 @@ class GHApi:
         if paginate:
             args.append("--paginate")
         retval, out, err = await srv.gh_call(*args)
-
         srv.check_retval(retval, err, endpoint=endpoint)
         repos_json = orjson.loads(out)
         _log_one_json(repos_json)
         repos = repos_jq.input_value(repos_json).first()
 
-        pins = {}
-        for t, o in {(repo["owner_type"].lower(), repo["owner"]) for repo in repos}:
-            retval, out, err = await srv.gh_graphql(
-                query=""  # noqa: UP031 %-format
-                """{
+        pins_query = """{
   %s(login: "%s") {
     pinnedItems(first: 6, types: [REPOSITORY]) {
       nodes {
@@ -195,15 +190,19 @@ class GHApi:
       }
     }
   }
-}""" % (t, o),
+}"""
+        pins_jq = jq.compile(
+            ".data.organization.pinnedItems.nodes[]?.nameWithOwner "
+            '| sub("^[^/]+/"; "") // empty',
+        )
+        pins = {}
+        for t, o in {(repo["owner_type"].lower(), repo["owner"]) for repo in repos}:
+            retval, out, err = await srv.gh_graphql(
+                query=pins_query % (t, o),
             )
 
             srv.check_retval(retval, err)
             pins_raw = orjson.loads(out)
-            pins_jq = jq.compile(
-                ".data.organization.pinnedItems.nodes[]?.nameWithOwner "
-                '| sub("^[^/]+/"; "") // empty',
-            )
             pins[o] = pins_jq.input_value(pins_raw).all() if pins_raw else []
 
         for repo in repos:
