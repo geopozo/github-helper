@@ -1,3 +1,5 @@
+"""File service allows you to view the file tree and its contents."""
+
 import asyncio
 import atexit
 import subprocess
@@ -30,7 +32,10 @@ def _clean_cancel_task(task):
 # y sí lo usamos para locales, se cambia
 # el comportamiento
 class Repo:
+    """Provides functions for manage repositories."""
+
     def __init__(self, url, owner, name, path, *, working=False):
+        """Initializize a new Repo with arguments."""
         self.url = url
         self.owner = owner
         self.name = name
@@ -57,12 +62,15 @@ class Repo:
         return stdout
 
     async def list_branches(self):
-        return await self._git_("branch", "-a")
+        """Return the list of branches."""
+        return await self._git_("branch", "-a").split("\n")
 
     async def list_tags(self):
-        return await self._git_("tag", "-l", "--sort=-v:refname")
+        """Return the list of tags."""
+        return await self._git_("tag", "-l", "--sort=-v:refname").split("\n")
 
     async def describe(self, ref):
+        """Return the version tag as given by git describe."""
         # with --all, priority is: a tags, light tags, branches
         if not self.working:
             return await self._git_("describe", "--all", ref)
@@ -70,9 +78,11 @@ class Repo:
             return await self._git_("describe", "--all", "--dirty")
 
     async def get_working_tree(self, ref):
-        return await self._git_("ls-tree", "-r", "--name-only", ref)
+        """Return a complete list of files with their paths."""
+        return await self._git_("ls-tree", "-r", "--name-only", ref).split("\n")
 
     async def get_file(self, path, ref):
+        """Return a byte string of file contents."""
         if "github" in self.url:
             return await ghf.get_file(self.owner, self.name, path, ref)
         else:
@@ -81,9 +91,11 @@ class Repo:
             )
 
     async def get_files(self, *paths, ref):
+        """Return a list of byte string file contents."""
         raise NotImplementedError("multiple file get not yet implemented")
 
     async def update_repo(self):
+        """Return an updated repository."""
         if (self._path).is_dir():
             return await self._fetch_repo()
         else:
@@ -111,9 +123,12 @@ class Repo:
 
 
 class RepoFolder:
+    """Provides functions for manage repositories."""
+
     _github = "https://www.github.com"
 
     def __init__(self, *, cache=True, path=None):
+        """Initializize a new RepoFolder with arguments."""
         if not cache:
             self._tempdir = tempfile.TemporaryDirectory(
                 delete=True,
@@ -128,6 +143,7 @@ class RepoFolder:
         self.repos = {}
 
     async def add_repo(self, owner, name, url=None):
+        """Return initialized repo instance."""
         # if not cache
         path = self._root / owner
         path.mkdir(parents=True, exist_ok=True)
@@ -140,6 +156,7 @@ class RepoFolder:
         return repo
 
     def __del__(self):
+        """Clean up temp files."""
         # if not cache
         self._tempdir.cleanup()
         del self._tempdir
