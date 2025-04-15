@@ -28,14 +28,15 @@ class Repo:
         self.url = url
         self.owner = owner
         self.name = name
-        self.cloned = False
-        self._path = path
+        self._path = path / self.owner / self.name
 
     # check git version
-    async def _git_(self, *args):
-        command = list("git", *args)
+    async def _git_(self, *args, repo=True):
+        myself = ["-C", self._path] if repo else []
         p = await asyncio.create_subprocess_exec(
-            *command,
+            "git",
+            *myself,
+            *args,
             stderr=subprocess.PIPE,
         )
         retval = await p.wait()
@@ -47,14 +48,13 @@ class Repo:
         return stdout
 
     async def update_repo(self):
-        if (self._path / ".git").is_dir():
+        if (self._path).is_dir():
             return await self._fetch_repo()
         else:
             return await self._clone_repo()
 
     async def _fetch_repo(self):
         _ = await self._git_(
-            "git",
             "fetch",
             "--prune",
             "origin",
@@ -69,7 +69,8 @@ class Repo:
             "--mirror",
             "--quiet",
             f"{self.url!s}/{self.owner!s}/{self.name!s}",
-            str(self._path / self.owner / self.name),
+            str(self._path),
+            repo=False,
         )
 
 
@@ -91,9 +92,10 @@ class RepoFolder:
 
     async def add_repo(self, owner, name, url=None):
         # if not cache
-        (self._root / owner).mkdir(parents=True, exist_ok=True)
+        path = self._root / owner
+        path.mkdir(parents=True, exist_ok=True)
 
-        repo = Repo(url if url else self._github, owner, name)
+        repo = Repo(url if url else self._github, owner, name, self._root)
         if owner not in self.repos:
             self.repos[owner] = {}
         self.repos[owner][name] = repo
