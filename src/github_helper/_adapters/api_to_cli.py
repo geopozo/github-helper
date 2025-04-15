@@ -37,24 +37,24 @@ class GHAdapter:
             return to_json.to_string(orgs_data, pretty=self._pretty)
         for org in orgs_data:
             org["name"] = org["name"][:24]
-        return to_table.to_table(orgs_data, pretty=self._pretty)
+        return to_table.format_table(orgs_data, pretty=self._pretty)
 
     async def transform_user_data(self, user_data):
         if self._json:
             return to_json.to_string({"user": user_data}, pretty=self._pretty)
         if self._pretty:
-            return to_table.to_table([{"user": user_data}], pretty=self._pretty)
+            return to_table.format_table([{"user": user_data}], pretty=self._pretty)
         return user_data
 
     async def transform_scopes_data(self, scopes_data):
         if self._json:
             return to_json.to_string(scopes_data, pretty=self._pretty)
         if self._pretty:
-            return to_table.to_table(
+            return to_table.format_table(
                 [{"scope": scope} for scope in scopes_data],
                 pretty=self._pretty,
             )
-        return to_table.to_table([scopes_data], pretty=self._pretty)
+        return to_table.format_table([scopes_data], pretty=self._pretty)
 
     async def transform_repos_data(self, repos_data):
         if self._html:
@@ -83,7 +83,7 @@ class GHAdapter:
             for repo in repos_data
         ]
 
-        return to_table.to_table(
+        return to_table.format_table(
             data,
             pretty=self._pretty,
             headers=("repo", "type", "people", "topics"),
@@ -92,14 +92,14 @@ class GHAdapter:
     async def transform_tags_data(self, tags_data):
         if self._json:
             return to_json.to_string(tags_data, pretty=self._pretty)
-        return to_table.to_table(tags_data, pretty=self._pretty)
+        return to_table.format_table(tags_data, pretty=self._pretty)
 
     async def transform_releases_data(self, releases_data):
         if self._json:
             return to_json.to_string(releases_data, pretty=self._pretty)
         if self._pretty:
-            return to_table.to_table(releases_data, pretty=self._pretty)
-        return to_table.to_table(
+            return to_table.format_table(releases_data, pretty=self._pretty)
+        return to_table.format_table(
             [
                 [
                     release["tag"],
@@ -115,4 +115,4 @@ class GHAdapter:
             return to_json.to_string(audit_rulesets_data, pretty=self._pretty)
         for rule in audit_rulesets_data:
             rule["template"] = rule["template"][:24]
-        return to_table.to_table(audit_rulesets_data, pretty=self._pretty)
+        return to_table.format_table(audit_rulesets_data, pretty=self._pretty)

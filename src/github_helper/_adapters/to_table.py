@@ -1,7 +1,7 @@
 from tabulate import tabulate
 
 
-def to_table(data, *, pretty=False, headers="keys"):
+def format_table(data, *, pretty=False, headers="keys"):
     return tabulate(
         data,
         headers=headers if pretty else "",
