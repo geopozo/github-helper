@@ -106,5 +106,5 @@ class RepoFolder:
 
     def __del__(self):
         # if not cache
-        tempfile.cleanup()
+        self._tempdir.cleanup()
         del self._tempdir
