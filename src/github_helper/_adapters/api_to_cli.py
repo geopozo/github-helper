@@ -4,7 +4,7 @@ import urllib.parse
 import logistro
 from tabulate import tabulate
 
-import github_helper._api_to_html_adapter as html_adapter
+import github_helper._adapters.api_to_html as html_adapter
 from github_helper._utils import AutoEncoder
 
 _logger = logistro.getLogger(__name__)
@@ -12,6 +12,17 @@ _logger = logistro.getLogger(__name__)
 
 class GHAdapter:
     """Allows the CLI to transform the data as required."""
+
+    def _check_options(self, formatters):
+        formats = {k for k, v in formatters.items() if v}
+        invalid_formats = {"html", "url"} & formats
+        if (self._command == "auth-status" and formats) or (
+            self._command != "repos" and invalid_formats
+        ):
+            raise NotImplementedError(
+                f"{', '.join(invalid_formats)} not valid flags for {self._command}",
+            )
+        return True
 
     def _to_json_string(self, data):
         return json.dumps(
@@ -27,27 +38,32 @@ class GHAdapter:
             tablefmt="psql" if self._pretty else "plain",
         )
 
-    def __init__(self, *, json, pretty, html, **kwargs):
-        self._json = json
-        self._pretty = pretty
-        self._html = html
-        self._url = kwargs.get("url", False)
+    def __init__(self, **args: dict):
+        valid_args = {"command", "json", "pretty", "html", "url"}
+        if args.keys() - valid_args:
+            raise ValueError("Additional args coming in from cli")
+        self._command = args.pop("command")
+        self._json = args.get("json", False)
+        self._pretty = args.get("pretty", False)
+        self._html = args.get("html", False)
+        self._url = args.get("url", False)
+        self._check_options(args)
 
-    def transform_orgs_data(self, orgs_data):
+    async def transform_orgs_data(self, orgs_data):
         if self._json:
             return self._to_json_string(orgs_data)
         for org in orgs_data:
             org["name"] = org["name"][:24]
         return self._to_table(orgs_data)
 
-    def transform_user_data(self, user_data):
+    async def transform_user_data(self, user_data):
         if self._json:
             return self._to_json_string({"user": user_data})
         if self._pretty:
             return self._to_table([{"user": user_data}])
         return user_data
 
-    def transform_scopes_data(self, scopes_data):
+    async def transform_scopes_data(self, scopes_data):
         if self._json:
             return self._to_json_string(
                 scopes_data,
@@ -73,7 +89,7 @@ class GHAdapter:
             [
                 f"https://github.com/{repo['owner']}/{repo['name']}",
                 (
-                    f'{"*" if repo["pinned"] else ""}'
+                    f"{'*' if repo['pinned'] else ''}"
                     f"{'f-' if repo['fork'] else ''}{repo['visibility']}"
                     f"{'-ar' if repo['archived'] else ''}"
                 ),
@@ -87,12 +103,12 @@ class GHAdapter:
 
         return self._to_table(data, ("repo", "type", "people", "topics"))
 
-    def transform_tags_data(self, tags_data):
+    async def transform_tags_data(self, tags_data):
         if self._json:
             return self._to_json_string(tags_data)
         return self._to_table(tags_data)
 
-    def transform_releases_data(self, releases_data):
+    async def transform_releases_data(self, releases_data):
         if self._json:
             return self._to_json_string(releases_data)
         if self._pretty:
@@ -107,7 +123,7 @@ class GHAdapter:
             ],
         )
 
-    def transform_audit_rulesets_data(self, audit_rulesets_data):
+    async def transform_audit_rulesets_data(self, audit_rulesets_data):
         if self._json:
             return self._to_json_string(audit_rulesets_data)
         for rule in audit_rulesets_data:
