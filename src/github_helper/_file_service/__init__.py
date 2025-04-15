@@ -27,10 +27,12 @@ def _clean_cancel_task(task):
 
 
 class Repo:
-    def __init__(self, url, owner, name, path):
+    def __init__(self, url, owner, name, path, *, working=False):
         self.url = url
         self.owner = owner
         self.name = name
+        self.working = working
+        # this should change how update clones TODO
         self._path = path / self.owner / self.name
 
     # check git version
@@ -49,6 +51,13 @@ class Repo:
                 f"Command: {args}. Reval: {retval!s}. Stderr: {stderr}.",
             )
         return stdout
+
+    async def describe(self, ref):
+        # with --all, priority is: a tags, light tags, branches
+        if not self.working:
+            return await self._git_("describe", "--all", ref)
+        else:
+            return await self._git_("describe", "--all", "--dirty")
 
     async def get_working_tree(self, ref):
         return await self._git_("ls-tree", "-r", "--name-only", ref)
