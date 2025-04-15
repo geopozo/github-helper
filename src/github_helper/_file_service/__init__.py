@@ -46,6 +46,7 @@ class Repo:
             *myself,
             *args,
             stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
         )
         retval = await p.wait()
         stdout, stderr = await p.communicate()
