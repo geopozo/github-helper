@@ -84,7 +84,7 @@ class GHApi:
         srv.check_retval(retval, err, endpoint=endpoint)
         orgs = orgs_jq.input_value(orjson.loads(out)).first()
 
-        _ = await self.get_user()
+        _ = await self.get_user()  # will refresh self._current_user
 
         role_jq = jq.compile(".role")
         for org in orgs:

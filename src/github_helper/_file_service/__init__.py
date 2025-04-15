@@ -4,6 +4,8 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from . import _github as ghf
+
 # get file
 # get tree
 # get graph (can we filter graph)
@@ -47,6 +49,20 @@ class Repo:
                 f"Command: {args}. Reval: {retval!s}. Stderr: {stderr}.",
             )
         return stdout
+
+    async def get_working_tree(self, ref):
+        return await self._git_("ls-tree", "-r", "--name-only", ref)
+
+    async def get_file(self, path, ref):
+        if "github" in self.url:
+            return await ghf.get_file(self.owner, self.name, path, ref)
+        else:
+            raise NotImplementedError(
+                "Non-github git archive file retrieval not yet implemented",
+            )
+
+    async def get_files(self, *paths, ref):
+        raise NotImplementedError("multiple file get not yet implemented")
 
     async def update_repo(self):
         if (self._path).is_dir():
