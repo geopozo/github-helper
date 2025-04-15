@@ -2,9 +2,7 @@ import urllib.parse
 
 import logistro
 
-import github_helper._adapters.to_html as html_adpt
-import github_helper._adapters.to_json as json_adpt
-import github_helper._adapters.to_table as table_adpt
+from github_helper._adapters import to_html, to_json, to_table
 
 _logger = logistro.getLogger(__name__)
 
@@ -36,38 +34,38 @@ class GHAdapter:
 
     async def transform_orgs_data(self, orgs_data):
         if self._json:
-            return json_adpt.to_json_string(orgs_data, pretty=self._pretty)
+            return to_json.to_json_string(orgs_data, pretty=self._pretty)
         for org in orgs_data:
             org["name"] = org["name"][:24]
-        return table_adpt.to_table(orgs_data, pretty=self._pretty)
+        return to_table.to_table(orgs_data, pretty=self._pretty)
 
     async def transform_user_data(self, user_data):
         if self._json:
-            return json_adpt.to_json_string({"user": user_data}, pretty=self._pretty)
+            return to_json.to_json_string({"user": user_data}, pretty=self._pretty)
         if self._pretty:
-            return table_adpt.to_table([{"user": user_data}], pretty=self._pretty)
+            return to_table.to_table([{"user": user_data}], pretty=self._pretty)
         return user_data
 
     async def transform_scopes_data(self, scopes_data):
         if self._json:
-            return json_adpt.to_json_string(scopes_data, pretty=self._pretty)
+            return to_json.to_json_string(scopes_data, pretty=self._pretty)
         if self._pretty:
-            return table_adpt.to_table(
+            return to_table.to_table(
                 [{"scope": scope} for scope in scopes_data],
                 pretty=self._pretty,
             )
-        return table_adpt.to_table([scopes_data], pretty=self._pretty)
+        return to_table.to_table([scopes_data], pretty=self._pretty)
 
     async def transform_repos_data(self, repos_data):
         if self._html:
-            generated_html = str(await html_adpt.repos(repos_data))
+            generated_html = str(await to_html.repos(repos_data))
             if not self._url:
                 return generated_html
             encoded = urllib.parse.quote(generated_html)
             return f"data:text/html;charset=utf-8,{encoded}"
 
         if self._json:
-            return json_adpt.to_json_string(repos_data, pretty=self._pretty)
+            return to_json.to_json_string(repos_data, pretty=self._pretty)
 
         data = [
             [
@@ -85,7 +83,7 @@ class GHAdapter:
             for repo in repos_data
         ]
 
-        return table_adpt.to_table(
+        return to_table.to_table(
             data,
             pretty=self._pretty,
             headers=("repo", "type", "people", "topics"),
@@ -93,15 +91,15 @@ class GHAdapter:
 
     async def transform_tags_data(self, tags_data):
         if self._json:
-            return json_adpt.to_json_string(tags_data, pretty=self._pretty)
-        return table_adpt.to_table(tags_data, pretty=self._pretty)
+            return to_json.to_json_string(tags_data, pretty=self._pretty)
+        return to_table.to_table(tags_data, pretty=self._pretty)
 
     async def transform_releases_data(self, releases_data):
         if self._json:
-            return json_adpt.to_json_string(releases_data, pretty=self._pretty)
+            return to_json.to_json_string(releases_data, pretty=self._pretty)
         if self._pretty:
-            return table_adpt.to_table(releases_data, pretty=self._pretty)
-        return table_adpt.to_table(
+            return to_table.to_table(releases_data, pretty=self._pretty)
+        return to_table.to_table(
             [
                 [
                     release["tag"],
@@ -114,7 +112,7 @@ class GHAdapter:
 
     async def transform_audit_rulesets_data(self, audit_rulesets_data):
         if self._json:
-            return json_adpt.to_json_string(audit_rulesets_data, pretty=self._pretty)
+            return to_json.to_json_string(audit_rulesets_data, pretty=self._pretty)
         for rule in audit_rulesets_data:
             rule["template"] = rule["template"][:24]
-        return table_adpt.to_table(audit_rulesets_data, pretty=self._pretty)
+        return to_table.to_table(audit_rulesets_data, pretty=self._pretty)
