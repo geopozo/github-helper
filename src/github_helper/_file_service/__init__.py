@@ -26,6 +26,9 @@ def _clean_cancel_task(task):
         return asyncio.CancelledError
 
 
+# no sé que have cuando hay dos remotos
+# y sí lo usamos para locales, se cambia
+# el comportamiento
 class Repo:
     def __init__(self, url, owner, name, path, *, working=False):
         self.url = url
@@ -51,6 +54,12 @@ class Repo:
                 f"Command: {args}. Reval: {retval!s}. Stderr: {stderr}.",
             )
         return stdout
+
+    async def list_branches(self):
+        return await self._git_("branch", "-a")
+
+    async def list_tags(self):
+        return await self._git_("tag", "-l", "--sort=-v:refname")
 
     async def describe(self, ref):
         # with --all, priority is: a tags, light tags, branches
