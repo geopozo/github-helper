@@ -9,8 +9,8 @@ import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
 
-from github_helper import _gh_service as srv
-from github_helper._gh_service import GHError, ScopesError, ScopesWarning
+from github_helper._services import gh as srv
+from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
 from github_helper.api import _audit
 
@@ -84,7 +84,7 @@ class GHApi:
         srv.check_retval(retval, err, endpoint=endpoint)
         orgs = orgs_jq.input_value(orjson.loads(out)).first()
 
-        _ = await self.get_user()
+        _ = await self.get_user()  # will refresh self._current_user
 
         role_jq = jq.compile(".role")
         for org in orgs:

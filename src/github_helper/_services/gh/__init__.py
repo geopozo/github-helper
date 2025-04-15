@@ -1,3 +1,5 @@
+"""Gh Service allows call gh api."""
+
 import asyncio
 import os
 import subprocess
@@ -22,6 +24,7 @@ class ScopesWarning(UserWarning, ErrorSerializer):
 
 
 async def gh_call(*commands) -> tuple[int, bytes, bytes]:
+    """Call gh api with arguments."""
     pipe_buffer = 10240000
     new_env = os.environ.copy()
     # new_env.update(CLICOLOR_FORCE="1") Bueno para auth pero no funciona para json
@@ -38,10 +41,12 @@ async def gh_call(*commands) -> tuple[int, bytes, bytes]:
 
 
 async def gh_api(endpoint: str) -> tuple[int, bytes, bytes]:
+    """It's a gh call wrapper."""
     return await gh_call("gh", "api", endpoint)
 
 
 async def gh_graphql(query: str) -> tuple[int, bytes, bytes]:
+    """It's a gh call wrapper using grapghql."""
     return await gh_call(
         "gh",
         "api",
@@ -52,5 +57,6 @@ async def gh_graphql(query: str) -> tuple[int, bytes, bytes]:
 
 
 def check_retval(retval, err, **kwargs):
+    """Return a GH error if there is an error in the API call."""
     if retval != 0:
         raise GHError(f"{err!s}, add'l: {kwargs.items()!s}")
