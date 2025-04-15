@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from . import _github as ghf
+from github_helper._services.file import _github as ghf
 
 # get file
 # get tree
