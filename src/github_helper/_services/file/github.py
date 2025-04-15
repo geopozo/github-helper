@@ -1,3 +1,5 @@
+"""File service allow view the file tree and contents."""
+
 import base64
 
 import jq  # type: ignore [import-not-found]

@@ -1,4 +1,4 @@
-"""File service allow view the file tree and contents."""
+"""Repo service allow manage repositories."""
 
 import asyncio
 import atexit
