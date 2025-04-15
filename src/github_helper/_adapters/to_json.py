@@ -3,7 +3,7 @@ import json
 from github_helper._utils import AutoEncoder
 
 
-def to_string(data, *, pretty=False):
+def format_json(data, *, pretty=False):
     return json.dumps(
         data,
         indent=2 if pretty else 0,

@@ -34,21 +34,21 @@ class GHAdapter:
 
     async def transform_orgs_data(self, orgs_data):
         if self._json:
-            return to_json.to_string(orgs_data, pretty=self._pretty)
+            return to_json.format_json(orgs_data, pretty=self._pretty)
         for org in orgs_data:
             org["name"] = org["name"][:24]
         return to_table.format_table(orgs_data, pretty=self._pretty)
 
     async def transform_user_data(self, user_data):
         if self._json:
-            return to_json.to_string({"user": user_data}, pretty=self._pretty)
+            return to_json.format_json({"user": user_data}, pretty=self._pretty)
         if self._pretty:
             return to_table.format_table([{"user": user_data}], pretty=self._pretty)
         return user_data
 
     async def transform_scopes_data(self, scopes_data):
         if self._json:
-            return to_json.to_string(scopes_data, pretty=self._pretty)
+            return to_json.format_json(scopes_data, pretty=self._pretty)
         if self._pretty:
             return to_table.format_table(
                 [{"scope": scope} for scope in scopes_data],
@@ -65,7 +65,7 @@ class GHAdapter:
             return f"data:text/html;charset=utf-8,{encoded}"
 
         if self._json:
-            return to_json.to_string(repos_data, pretty=self._pretty)
+            return to_json.format_json(repos_data, pretty=self._pretty)
 
         data = [
             [
@@ -91,12 +91,12 @@ class GHAdapter:
 
     async def transform_tags_data(self, tags_data):
         if self._json:
-            return to_json.to_string(tags_data, pretty=self._pretty)
+            return to_json.format_json(tags_data, pretty=self._pretty)
         return to_table.format_table(tags_data, pretty=self._pretty)
 
     async def transform_releases_data(self, releases_data):
         if self._json:
-            return to_json.to_string(releases_data, pretty=self._pretty)
+            return to_json.format_json(releases_data, pretty=self._pretty)
         if self._pretty:
             return to_table.format_table(releases_data, pretty=self._pretty)
         return to_table.format_table(
@@ -112,7 +112,7 @@ class GHAdapter:
 
     async def transform_audit_rulesets_data(self, audit_rulesets_data):
         if self._json:
-            return to_json.to_string(audit_rulesets_data, pretty=self._pretty)
+            return to_json.format_json(audit_rulesets_data, pretty=self._pretty)
         for rule in audit_rulesets_data:
             rule["template"] = rule["template"][:24]
         return to_table.format_table(audit_rulesets_data, pretty=self._pretty)
