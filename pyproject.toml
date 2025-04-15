@@ -13,7 +13,7 @@ name = "github-helper"
 description = "A tool for quickly looking at status of all repos."
 dynamic = ["version"]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 authors = [
   {name = "Andrew Pikul", email="ajpikul@gmail.com"},
   ]
