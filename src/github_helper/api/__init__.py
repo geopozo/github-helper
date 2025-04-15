@@ -9,8 +9,8 @@ import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
 
-from github_helper import _gh_service as srv
-from github_helper._gh_service import GHError, ScopesError, ScopesWarning
+from github_helper._services import gh as srv
+from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
 from github_helper.api import _audit
 

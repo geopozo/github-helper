@@ -1,4 +1,4 @@
-"""File service allows you to view the file tree and its contents."""
+"""File service allow view the file tree and contents."""
 
 import asyncio
 import atexit
