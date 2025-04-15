@@ -1,4 +1,5 @@
 import asyncio
+import atexit
 import subprocess
 import tempfile
 from pathlib import Path
@@ -6,6 +7,10 @@ from pathlib import Path
 # get file
 # get tree
 # get graph (can we filter graph)
+
+
+class GitError(RuntimeError):
+    """Error when git commanding."""
 
 
 def _clean_cancel_task(task):
@@ -17,10 +22,6 @@ def _clean_cancel_task(task):
     else:
         task.cancel()
         return asyncio.CancelledError
-
-
-class GitError(RuntimeError):
-    """Error when git commanding."""
 
 
 class Repo:
@@ -83,6 +84,7 @@ class RepoFolder:
                 delete=True,
                 ignore_cleanup_errors=True,
             )  # can set path here too, why not
+            atexit.register(self._tempdir.cleanup)
             self._root = Path(self._tempdir.name).resolve()
         else:
             _ = path
