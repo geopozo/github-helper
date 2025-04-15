@@ -63,11 +63,11 @@ class Repo:
 
     async def list_branches(self):
         """Return the list of branches."""
-        return await self._git_("branch", "-a").split("\n")
+        return (await self._git_("branch", "-a")).decode().split("\n")
 
     async def list_tags(self):
         """Return the list of tags."""
-        return await self._git_("tag", "-l", "--sort=-v:refname").split("\n")
+        return (await self._git_("tag", "-l", "--sort=-v:refname")).decode().split("\n")
 
     async def describe(self, ref):
         """Return the version tag as given by git describe."""
@@ -79,7 +79,9 @@ class Repo:
 
     async def get_working_tree(self, ref):
         """Return a complete list of files with their paths."""
-        return await self._git_("ls-tree", "-r", "--name-only", ref).split("\n")
+        return (
+            (await self._git_("ls-tree", "-r", "--name-only", ref)).decode().split("\n")
+        )
 
     async def get_file(self, path, ref):
         """Return a byte string of file contents."""
