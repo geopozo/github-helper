@@ -2,7 +2,7 @@ from pathlib import Path
 
 import jsondiff as jd
 
-from github_helper._gh_service import GHError
+from github_helper._services.gh import GHError
 from github_helper._utils import load_json
 
 _SCRIPT_DIR = Path(__file__).resolve().parent

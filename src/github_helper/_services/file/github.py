@@ -1,10 +1,12 @@
+"""File service allow view the file tree and contents."""
+
 import base64
 
 import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
 
-from github_helper import _gh_service as srv
+from github_helper._services import gh as srv
 
 _logger = logistro.getLogger(__name__)
 
