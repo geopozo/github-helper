@@ -1,12 +1,20 @@
 """A service to warn user if they need to start an ssh session."""
 
 import os
+import platform
 import subprocess
 from pathlib import Path
 
 import logistro
 
 _logger = logistro.getLogger(__name__)
+
+_extra_args = {}
+if platform.system() == "Windows":
+    startupinfo = subprocess.STARTUPINFO()
+    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    creationflags = subprocess.CREATE_NO_WINDOW
+    extra_args = {"startupinfo": startupinfo, "creationflags": creationflags}
 
 
 class NoSSHKeyError(RuntimeError):
@@ -60,6 +68,7 @@ def _is_key_encrypted():
             check=True,
             env={**os.environ, "DISPLAY": "none"},  # disable askpass fallback
             stdin=subprocess.DEVNULL,
+            **extra_args,
         )
     except subprocess.CalledProcessError:
         return True  # key requires passphrase
