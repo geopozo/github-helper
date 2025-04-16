@@ -1,5 +1,6 @@
 """A service to warn user if they need to start an ssh session."""
 
+import os
 import subprocess
 from pathlib import Path
 
@@ -57,6 +58,8 @@ def _is_key_encrypted():
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=True,
+            env={**os.environ, "DISPLAY": "none"},  # disable askpass fallback
+            stdin=subprocess.DEVNULL,
         )
     except subprocess.CalledProcessError:
         return True  # key requires passphrase
