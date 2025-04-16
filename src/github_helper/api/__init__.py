@@ -13,6 +13,7 @@ from github_helper._services import gh as srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
 from github_helper.api import _audit
+from github_helper.api._compare_versions import order_versions
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -242,7 +243,7 @@ class GHApi:
         srv.check_retval(retval, err, endpoint=endpoint)
         tags = tags_jq.input_value(orjson.loads(out)).first()
         sadness = int(not tags)
-        return tags, sadness
+        return order_versions(tags, "version"), sadness
 
     async def get_releases(self, repo):
         """Return releases for a repo."""
@@ -257,7 +258,7 @@ class GHApi:
         srv.check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
         sadness = int(not releases)
-        return releases, sadness
+        return order_versions(releases, "tag"), sadness
 
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""
