@@ -8,6 +8,7 @@ from pathlib import Path
 import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
+from packaging import version
 
 from github_helper._services import gh as srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
@@ -241,8 +242,14 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
         tags = tags_jq.input_value(orjson.loads(out)).first()
+        sorted_tags = sorted(
+            tags,
+            key=lambda x: version.parse(x["version"]),
+            reverse=True,
+        )
+
         sadness = int(not tags)
-        return tags, sadness
+        return sorted_tags, sadness
 
     async def get_releases(self, repo):
         """Return releases for a repo."""
