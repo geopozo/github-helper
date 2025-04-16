@@ -10,6 +10,8 @@ import logistro
 import orjson
 
 from github_helper._services import gh as srv
+from github_helper._services import repos as repo_srv
+from github_helper._services import ssh_srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
 from github_helper.api import _audit
@@ -17,6 +19,23 @@ from github_helper.api import _audit
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
+
+
+_check_ran = False
+
+
+def _check_ssh_once():
+    _logger = logistro.getLogger(__name__)
+    global _check_ran  # noqa: PLW0603 global
+    if not _check_ran:
+        _logger.debug("SSH has not been checked yet.")
+        ssh_srv.check_ssh_ready()
+        _check_ran = True
+    else:
+        _logger.debug("SSH is already ran.")
+
+
+_check_ssh_once()
 
 
 def _log_one_json(obj):
@@ -159,7 +178,8 @@ class GHApi:
             r"watchers: .watchers_count,"
             r"forks: .forks_count,"
             r"open_issues: .open_issues_count,"
-            r"license: .license"
+            r"license: .license,"
+            r"default_branch: .default_branch"
             r"})"
             r" | sort_by(.name)"
             r" | sort_by(.archived)"
@@ -227,6 +247,23 @@ class GHApi:
                     repo["collaborators"] = [e]
 
         await asyncio.gather(*[query_repo(repo) for repo in repos])
+
+        # need to cache
+        folder_repos = repo_srv.RepoFolder(cache=False)
+
+        async def query_version(repo):
+            _logger.debug(f"Downloading repo {repo['owner']}/{repo['name']}")
+            private = repo["visibility"] == "private"
+            url = "ssh://git@github.com" if private else None
+            r = await folder_repos.add_repo(
+                repo["owner"],
+                repo["name"],
+                url=url,
+            )
+            repo["version"] = await r.describe(repo["default_branch"])
+            repo["_repo"] = r
+
+        await asyncio.gather(*[query_version(repo) for repo in repos])
 
         sadness = int(not repos)
         return repos, sadness

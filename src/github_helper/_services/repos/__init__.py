@@ -6,11 +6,11 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+import logistro
+
 from github_helper._services.file import github as ghf
 
-# get file
-# get tree
-# get graph (can we filter graph)
+_logger = logistro.getLogger(__name__)
 
 
 class GitError(RuntimeError):
@@ -34,7 +34,15 @@ def _clean_cancel_task(task):
 class Repo:
     """Provides functions for manage repositories."""
 
-    def __init__(self, url, owner, name, path, *, working=False):
+    def __init__(
+        self,
+        url,
+        owner,
+        name,
+        path,
+        *,
+        working=False,
+    ):
         """Initializize a new Repo with arguments."""
         self.url = url
         self.owner = owner
@@ -53,8 +61,8 @@ class Repo:
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
         )
-        retval = await p.wait()
         stdout, stderr = await p.communicate()
+        retval = await p.wait()
         if retval:
             raise GitError(
                 f"Command: {args}. Reval: {retval!s}. Stderr: {stderr}.",
@@ -71,11 +79,12 @@ class Repo:
 
     async def describe(self, ref):
         """Return the version tag as given by git describe."""
-        # with --all, priority is: a tags, light tags, branches
+        has_tags = await self._git_("tag")
+        flag = "--tags" if has_tags else "--all"
         if not self.working:
-            return await self._git_("describe", "--all", ref)
+            return await self._git_("describe", flag, ref)
         else:
-            return await self._git_("describe", "--all", "--dirty")
+            return await self._git_("describe", flag, "--dirty")
 
     async def get_working_tree(self, ref):
         """Return a complete list of files with their paths."""
@@ -150,7 +159,12 @@ class RepoFolder:
         path = self._root / owner
         path.mkdir(parents=True, exist_ok=True)
 
-        repo = Repo(url if url else self._github, owner, name, self._root)
+        repo = Repo(
+            url if url else self._github,
+            owner,
+            name,
+            self._root,
+        )
         if owner not in self.repos:
             self.repos[owner] = {}
         self.repos[owner][name] = repo
