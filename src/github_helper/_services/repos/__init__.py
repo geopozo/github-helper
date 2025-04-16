@@ -2,6 +2,7 @@
 
 import asyncio
 import atexit
+import fnmatch
 import subprocess
 import tempfile
 from pathlib import Path
@@ -91,6 +92,20 @@ class Repo:
         return (
             (await self._git_("ls-tree", "-r", "--name-only", ref)).decode().split("\n")
         )
+
+    async def get_files_by_name(self, name, ref):
+        """Get all files that match a certain name."""
+        tree = await self.get_working_tree(ref)
+
+        async def query(file):
+            return {"path": file, "content": await self.get_file(file, ref)}
+
+        tasks = {
+            asyncio.create_task(query(file), name=file)
+            for file in tree
+            if fnmatch.fnmatch(file.split("/")[-1], name)
+        }
+        return await asyncio.gather(*tasks, return_exceptions=True)
 
     async def get_file(self, path, ref):
         """Return a byte string of file contents."""
