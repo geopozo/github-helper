@@ -22,7 +22,7 @@ _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
 
 def _check_ssh_once():
-    _logger = logistro.get_logger(__name__)
+    _logger = logistro.getLogger(__name__)
     global _check_ran  # noqa: PLW0603 global
     if not _check_ran:
         _logger.debug("SSH has not been checked yet.")
