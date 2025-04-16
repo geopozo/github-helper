@@ -1,11 +1,8 @@
-import json
 import urllib.parse
 
 import logistro
-from tabulate import tabulate
 
-import github_helper._adapters.api_to_html as html_adapter
-from github_helper._utils import AutoEncoder
+from github_helper._adapters import to_html, to_json, to_table
 
 _logger = logistro.getLogger(__name__)
 
@@ -24,20 +21,6 @@ class GHAdapter:
             )
         return True
 
-    def _to_json_string(self, data):
-        return json.dumps(
-            data,
-            indent=2 if self._pretty else 0,
-            cls=AutoEncoder,
-        )
-
-    def _to_table(self, data, headers="keys"):
-        return tabulate(
-            data,
-            headers=headers if self._pretty else "",
-            tablefmt="psql" if self._pretty else "plain",
-        )
-
     def __init__(self, **args: dict):
         valid_args = {"command", "json", "pretty", "html", "url"}
         if args.keys() - valid_args:
@@ -51,43 +34,42 @@ class GHAdapter:
 
     async def transform_orgs_data(self, orgs_data):
         if self._json:
-            return self._to_json_string(orgs_data)
+            return to_json.format_json(orgs_data, pretty=self._pretty)
         for org in orgs_data:
             org["name"] = org["name"][:24]
-        return self._to_table(orgs_data)
+        return to_table.format_table(orgs_data, pretty=self._pretty)
 
     async def transform_user_data(self, user_data):
         if self._json:
-            return self._to_json_string({"user": user_data})
+            return to_json.format_json({"user": user_data}, pretty=self._pretty)
         if self._pretty:
-            return self._to_table([{"user": user_data}])
+            return to_table.format_table([{"user": user_data}], pretty=self._pretty)
         return user_data
 
     async def transform_scopes_data(self, scopes_data):
         if self._json:
-            return self._to_json_string(
-                scopes_data,
-            )
+            return to_json.format_json(scopes_data, pretty=self._pretty)
         if self._pretty:
-            return self._to_table(
+            return to_table.format_table(
                 [{"scope": scope} for scope in scopes_data],
+                pretty=self._pretty,
             )
-        return self._to_table([scopes_data])
+        return to_table.format_table([scopes_data], pretty=self._pretty)
 
     async def transform_repos_data(self, repos_data):
         if self._html:
-            generated_html = str(await html_adapter.repos(repos_data))
+            generated_html = str(await to_html.repos(repos_data))
             if not self._url:
                 return generated_html
             encoded = urllib.parse.quote(generated_html)
             return f"data:text/html;charset=utf-8,{encoded}"
 
         if self._json:
-            return self._to_json_string(repos_data)
+            return to_json.format_json(repos_data, pretty=self._pretty)
 
         data = [
             [
-                f"https://github.com/{repo['owner']}/{repo['name']}",
+                f"{repo['owner']}/{repo['name']}",
                 (
                     f"{'*' if repo['pinned'] else ''}"
                     f"{'f-' if repo['fork'] else ''}{repo['visibility']}"
@@ -101,19 +83,23 @@ class GHAdapter:
             for repo in repos_data
         ]
 
-        return self._to_table(data, ("repo", "type", "people", "topics"))
+        return to_table.format_table(
+            data,
+            pretty=self._pretty,
+            headers=("repo", "type", "people", "topics"),
+        )
 
     async def transform_tags_data(self, tags_data):
         if self._json:
-            return self._to_json_string(tags_data)
-        return self._to_table(tags_data)
+            return to_json.format_json(tags_data, pretty=self._pretty)
+        return to_table.format_table(tags_data, pretty=self._pretty)
 
     async def transform_releases_data(self, releases_data):
         if self._json:
-            return self._to_json_string(releases_data)
+            return to_json.format_json(releases_data, pretty=self._pretty)
         if self._pretty:
-            return self._to_table(releases_data)
-        return self._to_table(
+            return to_table.format_table(releases_data, pretty=self._pretty)
+        return to_table.format_table(
             [
                 [
                     release["tag"],
@@ -121,11 +107,12 @@ class GHAdapter:
                 ]
                 for release in releases_data
             ],
+            pretty=self._pretty,
         )
 
     async def transform_audit_rulesets_data(self, audit_rulesets_data):
         if self._json:
-            return self._to_json_string(audit_rulesets_data)
+            return to_json.format_json(audit_rulesets_data, pretty=self._pretty)
         for rule in audit_rulesets_data:
             rule["template"] = rule["template"][:24]
-        return self._to_table(audit_rulesets_data)
+        return to_table.format_table(audit_rulesets_data, pretty=self._pretty)
