@@ -17,9 +17,6 @@ class GitError(RuntimeError):
     """Error when git commanding."""
 
 
-_check_ran = False
-
-
 def _clean_cancel_task(task):
     if task.done():
         if not task.cancelled():
