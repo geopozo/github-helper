@@ -21,6 +21,9 @@ _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
+SSH_ENV = "SSH_PSWD"
+"""The environmental variable to use to indicate there is a password."""
+
 
 def _log_one_json(obj):
     obj = obj[0] if isinstance(obj, list) else obj
@@ -234,8 +237,9 @@ class GHApi:
 
         # need to cache
         folder_repos = repo_srv.RepoFolder(cache=False)
-        if "SSH_PASSWD" in os.environ:
-            secret = getpass.getpass("Enter ssh password: ")
+        secret = (
+            getpass.getpass("Enter ssh password: ") if SSH_ENV in os.environ else None
+        )
 
         async def query_version(repo):
             _logger.debug(f"Downloading repo {repo['owner']}/{repo['name']}")
