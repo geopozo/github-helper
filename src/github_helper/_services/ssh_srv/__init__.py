@@ -1,0 +1,84 @@
+"""A service to warn user if they need to start an ssh session."""
+
+import subprocess
+from pathlib import Path
+
+
+class NoSSHKeyError(RuntimeError):
+    """Return this error if the user has no SSH key."""
+
+
+class SSHKeyPasswordError(RuntimeError):
+    """Error to be returned if user needs to enter ssh password."""
+
+    def __init__(self, msg=None):
+        """Create an SSHKey error with default or custom message."""
+        default_message = (
+            "It looks like you have your secret key encrypted with a "
+            "password. You should run the command `ssh-agent -s` so that "
+            "you only have to enter your password once this terminal session."
+            " gh-helper will not run without out this."
+        )
+        super().__init__(msg or default_message)
+
+
+def _ssh(key):
+    return Path.home() / ".ssh" / key
+
+
+_accepted_algos = [
+    "id_ed25519",
+    "id_ecdsa",
+    "id_rsa",
+    "id_dsa",
+    "id_xmss",
+]
+
+_possible_keys = [_ssh(key) for key in _accepted_algos]
+
+
+def _find_key():
+    for key in _possible_keys:
+        if key.exists():
+            return key
+    raise NoSSHKeyError("Could not find a valid SSH Key for using git.")
+
+
+def _is_key_encrypted():
+    # ssh-keygen -yf returns public key; fails if passphrase is required and not cached
+    try:
+        _ = subprocess.run(  # noqa: S603 We trust this input
+            ["ssh-keygen", "-yf", str(_find_key())],  # noqa: S607 partial path
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        return True  # key requires passphrase
+    else:
+        return False  # no passphrase needed
+
+
+def _is_key_loaded_in_agent():
+    try:
+        result = subprocess.run(  # noqa: S603 We trust this input
+            ["ssh-add", "-l"],  # noqa: S607 partial path
+            capture_output=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return False
+    else:
+        return result.returncode == 0 and b"No identities" not in result.stdout
+
+
+def check_ssh_ready():
+    """Will run various checks to see if we can use our services."""
+    # why not check gh auth as well?
+    if not _is_key_encrypted():
+        return
+
+    if _is_key_loaded_in_agent():
+        return
+
+    raise SSHKeyPasswordError
