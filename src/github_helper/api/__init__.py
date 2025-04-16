@@ -238,7 +238,9 @@ class GHApi:
         # need to cache
         folder_repos = repo_srv.RepoFolder(cache=False)
         secret = (
-            getpass.getpass("Enter ssh password: ") if SSH_ENV in os.environ else None
+            getpass.getpass("Enter ssh password: ").encode()
+            if SSH_ENV in os.environ
+            else b""
         )
 
         async def query_version(repo):
