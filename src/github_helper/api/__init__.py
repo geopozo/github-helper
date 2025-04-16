@@ -10,6 +10,7 @@ import logistro
 import orjson
 
 from github_helper._services import gh as srv
+from github_helper._services import repo as repo_srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
 from github_helper.api import _audit
@@ -159,7 +160,8 @@ class GHApi:
             r"watchers: .watchers_count,"
             r"forks: .forks_count,"
             r"open_issues: .open_issues_count,"
-            r"license: .license"
+            r"license: .license,"
+            r"default_branch: .default_branch"
             r"})"
             r" | sort_by(.name)"
             r" | sort_by(.archived)"
@@ -227,6 +229,23 @@ class GHApi:
                     repo["collaborators"] = [e]
 
         await asyncio.gather(*[query_repo(repo) for repo in repos])
+
+        # need to cache
+        folder_repos = repo_srv.RepoFolder(cache=False)
+
+        async def query_version(repo):
+            _logger.debug(f"Downloading repo {repo['owner']}/{repo['name']}")
+            private = repo["visibility"] == "private"
+            url = "ssh://git@github.com" if private else None
+            r = await folder_repos.add_repo(
+                repo["owner"],
+                repo["name"],
+                url=url,
+            )
+            repo["version"] = await r.describe(repo["default_branch"])
+            repo["_repo"] = r
+
+        await asyncio.gather(*[query_version(repo) for repo in repos])
 
         sadness = int(not repos)
         return repos, sadness

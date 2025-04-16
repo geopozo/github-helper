@@ -71,11 +71,12 @@ class Repo:
 
     async def describe(self, ref):
         """Return the version tag as given by git describe."""
-        # with --all, priority is: a tags, light tags, branches
+        has_tags = await self._git_("tag")
+        flag = "--tags" if has_tags else "--all"
         if not self.working:
-            return await self._git_("describe", "--all", ref)
+            return await self._git_("describe", flag, ref)
         else:
-            return await self._git_("describe", "--all", "--dirty")
+            return await self._git_("describe", flag, "--dirty")
 
     async def get_working_tree(self, ref):
         """Return a complete list of files with their paths."""
