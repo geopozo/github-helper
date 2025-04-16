@@ -63,7 +63,11 @@ def _find_key():
 def _start_ssh_agent_and_add_key():
     _logger.debug("Trying to start agent and add keys.")
     # 1) Launch ssh-agent
-    out = subprocess.check_output("ssh-agent -s", shell=True, text=True)
+    out = subprocess.check_output(  # noqa: S602
+        "ssh-agent -s",  # noqa: S607
+        shell=True,
+        text=True,
+    )
     # ssh-agent -s prints lines like:
     #    SSH_AUTH_SOCK=/tmp/ssh-XXXXXXXXXXXXXXXXXX/agent.PID; export SSH_AUTH_SOCK;
     #    SSH_AGENT_PID=12345; export SSH_AGENT_PID;
@@ -75,14 +79,14 @@ def _start_ssh_agent_and_add_key():
     # 2) Add your key (this will ask for the passphrase once)
     try:
         _logger.debug(f"Trying to add key {_find_key()}.")
-        subprocess.run(
-            ["ssh-add", str(_find_key())],
+        subprocess.run(  # noqa: S603
+            ["ssh-add", str(_find_key())],  # noqa: S607
             check=True,
         )
     except BaseException as e:
         raise RuntimeError(
             "Tried to add your ssh key to our agent. But that failed. "
-            "You can run `eval (ssh-agent -s)` and `ssh-add PATH_TO_KEY` "
+            "You can run `eval $(ssh-agent -s)` and `ssh-add PATH_TO_KEY` "
             "manually if you need to.",
         ) from e
 
@@ -91,8 +95,8 @@ def _ensure_ssh_agent():
     _logger.debug("Looking for keys in ssh_add.")
     # If agent already has your key, do nothing
     try:
-        r = subprocess.run(
-            ["ssh-add", "-l"],
+        r = subprocess.run(  # noqa: S603
+            ["ssh-add", "-l"],  # noqa: S607
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             check=False,
