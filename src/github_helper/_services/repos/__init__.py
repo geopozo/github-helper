@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from github_helper._services import ssh_srv
 from github_helper._services.file import github as ghf
 
 # get file
@@ -15,6 +16,16 @@ from github_helper._services.file import github as ghf
 
 class GitError(RuntimeError):
     """Error when git commanding."""
+
+
+_check_ran = False
+
+
+def _check_ssh_once():
+    global _check_ran  # noqa: PLW0603 global
+    if not _check_ran:
+        ssh_srv.check_ssh_ready()
+        _check_ran = True
 
 
 def _clean_cancel_task(task):
@@ -34,7 +45,7 @@ def _clean_cancel_task(task):
 class Repo:
     """Provides functions for manage repositories."""
 
-    def __init__(  # noqa: PLR0913 allow too many args for now
+    def __init__(
         self,
         url,
         owner,
@@ -42,19 +53,18 @@ class Repo:
         path,
         *,
         working=False,
-        secret=None,
     ):
         """Initializize a new Repo with arguments."""
         self.url = url
         self.owner = owner
         self.name = name
         self.working = working
-        self._secret = secret
         # this should change how update clones TODO
         self._path = path / self.owner / self.name
 
     # check git version
     async def _git_(self, *args, repo=True):
+        _check_ssh_once()
         myself = ["-C", self._path] if repo else []
         p = await asyncio.create_subprocess_exec(
             "git",
@@ -62,9 +72,8 @@ class Repo:
             *args,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stdin=subprocess.PIPE,
         )
-        stdout, stderr = await p.communicate(self._secret)
+        stdout, stderr = await p.communicate()
         retval = await p.wait()
         if retval:
             raise GitError(
@@ -156,7 +165,7 @@ class RepoFolder:
 
         self.repos = {}
 
-    async def add_repo(self, owner, name, url=None, secret=None):
+    async def add_repo(self, owner, name, url=None):
         """Return initialized repo instance."""
         # if not cache
         path = self._root / owner
@@ -167,7 +176,6 @@ class RepoFolder:
             owner,
             name,
             self._root,
-            secret=secret,
         )
         if owner not in self.repos:
             self.repos[owner] = {}
