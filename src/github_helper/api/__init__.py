@@ -1,8 +1,6 @@
 """A CLI dashboard for github status."""
 
 import asyncio
-import getpass
-import os
 import re
 import warnings
 from pathlib import Path
@@ -237,11 +235,6 @@ class GHApi:
 
         # need to cache
         folder_repos = repo_srv.RepoFolder(cache=False)
-        secret = (
-            getpass.getpass("Enter ssh password: ").encode()
-            if SSH_ENV in os.environ
-            else b""
-        )
 
         async def query_version(repo):
             _logger.debug(f"Downloading repo {repo['owner']}/{repo['name']}")
@@ -251,7 +244,6 @@ class GHApi:
                 repo["owner"],
                 repo["name"],
                 url=url,
-                secret=secret,
             )
             repo["version"] = await r.describe(repo["default_branch"])
             repo["_repo"] = r
