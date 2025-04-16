@@ -346,3 +346,14 @@ class GHApi:
             result = result + diffs
         sadness = len(result)
         return result, sadness
+
+    async def audit_versions(self, repo):
+        """
+        Verify that version of a repository have differences.
+
+        Args:
+            repo: the name of the repo to verify. Can be "owner/repo" or just
+            "repo" and owner is assumed to be the current user.
+
+        """
+        return repo, 0

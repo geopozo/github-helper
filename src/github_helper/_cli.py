@@ -154,15 +154,17 @@ def run_cli():
     _gc_run(_run_cli_async())
 
 
-async def _run_cli_async():
+async def _run_cli_async():  # noqa: C901 complex
     parser, cli_args = _get_cli_args()
     repo = cli_args.pop("repo", None)
     paginate = cli_args.pop("paginate", False)
     command = cli_args.pop("command", None)
     cli_args.pop("log")
     cli_args.pop("human")
+
     gh = api.GHApi()
     adpt = GHAdapter(**cli_args, command=command)
+
     match command:
         case "auth-status":
             data, sadness = await gh.check_auth()
@@ -187,6 +189,8 @@ async def _run_cli_async():
         case "audit-repo":
             data, sadness = await gh.audit_rulesets(repo)
             data = await adpt.transform_audit_rulesets_data(data)
+        case "audit-versions":
+            data, sadness = await gh.audit_versions(repo)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()
