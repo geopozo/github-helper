@@ -2,7 +2,9 @@
 
 import os
 import platform
+import re
 import subprocess
+import sys
 from pathlib import Path
 
 import logistro
@@ -58,51 +60,57 @@ def _find_key():
     raise NoSSHKeyError("Could not find a valid SSH Key for using git.")
 
 
-def _is_key_encrypted():
-    _logger.debug("Checking for password.")
-    # ssh-keygen -yf returns public key; fails if passphrase is required and not cached
+def _start_ssh_agent_and_add_key():
+    _logger.debug("Trying to start agent and add keys.")
+    # 1) Launch ssh-agent
+    out = subprocess.check_output("ssh-agent -s", shell=True, text=True)
+    # ssh-agent -s prints lines like:
+    #    SSH_AUTH_SOCK=/tmp/ssh-XXXXXXXXXXXXXXXXXX/agent.PID; export SSH_AUTH_SOCK;
+    #    SSH_AGENT_PID=12345; export SSH_AGENT_PID;
+    for line in out.splitlines():
+        m = re.match(r"^(SSH_AUTH_SOCK|SSH_AGENT_PID)=([^;]+);", line)
+        if m:
+            os.environ[m.group(1)] = m.group(2)
+
+    # 2) Add your key (this will ask for the passphrase once)
     try:
-        _ = subprocess.run(  # noqa: S603 We trust this input
-            ["ssh-keygen", "-yf", str(_find_key())],  # noqa: S607 partial path
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+        _logger.debug(f"Trying to add key {_find_key()}.")
+        subprocess.run(
+            ["ssh-add", str(_find_key())],
             check=True,
-            env={
-                **os.environ,
-                "DISPLAY": "",
-                "SSH_ASKPASS": "false",
-            },  # disable askpass fallback
-            stdin=subprocess.DEVNULL,
-            **extra_args,
         )
-    except subprocess.CalledProcessError:
-        return True  # key requires passphrase
-    else:
-        return False  # no passphrase needed
+    except BaseException as e:
+        raise RuntimeError(
+            "Tried to add your ssh key to our agent. But that failed. "
+            "You can run `eval (ssh-agent -s)` and `ssh-add PATH_TO_KEY` "
+            "manually if you need to.",
+        ) from e
 
 
-def _is_key_loaded_in_agent():
-    _logger.debug("Checking for agent.")
+def _ensure_ssh_agent():
+    _logger.debug("Looking for keys in ssh_add.")
+    # If agent already has your key, do nothing
     try:
-        result = subprocess.run(  # noqa: S603 We trust this input
-            ["ssh-add", "-l"],  # noqa: S607 partial path
-            capture_output=True,
+        r = subprocess.run(
+            ["ssh-add", "-l"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
             check=False,
+            env=os.environ,
         )
+        out = r.stdout.decode().lower()
+        if r.returncode == 0 and "no identities" not in out:
+            return
     except FileNotFoundError:
-        return False
-    else:
-        return result.returncode == 0 and b"No identities" not in result.stdout
+        # ssh-add not found; bail out
+        sys.stderr.write("✖ ssh-add not found in PATH, it's needed.\n")
+        sys.exit(1)
+
+    # Otherwise, start a fresh agent and add the key
+    _start_ssh_agent_and_add_key()
 
 
 def check_ssh_ready():
     """Will run various checks to see if we can use our services."""
-    _logger.debug("Checking ssh.")
     # why not check gh auth as well?
-    if not _is_key_encrypted():
-        return
-
-    if _is_key_loaded_in_agent():
-        return
-
-    raise SSHKeyPasswordError
+    _ensure_ssh_agent()

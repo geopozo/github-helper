@@ -8,7 +8,6 @@ from pathlib import Path
 
 import logistro
 
-from github_helper._services import ssh_srv
 from github_helper._services.file import github as ghf
 
 _logger = logistro.getLogger(__name__)
@@ -19,15 +18,6 @@ class GitError(RuntimeError):
 
 
 _check_ran = False
-
-
-def _check_ssh_once():
-    _logger.debug("Checking ssh once:")
-    global _check_ran  # noqa: PLW0603 global
-    if not _check_ran:
-        _logger.debug("Has not been checked yet.")
-        ssh_srv.check_ssh_ready()
-        _check_ran = True
 
 
 def _clean_cancel_task(task):
@@ -66,7 +56,6 @@ class Repo:
 
     # check git version
     async def _git_(self, *args, repo=True):
-        _check_ssh_once()
         myself = ["-C", self._path] if repo else []
         p = await asyncio.create_subprocess_exec(
             "git",

@@ -11,6 +11,7 @@ import orjson
 
 from github_helper._services import gh as srv
 from github_helper._services import repos as repo_srv
+from github_helper._services import ssh_srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
 from github_helper.api import _audit
@@ -19,8 +20,19 @@ _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
-SSH_ENV = "SSH_PSWD"
-"""The environmental variable to use to indicate there is a password."""
+
+def _check_ssh_once():
+    _logger = logistro.get_logger(__name__)
+    global _check_ran  # noqa: PLW0603 global
+    if not _check_ran:
+        _logger.debug("SSH has not been checked yet.")
+        ssh_srv.check_ssh_ready()
+        _check_ran = True
+    else:
+        _logger.debug("SSH is already ran.")
+
+
+_check_ssh_once()
 
 
 def _log_one_json(obj):
