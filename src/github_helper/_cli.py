@@ -121,6 +121,17 @@ def _get_cli_args():
         help="Name of repository required.",
         required=True,
     )
+    audit_versions = subparsers.add_parser(
+        "audit-versions",
+        description="",
+        help="Compare versions of a repo",
+    )
+    audit_versions.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
+    )
 
     basic_args = parser.parse_args()
     return parser, vars(basic_args)
