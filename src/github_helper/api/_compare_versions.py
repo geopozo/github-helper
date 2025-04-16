@@ -16,4 +16,4 @@ def filter_versions(versions: list[dict], key: str):
         r"^" + version.VERSION_PATTERN + r"$",
         re.VERBOSE,
     )
-    return [v for v in versions if _regex.match(v[key])]
+    return {v[key] for v in versions if _regex.match(v[key])}
