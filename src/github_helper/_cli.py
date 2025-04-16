@@ -124,7 +124,7 @@ def _get_cli_args():
     audit_versions = subparsers.add_parser(
         "audit-versions",
         description="",
-        help="Compare versions of a repo",
+        help="Compare versions of a repository between different sources",
     )
     audit_versions.add_argument(
         "-r",
