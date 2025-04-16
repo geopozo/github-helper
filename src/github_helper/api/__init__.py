@@ -12,7 +12,7 @@ import logistro
 import orjson
 
 from github_helper._services import gh as srv
-from github_helper._services import repo as repo_srv
+from github_helper._services import repos as repo_srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
 from github_helper.api import _audit
