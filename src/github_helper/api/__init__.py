@@ -263,8 +263,14 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
+        sorted_releases = sorted(
+            releases,
+            key=lambda x: version.parse(x["tag"]),
+            reverse=True,
+        )
+
         sadness = int(not releases)
-        return releases, sadness
+        return sorted_releases, sadness
 
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""
