@@ -8,7 +8,6 @@ from pathlib import Path
 import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
-from packaging import version
 
 from github_helper._services import gh as srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
@@ -242,14 +241,8 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
         tags = tags_jq.input_value(orjson.loads(out)).first()
-        sorted_tags = sorted(
-            tags,
-            key=lambda x: version.parse(x["version"]),
-            reverse=True,
-        )
-
         sadness = int(not tags)
-        return sorted_tags, sadness
+        return tags, sadness
 
     async def get_releases(self, repo):
         """Return releases for a repo."""
@@ -263,14 +256,8 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
-        sorted_releases = sorted(
-            releases,
-            key=lambda x: version.parse(x["tag"]),
-            reverse=True,
-        )
-
         sadness = int(not releases)
-        return sorted_releases, sadness
+        return releases, sadness
 
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""
