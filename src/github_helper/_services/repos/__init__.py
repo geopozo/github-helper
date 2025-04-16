@@ -34,12 +34,22 @@ def _clean_cancel_task(task):
 class Repo:
     """Provides functions for manage repositories."""
 
-    def __init__(self, url, owner, name, path, *, working=False):
+    def __init__(  # noqa: PLR0913 allow too many args for now
+        self,
+        url,
+        owner,
+        name,
+        path,
+        *,
+        working=False,
+        secret=None,
+    ):
         """Initializize a new Repo with arguments."""
         self.url = url
         self.owner = owner
         self.name = name
         self.working = working
+        self._secret = secret
         # this should change how update clones TODO
         self._path = path / self.owner / self.name
 
@@ -52,9 +62,10 @@ class Repo:
             *args,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
         )
+        stdout, stderr = await p.communicate(self._secret)
         retval = await p.wait()
-        stdout, stderr = await p.communicate()
         if retval:
             raise GitError(
                 f"Command: {args}. Reval: {retval!s}. Stderr: {stderr}.",
@@ -145,13 +156,19 @@ class RepoFolder:
 
         self.repos = {}
 
-    async def add_repo(self, owner, name, url=None):
+    async def add_repo(self, owner, name, url=None, secret=None):
         """Return initialized repo instance."""
         # if not cache
         path = self._root / owner
         path.mkdir(parents=True, exist_ok=True)
 
-        repo = Repo(url if url else self._github, owner, name, self._root)
+        repo = Repo(
+            url if url else self._github,
+            owner,
+            name,
+            self._root,
+            secret=secret,
+        )
         if owner not in self.repos:
             self.repos[owner] = {}
         self.repos[owner][name] = repo
