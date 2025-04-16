@@ -346,9 +346,12 @@ class GHApi:
         """
         tags, sadness = await self.get_tagged_versions(repo)
         releases, sadness = await self.get_releases(repo)
+
         filtered_tags = filter_versions(tags, "version")
         filtered_releases = filter_versions(releases, "tag")
+
         versions = filtered_tags | filtered_releases
+
         result = [
             {
                 "version": v,
