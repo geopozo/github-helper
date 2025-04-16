@@ -129,3 +129,8 @@ class GHAdapter:
         for rule in audit_rulesets_data:
             rule["template"] = rule["template"][:24]
         return self._to_table(audit_rulesets_data)
+
+    async def transform_audit_versions_data(self, version_data):
+        if self._json:
+            return self._to_json_string(version_data)
+        return self._to_table(version_data)
