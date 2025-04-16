@@ -3,6 +3,10 @@
 import subprocess
 from pathlib import Path
 
+import logistro
+
+_logger = logistro.getLogger(__name__)
+
 
 class NoSSHKeyError(RuntimeError):
     """Return this error if the user has no SSH key."""
@@ -45,6 +49,7 @@ def _find_key():
 
 
 def _is_key_encrypted():
+    _logger.debug("Checking for password.")
     # ssh-keygen -yf returns public key; fails if passphrase is required and not cached
     try:
         _ = subprocess.run(  # noqa: S603 We trust this input
@@ -60,6 +65,7 @@ def _is_key_encrypted():
 
 
 def _is_key_loaded_in_agent():
+    _logger.debug("Checking for agent.")
     try:
         result = subprocess.run(  # noqa: S603 We trust this input
             ["ssh-add", "-l"],  # noqa: S607 partial path
@@ -74,6 +80,7 @@ def _is_key_loaded_in_agent():
 
 def check_ssh_ready():
     """Will run various checks to see if we can use our services."""
+    _logger.debug("Checking ssh.")
     # why not check gh auth as well?
     if not _is_key_encrypted():
         return
