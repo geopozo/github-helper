@@ -21,6 +21,9 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
 
+_check_ran = False
+
+
 def _check_ssh_once():
     _logger = logistro.getLogger(__name__)
     global _check_ran  # noqa: PLW0603 global
