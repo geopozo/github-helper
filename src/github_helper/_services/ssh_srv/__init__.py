@@ -1,41 +1,17 @@
 """A service to warn user if they need to start an ssh session."""
 
 import os
-import platform
 import re
 import subprocess
-import sys
 from pathlib import Path
 
 import logistro
 
 _logger = logistro.getLogger(__name__)
 
-_extra_args = {}
-if platform.system() == "Windows":
-    _logger.debug("Is windows.")
-    startupinfo = subprocess.STARTUPINFO()
-    startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    creationflags = subprocess.CREATE_NO_WINDOW
-    extra_args = {"startupinfo": startupinfo, "creationflags": creationflags}
-
 
 class NoSSHKeyError(RuntimeError):
     """Return this error if the user has no SSH key."""
-
-
-class SSHKeyPasswordError(RuntimeError):
-    """Error to be returned if user needs to enter ssh password."""
-
-    def __init__(self, msg=None):
-        """Create an SSHKey error with default or custom message."""
-        default_message = (
-            "It looks like you have your secret key encrypted with a "
-            "password. You should run the command `ssh-agent -s` so that "
-            "you only have to enter your password once this terminal session."
-            " gh-helper will not run without out this."
-        )
-        super().__init__(msg or default_message)
 
 
 def _ssh(key):
@@ -97,18 +73,17 @@ def _ensure_ssh_agent():
     try:
         r = subprocess.run(  # noqa: S603
             ["ssh-add", "-l"],  # noqa: S607
-            stdout=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=False,
             env=os.environ,
         )
-        out = r.stdout.decode().lower()
-        if r.returncode == 0 and "no identities" not in out:
+        if r.returncode == 0:
             return
     except FileNotFoundError:
         # ssh-add not found; bail out
-        sys.stderr.write("✖ ssh-add not found in PATH, it's needed.\n")
-        sys.exit(1)
+        _logger.exception("✖ ssh-add not found in PATH, it's needed.\n")
+        raise
 
     # Otherwise, start a fresh agent and add the key
     _start_ssh_agent_and_add_key()
