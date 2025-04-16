@@ -11,6 +11,7 @@ _logger = logistro.getLogger(__name__)
 
 _extra_args = {}
 if platform.system() == "Windows":
+    _logger.debug("Is windows.")
     startupinfo = subprocess.STARTUPINFO()
     startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     creationflags = subprocess.CREATE_NO_WINDOW
@@ -66,7 +67,11 @@ def _is_key_encrypted():
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             check=True,
-            env={**os.environ, "DISPLAY": "none"},  # disable askpass fallback
+            env={
+                **os.environ,
+                "DISPLAY": "",
+                "SSH_ASKPASS": "false",
+            },  # disable askpass fallback
             stdin=subprocess.DEVNULL,
             **extra_args,
         )
