@@ -191,6 +191,7 @@ async def _run_cli_async():  # noqa: C901 complex
             data = await adpt.transform_audit_rulesets_data(data)
         case "audit-versions":
             data, sadness = await gh.audit_versions(repo)
+            data = await adpt.transform_audit_versions_data(data)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()
