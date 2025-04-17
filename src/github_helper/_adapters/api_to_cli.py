@@ -119,5 +119,5 @@ class GHAdapter:
 
     async def transform_audit_versions_data(self, version_data):
         if self._json:
-            return self._to_json_string(version_data)
-        return self._to_table(version_data)
+            return to_json.format_json(version_data, pretty=self._pretty)
+        return to_table.format_table(version_data, pretty=self._pretty)
