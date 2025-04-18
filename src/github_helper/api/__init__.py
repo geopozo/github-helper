@@ -314,14 +314,17 @@ class GHApi:
 
         versions = filtered_tags | filtered_releases
 
-        result = [
-            {
-                "version": v,
-                "tags": v in filtered_tags,
-                "releases": v in filtered_releases,
-            }
-            for v in versions
-        ]
+        result = order_versions(
+            [
+                {
+                    "version": v,
+                    "tags": v in filtered_tags,
+                    "releases": v in filtered_releases,
+                }
+                for v in versions
+            ],
+            "version",
+        )
         return result, sadness
 
     async def _get_ruleset(self, owner, repo, ruleset_id):
