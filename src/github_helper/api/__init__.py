@@ -286,14 +286,23 @@ class GHApi:
         """Return releases for a repo."""
         _ = await self.get_user()
         releases_jq = jq.compile(
-            r"map({" r"tag: .tag_name, " r"published: (.draft | not)" r"})",
+            r"map("
+            r"select(.draft | not) | "
+            r"{"
+            r"tag: .tag_name, "
+            r"prerelease: .prerelease, "
+            r"files: [.assets | .[]? | .name], "
+            r"}"
+            r")",
         )
         owner, repo = self._split_full_name(full_name=repo)
         endpoint = f"repos/{owner}/{repo}/releases"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
-        releases = releases_jq.input_value(orjson.loads(out)).first()
+        obj = orjson.loads(out)
+        _log_one_json(obj)
+        releases = releases_jq.input_value(obj).first()
         sadness = int(not releases)
         return releases, sadness
 
