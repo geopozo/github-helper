@@ -297,6 +297,33 @@ class GHApi:
         sadness = int(not releases)
         return order_versions(releases, "tag"), sadness
 
+    async def audit_versions(self, repo):
+        """
+        Verify that version of a repository have differences.
+
+        Args:
+            repo: the name of the repo to verify. Can be "owner/repo" or just
+            "repo" and owner is assumed to be the current user.
+
+        """
+        tags, sadness = await self.get_tagged_versions(repo)
+        releases, sadness = await self.get_releases(repo)
+
+        filtered_tags = filter_versions(tags, "version")
+        filtered_releases = filter_versions(releases, "tag")
+
+        versions = filtered_tags | filtered_releases
+
+        result = [
+            {
+                "version": v,
+                "tags": v in filtered_tags,
+                "releases": v in filtered_releases,
+            }
+            for v in versions
+        ]
+        return result, sadness
+
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""
         endpoint = f"repos/{owner}/{repo}/rulesets/{ruleset_id}"
@@ -370,31 +397,4 @@ class GHApi:
                 diff["template"] = template
             result = result + diffs
         sadness = len(result)
-        return result, sadness
-
-    async def audit_versions(self, repo):
-        """
-        Verify that version of a repository have differences.
-
-        Args:
-            repo: the name of the repo to verify. Can be "owner/repo" or just
-            "repo" and owner is assumed to be the current user.
-
-        """
-        tags, sadness = await self.get_tagged_versions(repo)
-        releases, sadness = await self.get_releases(repo)
-
-        filtered_tags = filter_versions(tags, "version")
-        filtered_releases = filter_versions(releases, "tag")
-
-        versions = filtered_tags | filtered_releases
-
-        result = [
-            {
-                "version": v,
-                "tags": v in filtered_tags,
-                "releases": v in filtered_releases,
-            }
-            for v in versions
-        ]
         return result, sadness
