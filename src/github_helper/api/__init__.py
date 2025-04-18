@@ -269,10 +269,10 @@ class GHApi:
         sadness = int(not repos)
         return repos, sadness
 
-    async def get_tagged_versions(self, repo):
+    async def get_remote_tags(self, repo):
         """Return tags for a repo."""
         _ = await self.get_user()
-        tags_jq = jq.compile("map({version: .name})")
+        tags_jq = jq.compile("map({tag: .name})")
         owner, repo = self._split_full_name(full_name=repo)
         endpoint = f"repos/{owner}/{repo}/tags"
         _logger.debug(f"Calling API: {endpoint}")
@@ -280,7 +280,7 @@ class GHApi:
         srv.check_retval(retval, err, endpoint=endpoint)
         tags = tags_jq.input_value(orjson.loads(out)).first()
         sadness = int(not tags)
-        return order_versions(tags, "version"), sadness
+        return tags, sadness
 
     async def get_releases(self, repo):
         """Return releases for a repo."""
@@ -295,7 +295,7 @@ class GHApi:
         srv.check_retval(retval, err, endpoint=endpoint)
         releases = releases_jq.input_value(orjson.loads(out)).first()
         sadness = int(not releases)
-        return order_versions(releases, "tag"), sadness
+        return releases, sadness
 
     async def audit_versions(self, repo):
         """
@@ -306,10 +306,10 @@ class GHApi:
             "repo" and owner is assumed to be the current user.
 
         """
-        tags, sadness = await self.get_tagged_versions(repo)
+        tags, sadness = await self.get_remote_tags(repo)
         releases, sadness = await self.get_releases(repo)
 
-        filtered_tags = filter_versions(tags, "version")
+        filtered_tags = filter_versions(tags, "tag")
         filtered_releases = filter_versions(releases, "tag")
 
         versions = filtered_tags | filtered_releases
