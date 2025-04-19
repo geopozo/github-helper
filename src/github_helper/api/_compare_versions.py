@@ -151,7 +151,16 @@ class PyProjectAudit(ProjectAudit):
         self.linux_musl = ArchSet()
         self.add_file(filename, rest)
 
-    def add_file(self, filename, rest):  # noqa: PLR0912, C901 complexity
+    def __str__(self):
+        # name
+        # sdist?
+        # bdist?
+        # pure/compiled
+        # windows, mac, linux glibc, linux musl
+        return ""
+
+    def add_file(self, filename, rest):  # noqa: PLR0912, C901, PLR0915 complexity
+        _logger.debug2(f"add_file to pyproject audit: {filename} {rest}")
         if filename.endswith("tar.gz"):
             self.with_sdist = True
             return True
@@ -159,11 +168,14 @@ class PyProjectAudit(ProjectAudit):
             (
                 version,
                 build_tag,
-                python_tag,
-                abi_tags,
-                platform_tags,
+                (wheel_tag,),
             ) = rest
-            _logger.debug(f"whl attributes: {rest}")
+            python_tag, abi_tag, platform_tag = (
+                wheel_tag.interpreter,
+                wheel_tag.abi,
+                wheel_tag.platform,
+            )
+
             self.with_bdist = True
             if python_tag in ("py3", "py2.py3"):
                 self.pure_python = True
@@ -177,10 +189,10 @@ class PyProjectAudit(ProjectAudit):
                     return False
                 py_h = V(f"3.{match.group(1)}")
 
-                if abi_tags != "abi3":
+                if abi_tag != "abi3":
                     return False
                 cm = CompatibilityMatrix(abi3=True, python_h=py_h)
-                match platform_tags:
+                match platform_tag:
                     case "win_amd64":
                         self.win.x86_64 = cm
                     case "win32":
@@ -213,23 +225,38 @@ class PyProjectAudit(ProjectAudit):
                                 self.linux_musl.x86 = cm
                             case "armv7l":
                                 self.linux_musl.amd64 = cm
+                return True
         return False
-
-        # identify operating system
 
 
 class Projects:
     projects: field(default_factory=MutableMapping[str, ProjectAudit])
     unknown_files: field(default_factory=list[str])
     incompliant_files: field(default_factory=list[str])
+    sigstore_files: field(default_factory=list[str])
 
     def __init__(self):
         self.projects = {}
         self.unknown_files = []
         self.incompliant_files = []
+        self.sigstore_files = []
+
+    def __str__(self):
+        ret = ""
+        if self.unknown_files:
+            ret += "Unknown Files:\n "
+            ret += "\n ".join(self.unknown_files)
+            ret += "\n"
+        if self.incompliant_files:
+            ret += "Incompliant Files:\n"
+            ret += "\n ".join(self.incompliant_files)
+            ret += "\n"
+        for name, project in self.projects.items():
+            ret += f"{name!s}:\n"
+        return ret
 
     def add_file(self, filename):
-        if filename.endswith((".whl", "tar.gz")):
+        if filename.endswith("tar.gz"):
             try:
                 name, *rest = utils.parse_sdist_filename(filename)
                 if name not in self.projects:
@@ -237,18 +264,23 @@ class Projects:
                 elif not self.projects[name].add_file(filename, rest):
                     self.incompliant_files.append(filename)
             except utils.InvalidSdistFilename:
+                _logger.debug(f"Invalid Sdist Filename: {filename}")
                 self.unknown_files.append(filename)
                 return
         elif filename.endswith(".whl"):
             try:
                 name, *rest = utils.parse_wheel_filename(filename)
+                _logger.debug2(f"Adding file: {name} {rest}")
                 if name not in self.projects:
                     self.projects[name] = PyProjectAudit(name, filename, rest)
                 elif not self.projects[name].add_file(filename, rest):
                     self.incompliant_files.append(filename)
             except utils.InvalidWheelFilename:
+                _logger.debug(f"Invalid Wheel Filename: {filename}")
                 self.incompliant_files.append(filename)
                 return
+        elif filename.endswith("sigstore.json"):
+            self.sigstore_files.append(filename)
         else:
             self.unknown_files.append(filename)
             return
@@ -270,9 +302,11 @@ class ReleaseAudit:
             self.projects.add_file(file)
 
     def __str__(self):
+        ret = ""
         if not self.prerelease_agree:
-            return "prerelease disagreement."
-        return ""
+            ret += "prerelease disagreement.\n"
+        ret += str(self.projects)
+        return ret
 
 
 def explode_versions(tag):
