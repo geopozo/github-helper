@@ -313,7 +313,7 @@ class GHApi:
         for release in releases:
             audit = _compare_versions.ReleaseAudit(release)
             # add audit to the releases results
-            release["notes"] = [f"rc agreement: {audit.prerelease_agree}"]
+            release["audit"] = audit
         return releases, sadness
 
     async def audit_versions(self, repo):

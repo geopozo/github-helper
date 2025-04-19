@@ -73,6 +73,11 @@ class ReleaseAudit:
         # intel
         # universal
 
+    def __str__(self):
+        if not self.prerelease_agree:
+            return "prerelease disagreement."
+        return ""
+
 
 def explode_versions(tag):
     v = None
