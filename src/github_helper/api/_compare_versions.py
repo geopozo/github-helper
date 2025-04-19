@@ -32,6 +32,7 @@ class ArchSet(NamedTuple):
 class ProjectAudit:
     name: str
     language: str
+    sdist: bool
 
 
 class PyProjectAudit(ProjectAudit):
@@ -51,6 +52,26 @@ class PyProjectAudit(ProjectAudit):
 class ReleaseAudit:
     prerelease_agree: bool
     projects: field(default_factory=list[ProjectAudit])
+
+    def __init__(self, release):
+        self.version = explode_versions(release["tag"])
+        if not self.version:
+            return
+        self.prerelease_agree = self.version["is_prerelease"] == release["prerelease"]
+        self.projects = {}
+        # for file in release["files"]
+        # create projects
+        # find wheels, find bdists
+        # minimum interpreter version (c-constraint)
+        # universal abi3
+        # supports windows
+        # amd64
+        # arm64
+        # x86
+        # supports mac
+        # silicon
+        # intel
+        # universal
 
 
 def explode_versions(tag):
