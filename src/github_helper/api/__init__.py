@@ -14,8 +14,7 @@ from github_helper._services import repos as repo_srv
 from github_helper._services import ssh_srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
-from github_helper.api import _audit
-from github_helper.api._compare_versions import filter_versions, order_versions
+from github_helper.api import _audit, _compare_versions
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -339,12 +338,12 @@ class GHApi:
         tags, sadness = await self.get_remote_tags(repo)
         releases, sadness = await self.get_releases(repo)
 
-        filtered_tags = filter_versions(tags, "tag")
-        filtered_releases = filter_versions(releases, "tag")
+        filtered_tags = _compare_versions.filter_versions(tags, "tag")
+        filtered_releases = _compare_versions.filter_versions(releases, "tag")
 
         versions = filtered_tags | filtered_releases
 
-        result = order_versions(
+        result = _compare_versions.order_versions(
             [
                 {
                     "version": v,
