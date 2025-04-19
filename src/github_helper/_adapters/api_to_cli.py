@@ -110,6 +110,24 @@ class GHAdapter:
             headers=("version", "files"),
         )
 
+    async def transform_audit_releases_data(self, releases_data):
+        if self._json:
+            return to_json.format_json(releases_data, pretty=self._pretty)
+        delim = "," if not self._pretty else "\n"
+        spacer = "" if not self._pretty else "\n"
+        return to_table.format_table(
+            [
+                [
+                    release["tag"],
+                    spacer + delim.join(release["files"]),
+                    delim.join(release["notes"]) if self._pretty else None,
+                ]
+                for release in releases_data
+            ],
+            pretty=self._pretty,
+            headers=("version", "files"),
+        )
+
     async def transform_audit_rulesets_data(self, audit_rulesets_data):
         if self._json:
             return to_json.format_json(audit_rulesets_data, pretty=self._pretty)

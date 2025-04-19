@@ -306,6 +306,27 @@ class GHApi:
         sadness = int(not releases)
         return releases, sadness
 
+    async def audit_releases(self, repo):
+        """Run get_releases and process information."""
+        releases, sadness = await self.get_releases(repo)
+        if sadness:
+            return None, sadness
+        for release in releases:
+            release["notes"] = "Note."
+            # is prerelease does it agree? (release wide)
+            # has wheel? (is python, create project? with details)
+            # minimum interpreter version (c-constraint)
+            # universal abi3
+            # supports windows
+            # amd64
+            # arm64
+            # x86
+            # supports mac
+            # silicon
+            # intel
+            # universal
+        return releases, sadness
+
     async def audit_versions(self, repo):
         """
         Verify that version of a repository have differences.
