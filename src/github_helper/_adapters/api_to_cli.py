@@ -115,7 +115,7 @@ class GHAdapter:
             return to_json.format_json(releases_data, pretty=self._pretty)
 
         delim = "\n"
-        spacer = "-\t\n"
+        spacer = "-\n"
         return to_table.format_table(
             [
                 [
