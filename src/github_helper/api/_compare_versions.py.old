@@ -168,8 +168,18 @@ class PyProjectAudit(ProjectAudit):
             (
                 version,
                 build_tag,
-                (wheel_tag,),
+                wheel_tags,
             ) = rest
+            for wheel_tag in wheel_tags:
+                if wheel_tag.interpreter == "py2":
+                    continue
+
+                #### NOTE, gave up here, one file can actually
+                #### branch off into many tag combinations,
+                #### so we'd need to loop outside that
+                #### and also, this whole method suggests
+                #### a manner of distributing, it's better just to supply
+                #### the files and read
             python_tag, abi_tag, platform_tag = (
                 wheel_tag.interpreter,
                 wheel_tag.abi,
