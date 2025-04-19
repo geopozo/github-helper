@@ -2,6 +2,7 @@ import re
 from dataclasses import field
 from typing import NamedTuple
 
+import semver
 from packaging import version
 
 GlibcReference = {
@@ -50,6 +51,32 @@ class PyProjectAudit(ProjectAudit):
 class ReleaseAudit:
     prerelease_agree: bool
     projects: field(default_factory=list[ProjectAudit])
+
+
+def explode_versions(tag):
+    v = None
+    try:
+        v = version.Version(tag)
+    except version.InvalidVersion:
+        pass
+    try:
+        v = semver.Version.parse(tag)
+    except ValueError:
+        pass
+    if not v:
+        return None
+    ret = {
+        "major": v.major,
+        "minor": v.minor,
+        "patch": v.patch if hasattr(v, "patch") else v.micro,
+        "pre": v.prerelease if hasattr(v, "prerelese") else v.pre,
+        "dev": v.dev if hasattr(v, "dev") else None,
+        "post": v.post if hasattr(v, "post") else None,
+    }
+    ret["is_prerelease"] = (
+        v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.pre)
+    )
+    return ret
 
 
 def order_versions(versions: list[dict], key: str):
