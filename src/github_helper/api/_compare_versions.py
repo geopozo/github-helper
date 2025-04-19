@@ -57,14 +57,14 @@ _logger = logistro.getLogger(__name__)
 
 
 GlibcReference = {
-    V(2.17): "Most compatible.",
-    V(2.28): "Debian 10. Reasonably Compatible >2018",
-    V(2.29): "Transitional Version.",
-    V(2.31): "Ubuntu 20.04",
-    V(2.34): "Ubuntu 22.04",
-    V(2.35): "Ubuntu >22.04.1. 2022+",
-    V(2.36): "New?",
-    V(2.38): "Released Yesterday?",
+    V("2.17"): "Most compatible.",
+    V("2.28"): "Debian 10. Reasonably Compatible >2018",
+    V("2.29"): "Transitional Version.",
+    V("2.31"): "Ubuntu 20.04",
+    V("2.34"): "Ubuntu 22.04",
+    V("2.35"): "Ubuntu >22.04.1. 2022+",
+    V("2.36"): "New?",
+    V("2.38"): "Released Yesterday?",
 }
 """
 A list of common Glibc versions and what theyare as of 2025-04-19.
@@ -77,7 +77,7 @@ unsupported on older distros where everything is compiled against a lower
 version.
 """
 
-GlibcRecommended = (V(2.17), V(2.28), V(2.31), V(2.34))
+GlibcRecommended = (V("2.17"), V("2.28"), V("2.31"), V("2.34"))
 """List of libc versions recommended as of 2025-04-19."""
 
 
@@ -105,7 +105,7 @@ class GlibcMatrix(dict[V, CompatibilityMatrix]):
 class ArchSet:
     x86: CompatibilityMatrix | GlibcMatrix | None = None
     x86_64: CompatibilityMatrix | GlibcMatrix | None = None
-    universal: CompatibilityMatrix | None
+    universal: CompatibilityMatrix | None = None
     arm64: CompatibilityMatrix | GlibcMatrix | None = None
     arm32: CompatibilityMatrix | GlibcMatrix | None = None
 
@@ -152,17 +152,17 @@ class PyProjectAudit(ProjectAudit):
         self.add_file(filename, rest)
 
     def add_file(self, filename, rest):  # noqa: PLR0912, C901 complexity
-        if filename.endswidth("tar.gz"):
+        if filename.endswith("tar.gz"):
             self.with_sdist = True
             return True
-        elif filename.endswidth(".whl"):
+        elif filename.endswith(".whl"):
             (
                 version,
                 build_tag,
                 python_tag,
                 abi_tags,
                 platform_tags,
-            ) = *rest
+            ) = rest
             _logger.debug(f"whl attributes: {rest}")
             self.with_bdist = True
             if python_tag in ("py3", "py2.py3"):
@@ -223,8 +223,13 @@ class Projects:
     unknown_files: field(default_factory=list[str])
     incompliant_files: field(default_factory=list[str])
 
+    def __init__(self):
+        self.projects = {}
+        self.unknown_files = []
+        self.incompliant_files = []
+
     def add_file(self, filename):
-        if filename.endswidth("tar.gz") or filename.endswith(".whl"):
+        if filename.endswith((".whl", "tar.gz")):
             try:
                 name, *rest = utils.parse_sdist_filename(filename)
                 if name not in self.projects:
@@ -234,7 +239,7 @@ class Projects:
             except utils.InvalidSdistFilename:
                 self.unknown_files.append(filename)
                 return
-        elif filename.endswidth(".whl"):
+        elif filename.endswith(".whl"):
             try:
                 name, *rest = utils.parse_wheel_filename(filename)
                 if name not in self.projects:

@@ -314,7 +314,10 @@ class GHApi:
             audit = _compare_versions.ReleaseAudit(release)
             # add audit to the releases results
             release["audit"] = audit
-        return releases, sadness
+        return (
+            _compare_versions.order_versions(releases, "tag"),
+            sadness,
+        )
 
     async def audit_versions(self, repo):
         """
