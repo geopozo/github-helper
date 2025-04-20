@@ -1,55 +1,10 @@
-# move down to note about where i stopped.
-# my strategy suggested one release of the lowest common denominator
-# numpy releases many combinations.
-"""
-Github and Pypi versions can contain multiple files: here are tools.
-
-a) the versions can have multiple projects (separated by name).
-
-b) compiled binary extensions: When writing python (or javascript) extensions
-in C, C++, rust, etc, you have to create a separate binary for each
-environment you wish to support, and there are several levels.
-
-Here is a list of the environments we check for:
-
-.
-|-- Windows
-|   |-- x86_64
-|   |-- Arm64
-|   `-- Win32
-|-- Mac
-|   |-- Apple ARM
-|   |-- Intel
-|   `-- Universal (1 binary twice the size, 2 architectures)
-`-- Linux
-    |-- x86_64
-    |   |-- Glibc-2.17
-    |   |-- Glibc-2.28
-    |   |-- Glibc-2.31
-    |   |-- Glibc-2.35
-    |   `-- musl
-    |-- Arm64
-    |   |-- Glibc-2.17
-    |   |-- Glibc-2.28
-    |   |-- Glibc-2.31
-    |   |-- Glibc-2.35
-    |   `-- musl
-    `-- Arm32
-        |-- Glibc-2.17
-        |-- Glibc-2.28
-        |-- Glibc-2.31
-        |-- Glibc-2.35
-        `-- musl
-
-On top of that, we have to see what is the minimum python version supported for
-each one.
-"""
+"""Github and Pypi versions can contain multiple files: here are tools."""
 
 import re
 
 import logistro
 import semver
-from packaging import version
+from packaging import utils, version
 
 _logger = logistro.getLogger(__name__)
 
@@ -109,3 +64,27 @@ def filter_versions(versions: list[dict], key: str):
         re.VERBOSE,
     )
     return {v[key] for v in versions if _regex.match(v[key])}
+
+
+def get_file_notes(filename: str):
+    if filename.endswith("tar.gz"):
+        try:
+            name, version = utils.parse_sdist_filename(filename)
+        except utils.InvalidSdistFilename:
+            _logger.debug(f"Invalid Sdist Filename: {filename}")
+            return "invalid name"
+        else:
+            return [f"{name}: sdist"]
+
+    elif filename.endswith(".whl"):
+        try:
+            name, version, build, compat_tags = utils.parse_wheel_filename(filename)
+        except utils.InvalidWheelFilename:
+            _logger.debug(f"Invalid Wheel Filename: {filename}")
+            return ["invalid name"]
+        else:
+            return [f"{name}: bdist", *[str(tag) for tag in compat_tags]]
+    elif filename.endswith(("sigstore.json", ".sha256")):
+        return ["metadata"]
+    else:
+        return ["unknown"]

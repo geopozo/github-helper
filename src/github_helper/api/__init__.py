@@ -312,8 +312,13 @@ class GHApi:
             return None, sadness
         for release in releases:
             audit = _compare_versions.ReleaseAudit(release)
-            # add audit to the releases results
+            # audit was supposed to be much bigger so its a bit
+            # overstructured to only do a prereleasae check
             release["audit"] = audit
+            release["file-notes"] = {}
+            for file in release["files"]:
+                notes = _compare_versions.get_file_notes(file)
+                release["file-notes"][file] = notes
         return (
             _compare_versions.order_versions(releases, "tag"),
             sadness,
