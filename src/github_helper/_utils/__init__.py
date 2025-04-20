@@ -30,7 +30,7 @@ class AutoEncoder(json.JSONEncoder):
         return super().default(o)
 
 
-def get_cache_dir(app_name: str) -> Path:
+def get_cache_dir(app_name: str = "github-helper") -> Path:
     system = platform.system()
 
     if system == "Windows":

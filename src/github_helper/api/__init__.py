@@ -248,8 +248,7 @@ class GHApi:
 
         await asyncio.gather(*[query_repo(repo) for repo in repos])
 
-        # need to cache
-        folder_repos = repo_srv.RepoFolder(cache=False)
+        folder_repos = repo_srv.RepoFolder()
 
         async def query_version(repo):
             _logger.debug(f"Downloading repo {repo['owner']}/{repo['name']}")
