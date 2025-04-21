@@ -82,9 +82,9 @@ class Repo:
         has_tags = await self._git_("tag")
         flag = "--tags" if has_tags else "--all"
         if not self.working:
-            return await self._git_("describe", flag, ref)
+            return (await self._git_("describe", flag, ref)).decode()
         else:
-            return await self._git_("describe", flag, "--dirty")
+            return (await self._git_("describe", flag, "--dirty")).decode()
 
     async def get_working_tree(self, ref):
         """Return a complete list of files with their paths."""

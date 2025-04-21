@@ -263,7 +263,6 @@ class GHApi:
                 url=url,
             )
             repo["version"] = await r.describe(repo["default_branch"])
-            repo["_repo"] = r
 
         await asyncio.gather(*[query_version(repo) for repo in repos])
 
