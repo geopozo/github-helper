@@ -14,7 +14,7 @@ from github_helper._services import repos as repo_srv
 from github_helper._services import ssh_srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
-from github_helper.api import _audit
+from github_helper.api import _audit, _compare_versions
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -248,8 +248,7 @@ class GHApi:
 
         await asyncio.gather(*[query_repo(repo) for repo in repos])
 
-        # need to cache
-        folder_repos = repo_srv.RepoFolder(cache=False)
+        folder_repos = repo_srv.RepoFolder()
 
         async def query_version(repo):
             _logger.debug(f"Downloading repo {repo['owner']}/{repo['name']}")
@@ -268,10 +267,10 @@ class GHApi:
         sadness = int(not repos)
         return repos, sadness
 
-    async def get_tagged_versions(self, repo):
+    async def get_remote_tags(self, repo):
         """Return tags for a repo."""
         _ = await self.get_user()
-        tags_jq = jq.compile("map({version: .name})")
+        tags_jq = jq.compile("map({tag: .name})")
         owner, repo = self._split_full_name(full_name=repo)
         endpoint = f"repos/{owner}/{repo}/tags"
         _logger.debug(f"Calling API: {endpoint}")
@@ -285,16 +284,115 @@ class GHApi:
         """Return releases for a repo."""
         _ = await self.get_user()
         releases_jq = jq.compile(
-            r"map({" r"tag: .tag_name, " r"published: (.draft | not)" r"})",
+            r"map("
+            r"select(.draft | not) | "
+            r"{"
+            r"tag: .tag_name, "
+            r"prerelease: .prerelease, "
+            r"files: [.assets | .[]? | .name], "
+            r"}"
+            r")",
         )
         owner, repo = self._split_full_name(full_name=repo)
         endpoint = f"repos/{owner}/{repo}/releases"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
-        releases = releases_jq.input_value(orjson.loads(out)).first()
+        obj = orjson.loads(out)
+        _log_one_json(obj)
+        releases = releases_jq.input_value(obj).first()
         sadness = int(not releases)
         return releases, sadness
+
+    async def audit_releases(self, repo, *, skip=True):
+        """Run get_releases and process information."""
+        releases, sadness = await self.get_releases(repo)
+        if sadness:
+            return None, sadness
+
+        for release in releases:
+            audit = _compare_versions.ReleaseAudit(release)
+            # audit was supposed to be much bigger so its a bit
+            # overstructured to only do a prereleasae check
+            release["audit"] = audit
+            if skip:
+                kept_files = []
+            release["file-notes"] = {}
+            for file in release["files"]:
+                notes = _compare_versions.get_file_notes(release["tag"], file)
+                if not skip:
+                    release["file-notes"][file] = notes
+                    continue
+                if notes.get("type") in ("metadata", "github-archive"):
+                    _logger.debug2(f"Skipping type: {notes.get("type")}")
+                    continue
+                kept_files.append(file)
+                release["file-notes"][file] = notes
+            if skip:
+                release["files"] = kept_files
+
+            unknown_files = []
+            projects = {}
+            for file, note in release["file-notes"].items():
+                if note.get("type") in ("metadata", "github-archive"):
+                    continue
+                if note.get("error"):
+                    unknown_files.append(file)
+                if name := note.get("name"):
+                    if name not in projects:
+                        projects[name] = {}
+                    if note.get("type") == "sdist":
+                        projects[name]["sdist"] = True
+                    elif note.get("type") == "bdist":
+                        projects[name]["bdist"] = True
+                        if "tags" not in projects[name]:
+                            projects[name]["tags"] = set()
+                        projects[name]["tags"].update(note.get("tags"))
+            release["notes"] = ""
+            if unknown_files:
+                release["notes"] += "Unknown Files:\n "
+                release["notes"] += "\n ".join(unknown_files)
+                release["notes"] += "\n"
+            for name, data in projects.items():
+                release["notes"] += f"Project: {name}"
+                release["notes"] += ", sdist" if data.get("sdist") else ""
+                release["notes"] += ", bdist" if data.get("bdist") else ""
+                release["notes"] += "\n "
+                release["notes"] += "\n ".join(str(i) for i in data.get("tags", []))
+        return (
+            _compare_versions.order_versions(releases, "tag"),
+            sadness,
+        )
+
+    async def audit_versions(self, repo):
+        """
+        Verify that version of a repository have differences.
+
+        Args:
+            repo: the name of the repo to verify. Can be "owner/repo" or just
+            "repo" and owner is assumed to be the current user.
+
+        """
+        tags, sadness = await self.get_remote_tags(repo)
+        releases, sadness = await self.get_releases(repo)
+
+        filtered_tags = _compare_versions.filter_versions(tags, "tag")
+        filtered_releases = _compare_versions.filter_versions(releases, "tag")
+
+        versions = filtered_tags | filtered_releases
+
+        result = _compare_versions.order_versions(
+            [
+                {
+                    "version": v,
+                    "tags": v in filtered_tags,
+                    "releases": v in filtered_releases,
+                }
+                for v in versions
+            ],
+            "version",
+        )
+        return result, sadness
 
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""

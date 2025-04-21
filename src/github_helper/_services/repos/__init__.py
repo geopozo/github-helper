@@ -9,6 +9,7 @@ from pathlib import Path
 
 import logistro
 
+from github_helper import _utils as ghu
 from github_helper._services.file import github as ghf
 
 _logger = logistro.getLogger(__name__)
@@ -155,16 +156,19 @@ class RepoFolder:
 
     def __init__(self, *, cache=True, path=None):
         """Initializize a new RepoFolder with arguments."""
-        if not cache:
+        if cache and path:
+            raise ValueError("Use either cache or path or neither.")
+        if cache:
+            self._root = ghu.get_cache_dir()
+        elif path:
+            self._root = path
+        else:
             self._tempdir = tempfile.TemporaryDirectory(
                 delete=True,
                 ignore_cleanup_errors=True,
             )  # can set path here too, why not
             atexit.register(self._tempdir.cleanup)
             self._root = Path(self._tempdir.name).resolve()
-        else:
-            _ = path
-            raise NotImplementedError("Caching is not yet implemented.")
 
         self.repos = {}
 
@@ -189,5 +193,6 @@ class RepoFolder:
     def __del__(self):
         """Clean up temp files."""
         # if not cache
-        self._tempdir.cleanup()
-        del self._tempdir
+        if hasattr(self, "_tempdir") and self._tempdir:
+            self._tempdir.cleanup()
+            del self._tempdir
