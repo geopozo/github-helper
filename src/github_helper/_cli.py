@@ -80,8 +80,8 @@ def _get_cli_args():
         help="Return all repos of current logged in user.",
     )
     repos_parser.add_argument(
-        "-p",
-        "--paginate",
+        "-a",
+        "--all",
         help="Get all repos",
         action="store_true",
     )
