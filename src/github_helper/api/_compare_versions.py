@@ -66,25 +66,32 @@ def filter_versions(versions: list[dict], key: str):
     return {v[key] for v in versions if _regex.match(v[key])}
 
 
-def get_file_notes(filename: str):
+def get_file_notes(tag: str, filename: str):  # noqa: PLR0911
     if filename.endswith("tar.gz"):
         try:
             name, version = utils.parse_sdist_filename(filename)
         except utils.InvalidSdistFilename:
             _logger.debug(f"Invalid Sdist Filename: {filename}")
-            return "invalid name"
+            return {"error": "unrecognized name", "value": filename}
         else:
-            return [f"{name}: sdist"]
+            return {"name": name, "type": "sdist", "language": "python"}
 
     elif filename.endswith(".whl"):
         try:
             name, version, build, compat_tags = utils.parse_wheel_filename(filename)
         except utils.InvalidWheelFilename:
             _logger.debug(f"Invalid Wheel Filename: {filename}")
-            return ["invalid name"]
+            return {"error": "invalid name", "value": filename}
         else:
-            return [f"{name}: bdist", *[str(tag) for tag in compat_tags]]
+            return {
+                "name": name,
+                "type": "bdist",
+                "language": "python",
+                "tags": compat_tags,
+            }
     elif filename.endswith(("sigstore.json", ".sha256")):
-        return ["metadata"]
+        return {"type": "metadata"}
+    elif filename in (f"{tag}.zip", f"{tag}.tar.gz"):
+        return {"type": "github-archive"}
     else:
-        return ["unknown"]
+        return {"error": "unrecognized name", "value": filename}

@@ -114,30 +114,18 @@ class GHAdapter:
         if self._json:
             return to_json.format_json(releases_data, pretty=self._pretty)
 
-        def format_col_2_3(release):
-            column1 = ""
-            column2 = ""
-            for file in release["files"]:
-                column1 += f"{file}" + "\n" * len(release["file-notes"][file])
-                indent = ""
-                for note in release["file-notes"][file]:
-                    column2 += indent + note + "\n"
-                    indent = " "
-                indent = ""
-            return column1, column2
-
         rows = [
             [
                 release["tag"],
-                *format_col_2_3(release),
+                release["notes"],
             ]
             for release in releases_data
         ]
         return to_table.format_table(
             rows,
             pretty=True,  # force pretty
-            headers=("version", "files", "notes"),
-            colalign=("right", "right", "left"),
+            headers=("version", "notes"),
+            colalign=("right", "left"),
         )
 
     async def transform_audit_rulesets_data(self, audit_rulesets_data):
