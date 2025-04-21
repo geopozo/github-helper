@@ -4,7 +4,10 @@ import json
 from pathlib import Path
 
 import aiofiles
+import logistro
 import orjson
+
+_logger = logistro.getLogger(__name__)
 
 
 async def load_json(path):
@@ -23,6 +26,7 @@ class ErrorSerializer:
 
 class AutoEncoder(json.JSONEncoder):
     def default(self, o):
+        _logger.debug2(o)
         if hasattr(o, "__json__"):
             return o.__json__()  # manual call here
         return super().default(o)
