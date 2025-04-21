@@ -163,7 +163,7 @@ class GHApi:
         }
         jq_expr = (
             'map(select(.login != "{owner}") | '
-            "{ (.login): (["
+            "{ user: .login, permission: (["
             + ", ".join(
                 f"(if .permissions.{perm} == true then {val} else empty end)"
                 for perm, val in permissions_enum.items()
