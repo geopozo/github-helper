@@ -73,7 +73,14 @@ class Repo:
 
     async def list_branches(self):
         """Return the list of branches."""
-        return (await self._git_("branch", "-a")).decode().split("\n")
+        cli = [
+            "for-each-ref",
+            "--format=%(refname:short)",
+            "refs/heads",
+            "refs/remotes",
+        ]
+        branches = await self._git_(*cli)
+        return branches.decode().split("\n")
 
     async def list_tags(self):
         """Return the list of tags."""
