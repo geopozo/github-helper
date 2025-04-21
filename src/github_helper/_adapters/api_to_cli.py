@@ -77,8 +77,10 @@ class GHAdapter:
                 ),
                 ("\n" if self._pretty else ",").join(
                     [
-                        f"{s['user'][:6]}({s['permission']})"
-                        for s in repo["collaborators"]
+                        f"{colab['user'][:6]}({colab['permission']})"
+                        if isinstance(colab, dict)
+                        else colab
+                        for colab in repo["collaborators"]
                     ],
                 ),
                 f"{','.join(repo['topics'])}",
