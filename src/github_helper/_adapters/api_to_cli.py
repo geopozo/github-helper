@@ -3,6 +3,7 @@ import urllib.parse
 import logistro
 
 from github_helper._adapters import to_html, to_json, to_table
+from github_helper._utils import strip_keys
 
 _logger = logistro.getLogger(__name__)
 
@@ -38,6 +39,11 @@ class GHAdapter:
         for org in orgs_data:
             org["name"] = org["name"][:24]
         return to_table.format_table(orgs_data, pretty=self._pretty)
+
+    async def transform_project_configs_data(self, config_data):
+        if self._json:
+            return to_json.format_json(strip_keys(config_data), pretty=self._pretty)
+        return to_table.format_table(config_data, pretty=self._pretty)
 
     async def transform_user_data(self, user_data):
         if self._json:

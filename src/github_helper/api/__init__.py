@@ -2,6 +2,7 @@
 
 import asyncio
 import re
+import tomllib
 import warnings
 from pathlib import Path
 
@@ -279,6 +280,42 @@ class GHApi:
         tags = tags_jq.input_value(orjson.loads(out)).first()
         sadness = int(not tags)
         return tags, sadness
+
+    async def get_project_configs(self, repo):
+        """Find all projects in a repo."""
+        owner, repo = self._split_full_name(full_name=repo)
+        folder_repos = repo_srv.RepoFolder()
+        projects = {}
+
+        _logger.debug(f"Downloading repo {owner}/{repo}")
+        r = await folder_repos.add_repo(
+            owner,
+            repo,
+            url="ssh://git@github.com",
+        )
+        ref = "main" if "main" in await r.list_branches() else "master"
+        py_files = await r.get_files_by_name("pyproject.toml", ref=ref)
+        js_files = await r.get_files_by_name("package.json", ref=ref)
+        if py_files:
+            projects["py"] = {}
+            for f in py_files:
+                _logger.debug2(f"Found py: {f["path"]}")
+                projects["py"][f["path"]] = {
+                    "object": tomllib.loads(f["content"].decode()),
+                    "_original": f["content"].decode(),
+                }
+        if js_files:
+            projects["js"] = {}
+            for f in js_files:
+                _logger.debug2(f"Found js: {f["path"]}")
+                obj = orjson.loads(f["content"])
+                projects["js"][f["path"]] = {
+                    "object": obj,
+                    "_original": f["content"].decode(),
+                }
+
+        sadness = int(not projects)
+        return projects, sadness
 
     async def get_releases(self, repo):
         """Return releases for a repo."""
