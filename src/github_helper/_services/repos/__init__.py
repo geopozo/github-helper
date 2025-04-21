@@ -106,6 +106,8 @@ class Repo:
             for file in tree
             if fnmatch.fnmatch(file.split("/")[-1], name)
         }
+        if not tasks:
+            return None
         return await asyncio.gather(*tasks, return_exceptions=True)
 
     async def get_file(self, path, ref):
