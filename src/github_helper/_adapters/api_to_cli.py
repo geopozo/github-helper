@@ -43,7 +43,15 @@ class GHAdapter:
     async def transform_project_configs_data(self, config_data):
         if self._json:
             return to_json.format_json(strip_keys(config_data), pretty=self._pretty)
-        return to_table.format_table(config_data, pretty=self._pretty)
+        data = [
+            [
+                f"{language}: {path}",
+                content["_original"],
+            ]
+            for language, config in config_data.items()
+            for path, content in config.items()
+        ]
+        return to_table.format_table(data, pretty=self._pretty)
 
     async def transform_user_data(self, user_data):
         if self._json:
