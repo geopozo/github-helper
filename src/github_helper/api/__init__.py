@@ -154,7 +154,24 @@ class GHApi:
 
     async def _get_collaborators(self, owner, repo):
         """Return collaborators for a repo."""
-        collabs_jq = jq.compile(f'map(select(.login != "{owner}") | .login)')
+        permissions_enum = {
+            "admin": 4,
+            "maintain": 3,
+            "push": 2,
+            "triage": 1,
+            "pull": 0,
+        }
+        jq_expr = (
+            'map(select(.login != "{owner}") | '
+            "{ (.login): (["
+            + ", ".join(
+                f"(if .permissions.{perm} == true then {val} else empty end)"
+                for perm, val in permissions_enum.items()
+            )
+            + "] | max) })"
+        )
+        collabs_jq = jq.compile(jq_expr.replace("{owner}", "OWNER_LOGIN"))
+
         endpoint = f"repos/{owner}/{repo}/collaborators"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
