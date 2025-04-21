@@ -170,7 +170,7 @@ class GHApi:
             )
             + "] | max) })"
         )
-        collabs_jq = jq.compile(jq_expr.replace("{owner}", "OWNER_LOGIN"))
+        collabs_jq = jq.compile(jq_expr.replace("{owner}", owner))
 
         endpoint = f"repos/{owner}/{repo}/collaborators"
         _logger.debug(f"Calling API: {endpoint}")
