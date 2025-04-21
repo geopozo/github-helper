@@ -75,8 +75,11 @@ class GHAdapter:
                     f"{'f-' if repo['fork'] else ''}{repo['visibility']}"
                     f"{'-ar' if repo['archived'] else ''}"
                 ),
-                ",".join(
-                    [str(s)[:6] for s in repo["collaborators"]],
+                ("\n" if self._pretty else ",").join(
+                    [
+                        f"{s['user'][:6]}({s['permission']})"
+                        for s in repo["collaborators"]
+                    ],
                 ),
                 f"{','.join(repo['topics'])}",
             ]
