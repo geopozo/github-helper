@@ -157,7 +157,7 @@ def run_cli():
 async def _run_cli_async():  # noqa: C901 complex
     parser, cli_args = _get_cli_args()
     repo = cli_args.pop("repo", None)
-    paginate = cli_args.pop("paginate", False)
+    paginate = cli_args.pop("all", False)  # Internamente en gh api es un --paginate
     command = cli_args.pop("command", None)
     cli_args.pop("log")
     cli_args.pop("human")
