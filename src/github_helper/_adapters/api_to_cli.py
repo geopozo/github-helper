@@ -87,6 +87,7 @@ class GHAdapter:
             data,
             pretty=self._pretty,
             headers=("repo", "type", "people", "topics"),
+            colalign=("right",),
         )
 
     async def transform_tags_data(self, tags_data):
