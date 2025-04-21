@@ -72,7 +72,7 @@ def get_file_notes(tag: str, filename: str):  # noqa: PLR0911
             name, version = utils.parse_sdist_filename(filename)
         except utils.InvalidSdistFilename:
             _logger.debug(f"Invalid Sdist Filename: {filename}")
-            return {"error": "unrecognized name"}
+            return {"error": "unrecognized name", "value": filename}
         else:
             return {"name": name, "type": "sdist", "language": "python"}
 
@@ -81,7 +81,7 @@ def get_file_notes(tag: str, filename: str):  # noqa: PLR0911
             name, version, build, compat_tags = utils.parse_wheel_filename(filename)
         except utils.InvalidWheelFilename:
             _logger.debug(f"Invalid Wheel Filename: {filename}")
-            return {"error": "invalid name"}
+            return {"error": "invalid name", "value": filename}
         else:
             return {
                 "name": name,
@@ -94,4 +94,4 @@ def get_file_notes(tag: str, filename: str):  # noqa: PLR0911
     elif filename in (f"{tag}.zip", f"{tag}.tar.gz"):
         return {"type": "github-archive"}
     else:
-        return {"error": "unknown"}
+        return {"error": "unrecognized name", "value": filename}

@@ -310,6 +310,7 @@ class GHApi:
         releases, sadness = await self.get_releases(repo)
         if sadness:
             return None, sadness
+
         for release in releases:
             audit = _compare_versions.ReleaseAudit(release)
             # audit was supposed to be much bigger so its a bit
@@ -331,7 +332,34 @@ class GHApi:
             if skip:
                 release["files"] = kept_files
 
-            release["notes"] = "test"
+            unknown_files = []
+            projects = {}
+            for file, note in release["file-notes"].items():
+                if note.get("type") in ("metadata", "github-archive"):
+                    continue
+                if note.get("error"):
+                    unknown_files.append(file)
+                if name := note.get("name"):
+                    if name not in projects:
+                        projects[name] = {}
+                    if note.get("type") == "sdist":
+                        projects[name]["sdist"] = True
+                    elif note.get("type") == "bdist":
+                        projects[name]["bdist"] = True
+                        if "tags" not in projects[name]:
+                            projects[name]["tags"] = set()
+                        projects[name]["tags"].update(note.get("tags"))
+            release["notes"] = ""
+            if unknown_files:
+                release["notes"] += "Unknown Files:\n "
+                release["notes"] += "\n ".join(unknown_files)
+                release["notes"] += "\n"
+            for name, data in projects.items():
+                release["notes"] += f"Project: {name}"
+                release["notes"] += ", sdist" if data.get("sdist") else ""
+                release["notes"] += ", bdist" if data.get("bdist") else ""
+                release["notes"] += "\n "
+                release["notes"] += "\n ".join(str(i) for i in data.get("tags", []))
         return (
             _compare_versions.order_versions(releases, "tag"),
             sadness,
