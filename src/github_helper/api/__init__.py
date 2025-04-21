@@ -305,7 +305,7 @@ class GHApi:
         sadness = int(not releases)
         return releases, sadness
 
-    async def audit_releases(self, repo):
+    async def audit_releases(self, repo, *, skip=True):
         """Run get_releases and process information."""
         releases, sadness = await self.get_releases(repo)
         if sadness:
@@ -315,10 +315,23 @@ class GHApi:
             # audit was supposed to be much bigger so its a bit
             # overstructured to only do a prereleasae check
             release["audit"] = audit
+            if skip:
+                kept_files = []
             release["file-notes"] = {}
             for file in release["files"]:
-                notes = _compare_versions.get_file_notes(file)
+                notes = _compare_versions.get_file_notes(release["tag"], file)
+                if not skip:
+                    release["file-notes"][file] = notes
+                    continue
+                if notes.get("type") in ("metadata", "github-archive"):
+                    _logger.debug2(f"Skipping type: {notes.get("type")}")
+                    continue
+                kept_files.append(file)
                 release["file-notes"][file] = notes
+            if skip:
+                release["files"] = kept_files
+
+            release["notes"] = "test"
         return (
             _compare_versions.order_versions(releases, "tag"),
             sadness,
