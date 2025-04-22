@@ -305,61 +305,15 @@ class GHApi:
         sadness = int(not releases)
         return releases, sadness
 
-    async def audit_releases(self, repo, *, skip=True):
+    async def audit_releases(self, repo):
         """Run get_releases and process information."""
         releases, sadness = await self.get_releases(repo)
         if sadness:
             return None, sadness
 
         for release in releases:
-            audit = _compare_versions.ReleaseAudit(release)
-            # audit was supposed to be much bigger so its a bit
-            # overstructured to only do a prereleasae check
-            release["audit"] = audit
-            if skip:
-                kept_files = []
-            release["file-notes"] = {}
-            for file in release["files"]:
-                notes = _compare_versions.get_file_notes(release["tag"], file)
-                if not skip:
-                    release["file-notes"][file] = notes
-                    continue
-                if notes.get("type") in ("metadata", "github-archive"):
-                    _logger.debug2(f"Skipping type: {notes.get("type")}")
-                    continue
-                kept_files.append(file)
-                release["file-notes"][file] = notes
-            if skip:
-                release["files"] = kept_files
+            release["audit"] = _compare_versions.ReleaseAudit(release)
 
-            unknown_files = []
-            projects = {}
-            for file, note in release["file-notes"].items():
-                if note.get("type") in ("metadata", "github-archive"):
-                    continue
-                if note.get("error"):
-                    unknown_files.append(file)
-                if name := note.get("name"):
-                    if name not in projects:
-                        projects[name] = {}
-                    if note.get("type") == "sdist":
-                        projects[name]["sdist"] = True
-                    elif note.get("type") == "bdist":
-                        projects[name]["bdist"] = True
-                        if "tags" not in projects[name]:
-                            projects[name]["tags"] = set()
-                        projects[name]["tags"].update(note.get("tags"))
-            release["notes"] = ""
-            if unknown_files:
-                release["notes"] += "Unknown Files:\n "
-                release["notes"] += "\n ".join(unknown_files)
-                release["notes"] += "\n"
-            for name, data in projects.items():
-                release["notes"] += f"Project: {name}"
-                release["notes"] += ", sdist" if data.get("sdist") else ""
-                release["notes"] += ", bdist" if data.get("bdist") else ""
-                release["notes"] += "\n "
-                release["notes"] += "\n ".join(str(i) for i in data.get("tags", []))
         return (
             _compare_versions.order_versions(releases, "tag"),
             sadness,

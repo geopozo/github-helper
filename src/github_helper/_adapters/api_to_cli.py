@@ -117,7 +117,7 @@ class GHAdapter:
         rows = [
             [
                 release["tag"],
-                release["notes"],
+                release["audit"],
             ]
             for release in releases_data
         ]
