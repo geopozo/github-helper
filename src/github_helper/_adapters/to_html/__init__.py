@@ -105,7 +105,14 @@ class RepoRow:
                 *[
                     self._error_printer(s)
                     if isinstance(s, Exception)
-                    else html.a(s, href=f"{github_com}/{s}", class_="collaborator")
+                    else html.a(
+                        s["user"],
+                        href=f"{github_com}/{s['user']}",
+                        class_="collaborator",
+                        target="_blank",
+                    )
+                    if isinstance(s, dict)
+                    else s
                     for s in repo["collaborators"]
                 ],
                 class_="collaborators",
