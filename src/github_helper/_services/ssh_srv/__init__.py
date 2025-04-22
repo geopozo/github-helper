@@ -40,7 +40,7 @@ def _start_ssh_agent_and_add_key():
     _logger.debug("Trying to start agent and add keys.")
     # 1) Launch ssh-agent
     out = subprocess.check_output(  # noqa: S602
-        "ssh-agent -s",  # noqa: S607
+        "ssh-agent -s -t 5m",  # noqa: S607
         shell=True,
         text=True,
     )

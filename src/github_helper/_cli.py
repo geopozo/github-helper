@@ -110,12 +110,35 @@ def _get_cli_args():
         required=True,
     )
 
+    releases_audit_parser = subparsers.add_parser(
+        "audit-releases",
+        description="Show all releases from a repo with comments.",
+        help="Return all releases of a repo with comments.",
+    )
+    releases_audit_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
+    )
+
     audit_repo = subparsers.add_parser(
         "audit-repo",
         description="",
         help="Audit repo rulesets against template.",
     )
     audit_repo.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
+    )
+    audit_versions = subparsers.add_parser(
+        "audit-versions",
+        description="",
+        help="Compare versions of a repository between different sources",
+    )
+    audit_versions.add_argument(
         "-r",
         "--repo",
         help="Name of repository required.",
@@ -143,15 +166,17 @@ def run_cli():
     _gc_run(_run_cli_async())
 
 
-async def _run_cli_async():
+async def _run_cli_async():  # noqa: C901 complex
     parser, cli_args = _get_cli_args()
     repo = cli_args.pop("repo", None)
     paginate = cli_args.pop("paginate", False)
     command = cli_args.pop("command", None)
     cli_args.pop("log")
     cli_args.pop("human")
+
     gh = api.GHApi()
     adpt = GHAdapter(**cli_args, command=command)
+
     match command:
         case "auth-status":
             data, sadness = await gh.check_auth()
@@ -168,14 +193,20 @@ async def _run_cli_async():
             data, sadness = await gh.get_repos(paginate=paginate)
             data = await adpt.transform_repos_data(data)
         case "tags":
-            data, sadness = await gh.get_tagged_versions(repo)
+            data, sadness = await gh.get_remote_tags(repo)
             data = await adpt.transform_tags_data(data)
         case "releases":
             data, sadness = await gh.get_releases(repo)
             data = await adpt.transform_releases_data(data)
+        case "audit-releases":
+            data, sadness = await gh.audit_releases(repo)
+            data = await adpt.transform_audit_releases_data(data)
         case "audit-repo":
             data, sadness = await gh.audit_rulesets(repo)
             data = await adpt.transform_audit_rulesets_data(data)
+        case "audit-versions":
+            data, sadness = await gh.audit_versions(repo)
+            data = await adpt.transform_audit_versions_data(data)
         case _:
             print("No command supplied.", file=sys.stderr)
             parser.print_help()
