@@ -75,8 +75,13 @@ class GHAdapter:
                     f"{'f-' if repo['fork'] else ''}{repo['visibility']}"
                     f"{'-ar' if repo['archived'] else ''}"
                 ),
-                ",".join(
-                    [str(s)[:6] for s in repo["collaborators"]],
+                ("\n" if self._pretty else ",").join(
+                    [
+                        f"{colab['user'][:6]}({colab['permission']})"
+                        if isinstance(colab, dict)
+                        else colab
+                        for colab in repo["collaborators"]
+                    ],
                 ),
                 f"{','.join(repo['topics'])}",
             ]
@@ -87,6 +92,7 @@ class GHAdapter:
             data,
             pretty=self._pretty,
             headers=("repo", "type", "people", "topics"),
+            colalign=("right",),
         )
 
     async def transform_tags_data(self, tags_data):

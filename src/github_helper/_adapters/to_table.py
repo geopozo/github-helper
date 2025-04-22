@@ -7,4 +7,5 @@ def format_table(data, *, pretty=False, headers="keys", colalign=None):
         headers=headers if pretty else "",
         colalign=colalign,
         tablefmt="psql" if pretty else "plain",
+        colalign=colalign,
     )
