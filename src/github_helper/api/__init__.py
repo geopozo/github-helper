@@ -474,7 +474,7 @@ class GHApi:
         active_rulesets = rulesets_jq.input_value(orjson.loads(out)).first()
 
         if not active_rulesets:
-            return []
+            return [], 1
 
         excluded_keys = [
             "id",
