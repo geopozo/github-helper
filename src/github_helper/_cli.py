@@ -181,7 +181,7 @@ async def _run_cli_async():  # noqa: C901 complex
             data, sadness = await gh.get_repos(paginate=paginate)
             data = await adpt.transform_repos_data(data)
         case "tags":
-            data, sadness = await gh.get_tagged_versions(repo)
+            data, sadness = await gh.get_remote_tags(repo)
             data = await adpt.transform_tags_data(data)
         case "releases":
             data, sadness = await gh.get_releases(repo)
