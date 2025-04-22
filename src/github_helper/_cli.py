@@ -98,12 +98,36 @@ def _get_cli_args():
         required=True,
     )
 
+    configs_parser = subparsers.add_parser(
+        "project-configs",
+        description="Show all releases from a repo.",
+        help="Return all releases of a repo.",
+    )
+    configs_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
+    )
+
     releases_parser = subparsers.add_parser(
         "releases",
         description="Show all releases from a repo.",
         help="Return all releases of a repo.",
     )
     releases_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
+    )
+
+    pypi_parser = subparsers.add_parser(
+        "pypi",
+        description="Show all pypi packages from a repo.",
+        help="Return all pypi releases of a repo.",
+    )
+    pypi_parser.add_argument(
         "-r",
         "--repo",
         help="Name of repository required.",
@@ -166,7 +190,7 @@ def run_cli():
     _gc_run(_run_cli_async())
 
 
-async def _run_cli_async():  # noqa: C901 complex
+async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
     parser, cli_args = _get_cli_args()
     repo = cli_args.pop("repo", None)
     paginate = cli_args.pop("paginate", False)
@@ -195,9 +219,15 @@ async def _run_cli_async():  # noqa: C901 complex
         case "tags":
             data, sadness = await gh.get_remote_tags(repo)
             data = await adpt.transform_tags_data(data)
+        case "project-configs":
+            data, sadness = await gh.get_project_configs(repo)
+            data = await adpt.transform_project_configs_data(data)
         case "releases":
             data, sadness = await gh.get_releases(repo)
             data = await adpt.transform_releases_data(data)
+        case "pypi":
+            data, sadness = await gh.get_pypi(repo)
+            data = await adpt.transform_pypi_data(data)
         case "audit-releases":
             data, sadness = await gh.audit_releases(repo)
             data = await adpt.transform_audit_releases_data(data)

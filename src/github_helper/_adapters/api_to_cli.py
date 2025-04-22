@@ -3,6 +3,7 @@ import urllib.parse
 import logistro
 
 from github_helper._adapters import to_html, to_json, to_table
+from github_helper._utils import strip_keys
 
 _logger = logistro.getLogger(__name__)
 
@@ -38,6 +39,19 @@ class GHAdapter:
         for org in orgs_data:
             org["name"] = org["name"][:24]
         return to_table.format_table(orgs_data, pretty=self._pretty)
+
+    async def transform_project_configs_data(self, config_data):
+        if self._json:
+            return to_json.format_json(strip_keys(config_data), pretty=self._pretty)
+        data = [
+            [
+                f"{language}: {path}",
+                content["_original"],
+            ]
+            for language, config in config_data.items()
+            for path, content in config.items()
+        ]
+        return to_table.format_table(data, pretty=self._pretty)
 
     async def transform_user_data(self, user_data):
         if self._json:
@@ -105,6 +119,23 @@ class GHAdapter:
                     delim.join(release["files"]),
                 ]
                 for release in releases_data
+            ],
+            pretty=self._pretty,
+            headers=("version", "files"),
+        )
+
+    async def transform_pypi_data(self, releases_data):
+        if self._json:
+            return to_json.format_json(releases_data, pretty=self._pretty)
+        delim = "," if not self._pretty else "\n"
+        return to_table.format_table(
+            [
+                [
+                    f"{name}-{release["tag"]}",
+                    delim.join(release["files"]),
+                ]
+                for name, subobject in releases_data.items()
+                for release in subobject
             ],
             pretty=self._pretty,
             headers=("version", "files"),
