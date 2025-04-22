@@ -344,8 +344,7 @@ class GHApi:
                 response = await session.get(url)
                 pypi_json = await response.json()
                 data = pypi_jq.input_value(pypi_json).first()
-
-                return data
+                return _compare_versions.order_versions(data, "tag")
             finally:
                 await response.release()
                 await session.close()
