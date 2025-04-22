@@ -6,6 +6,7 @@ import tomllib
 import warnings
 from pathlib import Path
 
+import aiohttp
 import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
@@ -316,6 +317,44 @@ class GHApi:
 
         sadness = int(not projects)
         return projects, sadness
+
+    async def get_pypi(self, repo):
+        """Get all pypi releases for a particular project."""
+        project_configs, sadness = await self.get_project_configs(repo)
+        project_names = set()
+        if "py" in project_configs:
+            for config in project_configs["py"].values():
+                name = config.get("object", {}).get("project", {}).get("name", {})
+                if name:
+                    project_names.add(name)
+
+        async def fetch_json(name):
+            url = f"https://pypi.org/pypi/{name}/json"
+            _logger.debug(url)
+            try:
+                jq_dir = (
+                    r".releases | "
+                    r"to_entries | map("
+                    r"{tag: .key, files:"
+                    r"[ .value[] | select(.yank != true) | .filename ]"
+                    r"})"
+                )
+                pypi_jq = jq.compile(jq_dir)
+                session = aiohttp.ClientSession()
+                response = await session.get(url)
+                pypi_json = await response.json()
+                data = pypi_jq.input_value(pypi_json).first()
+
+                return data
+            finally:
+                await response.release()
+                await session.close()
+
+        releases = {}
+        for name in project_names:
+            releases[name] = await fetch_json(name)
+        sadness = int(not releases)
+        return releases, sadness
 
     async def get_releases(self, repo):
         """Return releases for a repo."""

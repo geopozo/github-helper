@@ -124,6 +124,23 @@ class GHAdapter:
             headers=("version", "files"),
         )
 
+    async def transform_pypi_data(self, releases_data):
+        if self._json:
+            return to_json.format_json(releases_data, pretty=self._pretty)
+        delim = "," if not self._pretty else "\n"
+        return to_table.format_table(
+            [
+                [
+                    f"{name}-{release["tag"]}",
+                    delim.join(release["files"]),
+                ]
+                for name, subobject in releases_data.items()
+                for release in subobject
+            ],
+            pretty=self._pretty,
+            headers=("version", "files"),
+        )
+
     async def transform_audit_releases_data(self, releases_data):
         if self._json:
             return to_json.format_json(releases_data, pretty=self._pretty)

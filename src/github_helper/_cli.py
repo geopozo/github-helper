@@ -122,6 +122,18 @@ def _get_cli_args():
         required=True,
     )
 
+    pypi_parser = subparsers.add_parser(
+        "pypi",
+        description="Show all pypi packages from a repo.",
+        help="Return all pypi releases of a repo.",
+    )
+    pypi_parser.add_argument(
+        "-r",
+        "--repo",
+        help="Name of repository required.",
+        required=True,
+    )
+
     releases_audit_parser = subparsers.add_parser(
         "audit-releases",
         description="Show all releases from a repo with comments.",
@@ -178,7 +190,7 @@ def run_cli():
     _gc_run(_run_cli_async())
 
 
-async def _run_cli_async():  # noqa: C901, PLR0912 complex
+async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
     parser, cli_args = _get_cli_args()
     repo = cli_args.pop("repo", None)
     paginate = cli_args.pop("paginate", False)
@@ -213,6 +225,9 @@ async def _run_cli_async():  # noqa: C901, PLR0912 complex
         case "releases":
             data, sadness = await gh.get_releases(repo)
             data = await adpt.transform_releases_data(data)
+        case "pypi":
+            data, sadness = await gh.get_pypi(repo)
+            data = await adpt.transform_pypi_data(data)
         case "audit-releases":
             data, sadness = await gh.audit_releases(repo)
             data = await adpt.transform_audit_releases_data(data)
