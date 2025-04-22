@@ -14,8 +14,10 @@ class GHAdapter:
     def _check_options(self, formatters):
         formats = {k for k, v in formatters.items() if v}
         invalid_formats = {"html", "url"} & formats
-        if (self._command == "auth-status" and formats) or (
-            self._command != "repos" and invalid_formats
+        if (
+            (self._command == "auth-status" and formats)
+            or (self._command != "repos" and invalid_formats)
+            or (self._command == "audit-releases" and self._json)
         ):
             raise NotImplementedError(
                 f"{', '.join(invalid_formats)} not valid flags for {self._command}",
@@ -137,7 +139,7 @@ class GHAdapter:
         return to_table.format_table(
             [
                 [
-                    f"{name}-{release["tag"]}",
+                    f"{name}-{release['tag']}",
                     delim.join(release["files"]),
                 ]
                 for name, subobject in releases_data.items()
