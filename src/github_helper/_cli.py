@@ -76,8 +76,18 @@ def _get_cli_args():
 
     repos_parser = subparsers.add_parser(
         "repos",
-        description="Show all repos.",
+        description=(
+            """Show all repos.
+
+Permissions:
+  admin(4)    : Full access to the repository, including settings and collaborators.
+  maintain(3) : can also manage issues, pull requests, and some repository settings.
+  push(2)     : Can read, clone, and push to this repository.
+  triage(1)   : Can pull and also manage issues and pull requests.
+  pull(0)     : Can read and clone this repository."""
+        ),
         help="Return all repos of current logged in user.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     repos_parser.add_argument(
         "-a",
