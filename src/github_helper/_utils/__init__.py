@@ -50,3 +50,12 @@ def get_cache_dir(app_name: str = "github-helper") -> Path:
 
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def strip_keys(obj):
+    if isinstance(obj, dict):
+        return {k: strip_keys(v) for k, v in obj.items() if not k.startswith("_")}
+    elif isinstance(obj, list):
+        return [strip_keys(i) for i in obj]
+    else:
+        return obj

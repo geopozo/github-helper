@@ -22,6 +22,7 @@ maintainers = [
 ]
 dependencies = [
     "aiofiles>=24.1.0",
+    "aiohttp>=3.11.18",
     "colored>=2.3.0",
     "htmy>=0.7.3",
     "jq>=1.8.0",
