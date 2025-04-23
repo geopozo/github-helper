@@ -49,7 +49,6 @@ def filter_versions(versions: list[dict], key: str):
 
 
 bdist_template = {
-    "All OS": [],
     "Windows": {
         "x86_64": [],
         "arm64": [],
@@ -245,7 +244,10 @@ class ReleaseAudit:
                     ref["bdist-tree"] = copy.deepcopy(bdist_template)
 
                 if t.platform == "any":
-                    ref["bdist-tree"]["All OS"].append(pair)
+                    if "All OS" not in ref["bdist-tree"]:
+                        ref["bdist-tree"]["All OS"] = [pair]
+                    else:
+                        ref["bdist-tree"]["All OS"].append(pair)
                 elif r := self._parse_mac_platform(t.platform):
                     ref2 = ref["bdist-tree"]["Mac"][r["arch"]]
                     if r["version"] not in ref2:
