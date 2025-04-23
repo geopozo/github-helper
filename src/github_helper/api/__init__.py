@@ -376,7 +376,7 @@ class GHApi:
 
     async def audit_pypi(self, repo, count=7, *, testing=False):
         """Get all pypi releases for a project and audit it."""
-        releases, sadness = self.get_pypi(repo, testing=testing)
+        releases, sadness = await self.get_pypi(repo, testing=testing)
         if sadness:
             return None, sadness
 
