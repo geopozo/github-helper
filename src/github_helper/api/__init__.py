@@ -334,7 +334,7 @@ class GHApi:
         sadness = int(not projects)
         return projects, sadness
 
-    async def get_pypi(self, repo, *, testing=False):
+    async def get_pypi(self, repo, *, testing=False, flatten=False):
         """Get all pypi releases for a particular project."""
         project_configs, sadness = await self.get_project_configs(repo)
         project_names = set()
@@ -371,16 +371,20 @@ class GHApi:
         for name in project_names:
             releases[name] = await fetch_json(name)
         sadness = int(not releases)
-        _logger.debug2(releases)
+        if flatten:
+            releases = [release for project in releases.values() for release in project]
         return releases, sadness
 
     async def audit_pypi(self, repo, count=7, *, testing=False):
         """Get all pypi releases for a project and audit it."""
-        releases, sadness = await self.get_pypi(repo, testing=testing)
+        releases, sadness = await self.get_pypi(
+            repo,
+            testing=testing,
+            flatten=True,
+        )
         if sadness:
             return None, sadness
 
-        releases = [release for project in releases.values() for release in project]
         for release in releases:
             release["audit"] = _compare_versions.ReleaseAudit(
                 release,
@@ -416,7 +420,6 @@ class GHApi:
         _log_one_json(obj)
         releases = releases_jq.input_value(obj).first()
         sadness = int(not releases)
-        _logger.debug2(releases)
         return releases, sadness
 
     async def audit_releases(self, repo, count=7):
