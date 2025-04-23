@@ -251,15 +251,27 @@ class ReleaseAudit:
                     else:
                         ref["bdist-tree"]["All OS"].append(pair)
                 elif r := self._parse_mac_platform(t.platform):
-                    ref2 = ref["bdist-tree"]["Mac"][r["arch"]]
-                    if r["version"] not in ref2:
-                        ref2[r["version"]] = [pair]
+                    arch_dict = ref["bdist-tree"]["Mac"][r["arch"]]
+                    if r["version"] not in arch_dict:
+                        arch_dict[r["version"]] = [pair]
                     else:
-                        ref2[r["version"]].append(pair)
+                        arch_dict[r["version"]].append(pair)
                 elif r := self._parse_win_platform(t.platform):
                     ref["bdist-tree"]["Windows"][r].append(pair)
-                elif r := self._parse_manylinux_platform(t.platform):
-                    pass
+                elif (r := self._parse_manylinux_platform(t.platform)) or (
+                    r := self._parse_musllinux_platform(t.platform)
+                ):
+                    if r["arch"] not in ref["bdist-tree"]["Linux"]:
+                        ref["bdist-tree"]["Linux"][r["arch"]] = {
+                            "Glibc": {"2.17": []},
+                            "musl": {},
+                        }
+                    libc = r["libc"]
+                    libc_dict = ref["bdist-tree"]["Linux"][r["arch"]][libc]
+                    if r["version"] not in libc_dict:
+                        libc_dict[r["version"]] = [pair]
+                    else:
+                        libc_dict[r["version"]].append(pair)
                 else:
                     ref["unknown-tags"].append(str(t))
 
@@ -298,6 +310,7 @@ class ReleaseAudit:
             return {
                 "version": f"{glibc_major}.{glibc_minor}",
                 "arch": arch,
+                "libc": "Glibc",
             }
         elif tag.startswith("manylinux"):
             # Legacies: *1_x86_64, *2010_i686, *2014_x86_64, etc.
@@ -316,9 +329,22 @@ class ReleaseAudit:
                 version = "2.17"
             else:
                 return {}
-            return {"version": version, "arch": arch}
+            return {"version": version, "arch": arch, "libc": "Glibc"}
         else:
             return {}
+
+    def _parse_musllinux_platform(self, tag: str):
+        m = re.match(r"^musllinux_([0-9]+)_([0-9]+)_(.+)$", tag)
+        if not m:
+            return False
+        musl_major = int(m.group(1))
+        musl_minor = int(m.group(2))
+        arch = m.group(3)
+        return {
+            "version": f"{musl_major}.{musl_minor}",
+            "arch": arch,
+            "libc": "musl",
+        }
 
     def _build_tree_str(self, obj, indent="", *, is_last=True):
         lines = []
