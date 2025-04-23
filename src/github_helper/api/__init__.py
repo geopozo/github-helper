@@ -316,7 +316,7 @@ class GHApi:
         if py_files:
             projects["py"] = {}
             for f in py_files:
-                _logger.debug2(f"Found py: {f["path"]}")
+                _logger.debug2(f"Found py: {f['path']}")
                 projects["py"][f["path"]] = {
                     "object": tomllib.loads(f["content"].decode()),
                     "_original": f["content"].decode(),
@@ -324,7 +324,7 @@ class GHApi:
         if js_files:
             projects["js"] = {}
             for f in js_files:
-                _logger.debug2(f"Found js: {f["path"]}")
+                _logger.debug2(f"Found js: {f['path']}")
                 obj = orjson.loads(f["content"])
                 projects["js"][f["path"]] = {
                     "object": obj,
@@ -395,7 +395,7 @@ class GHApi:
         sadness = int(not releases)
         return releases, sadness
 
-    async def audit_releases(self, repo):
+    async def audit_releases(self, repo, count=7):
         """Run get_releases and process information."""
         releases, sadness = await self.get_releases(repo)
         if sadness:
@@ -405,7 +405,7 @@ class GHApi:
             release["audit"] = _compare_versions.ReleaseAudit(release)
 
         return (
-            _compare_versions.order_versions(releases, "tag"),
+            _compare_versions.order_versions(releases, "tag")[:count],
             sadness,
         )
 
