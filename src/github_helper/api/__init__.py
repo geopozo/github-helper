@@ -1,13 +1,13 @@
 """A CLI dashboard for github status."""
 
 import asyncio
-import colored
 import re
 import tomllib
 import warnings
 from pathlib import Path
 
 import aiohttp
+import colored
 import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
@@ -354,7 +354,7 @@ class GHApi:
                 jq_dir = (
                     r".releases // {} | "
                     r"to_entries | map("
-                    r"{tag: .key, files:"
+                    r'{tag: "v\(.key)", files:'
                     r"[ .value[] | select(.yank != true) | .filename ]"
                     r"})"
                 )
@@ -449,6 +449,7 @@ class GHApi:
 
         """
         # puede mezclar proyectos acá
+        # Ignoramos nombre de proyecto
         # todavia no probamos con mas de un projection en repositorio
         async with asyncio.TaskGroup() as tg:
             tags_task = tg.create_task(self.get_remote_tags(repo))
