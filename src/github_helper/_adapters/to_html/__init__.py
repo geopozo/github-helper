@@ -263,6 +263,7 @@ async def repos(repos_data):
                             id_="owner-filter",
                             name="owner-filter",
                             placeholder="Owner",
+                            class_="rounded shadow-sm sm:text-sm p-1",
                         ),
                     ),
                     html.label(
@@ -272,6 +273,7 @@ async def repos(repos_data):
                             id_="repo-filter",
                             name="repo-filter",
                             placeholder="Repo",
+                            class_="rounded shadow-sm sm:text-sm p-1",
                         ),
                     ),
                     style="margin-bottom: 1rem;",
