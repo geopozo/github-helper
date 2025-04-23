@@ -218,6 +218,8 @@ class ReleaseAudit:
             return {"type": "metadata", "action": "ignore"}
         return {"error": "unrecognized name", "value": filename}
 
+    # So, refactor, python project should be it's own class
+    # And maybe should have its own adapters?
     def _build_python_project_summary(self, notes):  # noqa: PLR0912, C901
         name = f"python/{notes['name']}"
         if name not in self.projects:
