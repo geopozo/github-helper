@@ -384,6 +384,7 @@ class GHApi:
         for release in releases:
             release["audit"] = _compare_versions.ReleaseAudit(
                 release,
+                prerelease_respect=True,
             )
 
         # I want count to be the API call or something
