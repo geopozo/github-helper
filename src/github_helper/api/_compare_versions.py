@@ -24,6 +24,7 @@ import copy
 import re
 from dataclasses import field
 
+import colored
 import logistro
 import semver
 from packaging import utils, version
@@ -51,29 +52,30 @@ bdist_template = {
     "All OS": [],
     "Windows": {
         "x86_64": [],
-        "Arm64": [],
-        "Win32": [],
+        "arm64": [],
+        "win32": [],
     },
     "Mac": {
-        "Apple ARM": [],
-        "Intel": [],
+        "x86_64": {},
+        "arm64": {},
+        "universal2": {},
     },
     "Linux": {
         "x86_64": {
             "Glibc": {
-                "2.17": [],
+                "2.17": {},
             },
-            "musl": [],
+            "musl": {},
         },
         "Arm64": {
             "Glibc": {
-                "2.17": [],
+                "2.17": {},
             },
             "musl": {},
         },
         "Arm32": {
             "Glibc": {
-                "2.17": [],
+                "2.17": {},
             },
             "musl": {},
         },
@@ -143,7 +145,7 @@ class ReleaseAudit:
 
                     pure = ""
                     if v["pure"]:
-                        pure = f", pure: {", ".join(v['pure'])}"
+                        pure = f", pure: {', '.join(v['pure'])}"
 
                     ret += f"{k}{warn}{pure}\n"
 
@@ -217,7 +219,7 @@ class ReleaseAudit:
             return {"type": "metadata", "action": "ignore"}
         return {"error": "unrecognized name", "value": filename}
 
-    def _build_python_project_summary(self, notes):
+    def _build_python_project_summary(self, notes):  # noqa: PLR0912, C901
         name = f"python/{notes['name']}"
         if name not in self.projects:
             self.projects[name] = {
@@ -233,17 +235,86 @@ class ReleaseAudit:
         elif notes.get("type") == "bdist":
             ref["bdist"] = True
             for t in notes.get("tags"):
+                pair = f"{t.interpreter}-{t.abi}"
                 # t.abi, t.interpreter, t.platform
                 if t.platform == "any" and t.abi == "none":
                     ref["pure"].append(t.interpreter)
                     continue
+
                 if not ref["bdist-tree"]:
                     ref["bdist-tree"] = copy.deepcopy(bdist_template)
-                pair = f"{t.interpreter}-{t.abi}"
+
                 if t.platform == "any":
                     ref["bdist-tree"]["All OS"].append(pair)
+                elif r := self._parse_mac_platform(t.platform):
+                    ref2 = ref["bdist-tree"]["Mac"][r["arch"]]
+                    if r["version"] not in ref2:
+                        ref2[r["version"]] = [pair]
+                    else:
+                        ref2[r["version"]].append(pair)
+                elif r := self._parse_win_platform(t.platform):
+                    ref["bdist-tree"]["Windows"][r].append(pair)
+                elif r := self._parse_manylinux_platform(t.platform):
+                    pass
                 else:
                     ref["unknown-tags"].append(str(t))
+
+    def _parse_mac_platform(self, tag):
+        pattern = r"^macosx_(\d+)(?:_(\d+))?_(.+)$"
+        m = re.match(pattern, tag)
+        if not m:
+            return {}
+
+        major = int(m.group(1))
+        minor = int(m.group(2) or 0)  # Default minor version to 0 if omitted
+        arch = m.group(3)
+        return {"version": f"{major!s}.{minor!s}", "arch": arch}
+
+    def _parse_win_platform(self, tag: str):
+        tag = tag.lower()
+        if tag == "win32":
+            return "win32"
+        if tag.startswith("win_"):
+            arch = tag.split("_", 1)[1]
+            if arch == "amd64":
+                return "x86_64"
+            elif arch == "arm64":
+                return "arm64"
+        return False
+
+    def _parse_manylinux_platform(self, tag: str):
+        if tag.startswith("manylinux_"):
+            # PEP 600 perennial tag: manylinux_X_Y_arch
+            m = re.match(r"^manylinux_([0-9]+)_([0-9]+)_(.+)$", tag)
+            if not m:
+                return {}
+            glibc_major = int(m.group(1))
+            glibc_minor = int(m.group(2))
+            arch = m.group(3)
+            return {
+                "version": f"{glibc_major}.{glibc_minor}",
+                "arch": arch,
+            }
+        elif tag.startswith("manylinux"):
+            # Legacies: *1_x86_64, *2010_i686, *2014_x86_64, etc.
+            m = re.match(r"^manylinux(\d+)_(.+)$", tag)
+            if not m:
+                return {}
+            identifier = m.group(1)  # e.g. "1", "2010", "2014"
+            arch = m.group(2)
+            # Map known legacy identifiers to glibc versions (optional)
+            version = None
+            if identifier == "1":
+                version = "2.5"
+            elif identifier == "2010":
+                version = "2.12"
+            elif identifier == "2014":
+                version = "2.17"
+            else:
+                return {}
+            return {"version": version, "arch": arch}
+        else:
+            return {}
 
     def _build_tree_str(self, obj, indent="", *, is_last=True):
         lines = []
@@ -255,10 +326,10 @@ class ReleaseAudit:
                 branch = "`-- " if is_last else "|-- "
                 next_indent = indent + ("    " if is_last else "|   ")
                 lines.append(f"{indent}{branch}{key}")
-                lines.extend(self._build_tree_str(value, next_indent))
-        elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                is_last = i == len(obj) - 1
-                branch = "`-- " if is_last else "|-- "
-                lines.append(f"{indent}{branch}{item}")
+                if not value:
+                    lines[-1] += f" {colored.Fore.red}missing{colored.Style.reset}"
+                elif isinstance(value, dict):
+                    lines.extend(self._build_tree_str(value, next_indent))
+                elif isinstance(value, (list, tuple)):
+                    lines[-1] += f" >> {', '.join(value)}"
         return lines
