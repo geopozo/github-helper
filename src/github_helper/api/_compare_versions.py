@@ -150,7 +150,11 @@ class ReleaseAudit:
                         warn = "bdist"
                     if not v["sdist"]:
                         warn = ", sdist" if warn else "sdist"
-                    warn = f", missing {warn}" if warn else ""
+                    warn = (
+                        f", {colored.Fore.red}missing {warn}{colored.Style.reset}"
+                        if warn
+                        else ""
+                    )
 
                     pure = ""
                     if v["pure"]:
@@ -169,12 +173,16 @@ class ReleaseAudit:
                         ret += " Unknown Tags:\n "
                         ret += "\n ".join(v["unknown-tags"]) + "\n"
         if self.unknown_files:
-            ret += f"{len(self.unknown_files)} Unknown Files:\n"
+            ret += (
+                f"{colored.Fore.yellow}"
+                f"{len(self.unknown_files)} Unknown Files:"
+                f"{colored.Style.reset}\n"
+            )
             for i, f in enumerate(self.unknown_files):
                 if i > 3:  # noqa: PLR2004
-                    ret += "...\n"
+                    ret += " ...\n"
                     break
-                ret += f"{f}\n"
+                ret += f" {f}\n"
         if self.ignore_counter:
             ret += "ignored: "
             for k, v in self.ignore_counter.items():
@@ -372,7 +380,7 @@ class ReleaseAudit:
                     lines.extend(self._build_tree_str(value, next_indent))
                 elif isinstance(value, (list, tuple)):
                     lines[-1] += (
-                        f" {colored.Fore.green}>>{colored.Style.reset} "
-                        f"{', '.join(value)}"
+                        f" {colored.Fore.green}>> "
+                        f"{', '.join(value)}{colored.Style.reset}"
                     )
         return lines
