@@ -76,12 +76,22 @@ def _get_cli_args():
 
     repos_parser = subparsers.add_parser(
         "repos",
-        description="Show all repos.",
+        description=(
+            """Show all repos.
+
+Permissions:
+  admin(4)    : Full access to the repository, including settings and collaborators.
+  maintain(3) : Can also manage issues, pull requests, and some repository settings.
+  push(2)     : Can read, clone, and push to this repository.
+  triage(1)   : Can pull and also manage issues and pull requests.
+  pull(0)     : Can read and clone this repository."""
+        ),
         help="Return all repos of current logged in user.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     repos_parser.add_argument(
-        "-p",
-        "--paginate",
+        "-a",
+        "--all",
         help="Get all repos",
         action="store_true",
     )
@@ -217,7 +227,7 @@ def run_cli():
 async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
     parser, cli_args = _get_cli_args()
     repo = cli_args.pop("repo", None)
-    paginate = cli_args.pop("paginate", False)
+    paginate = cli_args.pop("all", False)  # Internamente en gh api es un --paginate
     command = cli_args.pop("command", None)
     cli_args.pop("log")
     cli_args.pop("human")

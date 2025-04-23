@@ -75,6 +75,14 @@ class RepoRow:
 
     async def htmy(self, context: Context) -> Component:  # noqa: ARG002
         repo = self.repo
+        permission_msg = {
+            0: "Can read and clone this repository.",
+            1: "Can pull and also manage issues and pull requests.",
+            2: "Can read, clone, and push to this repository",
+            3: "Can also manage issues, pull requests, and some repository settings.",
+            4: "Full access to the repository, including settings and collaborators.",
+        }
+
         _logger.debug(f"Building html row for {repo['name']}")
         return html.tr(
             html.td(html.span("📌" if repo["pinned"] else "")),
@@ -90,7 +98,7 @@ class RepoRow:
                 ),
                 class_="repo",
             ),
-            html.td(html.span(repo["version"].decode())),
+            html.td(html.span(repo["version"])),
             html.td(html.span("⑂" if repo["fork"] else "")),
             html.td(
                 html.span(repo["description"] or ""),
@@ -105,8 +113,29 @@ class RepoRow:
                 *[
                     self._error_printer(s)
                     if isinstance(s, Exception)
-                    else html.a(s, href=f"{github_com}/{s}", class_="collaborator")
-                    for s in repo["collaborators"]
+                    else html.a(
+                        s["user"],
+                        html.sup(
+                            str(s["permission"]),
+                            class_="badge",
+                        ),
+                        href=f"{github_com}/{s['user']}",
+                        class_="collaborator",
+                        target="_blank",
+                        title=permission_msg[s["permission"]],
+                    )
+                    if isinstance(s, dict)
+                    else s
+                    for s in (
+                        sorted(
+                            repo["collaborators"],
+                            key=lambda d: d["permission"],
+                            reverse=True,
+                        )
+                        if repo["collaborators"]
+                        and isinstance(repo["collaborators"][0], dict)
+                        else repo["collaborators"]
+                    )
                 ],
                 class_="collaborators",
             ),
@@ -234,6 +263,7 @@ async def repos(repos_data):
                             id_="owner-filter",
                             name="owner-filter",
                             placeholder="Owner",
+                            class_="rounded shadow-sm sm:text-sm p-1",
                         ),
                     ),
                     html.label(
@@ -243,6 +273,7 @@ async def repos(repos_data):
                             id_="repo-filter",
                             name="repo-filter",
                             placeholder="Repo",
+                            class_="rounded shadow-sm sm:text-sm p-1",
                         ),
                     ),
                     style="margin-bottom: 1rem;",
