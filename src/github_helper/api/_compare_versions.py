@@ -331,5 +331,8 @@ class ReleaseAudit:
                 elif isinstance(value, dict):
                     lines.extend(self._build_tree_str(value, next_indent))
                 elif isinstance(value, (list, tuple)):
-                    lines[-1] += f" >> {', '.join(value)}"
+                    lines[-1] += (
+                        f" {colored.Fore.green}>>{colored.Style.reset} "
+                        f"{', '.join(value)}"
+                    )
         return lines
