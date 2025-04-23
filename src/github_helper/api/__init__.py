@@ -380,8 +380,11 @@ class GHApi:
         if sadness:
             return None, sadness
 
-        for release in releases.values():
-            release["audit"] = _compare_versions.ReleaseAudit(release)
+        releases = [release for project in releases.values() for release in project]
+        for release in releases:
+            release["audit"] = _compare_versions.ReleaseAudit(
+                release,
+            )
 
         # I want count to be the API call or something
         # but it has to be ordered first.
