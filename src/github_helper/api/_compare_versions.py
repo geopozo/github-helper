@@ -140,8 +140,10 @@ class ReleaseAudit:
     def __str__(self):  # noqa: C901, PLR0912
         ret = ""
         if not self.prerelease_agree:
-            ret += "PRERELEASE DISAGREEMENT\n"
-        if self.projects:
+            ret += f"{colored.Fore.red}PRERELEASE DISAGREEMENT{colored.Style.reset}\n"
+        if not self.projects:
+            ret += f"{colored.Fore.red}No Valid Projects Found.{colored.Style.reset}\n"
+        else:
             for k, v in self.projects.items():
                 if k.startswith("python/"):
                     ## look at bdist/sdist
@@ -158,9 +160,12 @@ class ReleaseAudit:
 
                     pure = ""
                     if v["pure"]:
-                        pure = f", pure: {', '.join(v['pure'])}"
+                        pure = (
+                            f", {colored.Fore.green}pure: {', '.join(v['pure'])}"
+                            f"{colored.Style.reset}"
+                        )
 
-                    ret += f"{k}{warn}{pure}\n"
+                    ret += f"{colored.Style.bold}{k}{colored.Style.reset}{warn}{pure}\n"
 
                     ## look at tags
                     ret += (
@@ -174,15 +179,15 @@ class ReleaseAudit:
                         ret += "\n ".join(v["unknown-tags"]) + "\n"
         if self.unknown_files:
             ret += (
-                f"{colored.Fore.yellow}"
+                f"{colored.Fore.yellow}{colored.Style.bold}"
                 f"{len(self.unknown_files)} Unknown Files:"
                 f"{colored.Style.reset}\n"
             )
             for i, f in enumerate(self.unknown_files):
                 if i > 3:  # noqa: PLR2004
-                    ret += " ...\n"
+                    ret += f" {colored.Fore.yellow}...{colored.Style.reset}\n"
                     break
-                ret += f" {f}\n"
+                ret += f" {colored.Fore.yellow}{f}{colored.Style.reset}\n"
         if self.ignore_counter:
             ret += "ignored: "
             for k, v in self.ignore_counter.items():
