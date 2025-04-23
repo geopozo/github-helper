@@ -355,7 +355,24 @@ class GHApi:
         for name in project_names:
             releases[name] = await fetch_json(name)
         sadness = int(not releases)
+        _logger.debug2(releases)
         return releases, sadness
+
+    async def audit_pypi(self, repo, count=7, *, testing=False):
+        """Get all pypi releases for a project and audit it."""
+        releases, sadness = self.get_pypi(repo, testing=testing)
+        if sadness:
+            return None, sadness
+
+        for release in releases.values():
+            release["audit"] = _compare_versions.ReleaseAudit(release)
+
+        # I want count to be the API call or something
+        # but it has to be ordered first.
+        return (
+            _compare_versions.order_versions(releases, "tag")[:count],
+            sadness,
+        )
 
     async def get_releases(self, repo):
         """Return releases for a repo."""
@@ -379,6 +396,7 @@ class GHApi:
         _log_one_json(obj)
         releases = releases_jq.input_value(obj).first()
         sadness = int(not releases)
+        _logger.debug2(releases)
         return releases, sadness
 
     async def audit_releases(self, repo, count=7):
@@ -390,6 +408,8 @@ class GHApi:
         for release in releases:
             release["audit"] = _compare_versions.ReleaseAudit(release)
 
+        # I want count to be the API call or something
+        # but it has to be ordered first.
         return (
             _compare_versions.order_versions(releases, "tag")[:count],
             sadness,
