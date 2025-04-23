@@ -1,6 +1,7 @@
 """A CLI dashboard for github status."""
 
 import asyncio
+import colored
 import re
 import tomllib
 import warnings
@@ -447,26 +448,48 @@ class GHApi:
             "repo" and owner is assumed to be the current user.
 
         """
-        tags, sadness = await self.get_remote_tags(repo)
-        releases, sadness = await self.get_releases(repo)
+        # puede mezclar proyectos acá
+        # todavia no probamos con mas de un projection en repositorio
+        async with asyncio.TaskGroup() as tg:
+            tags_task = tg.create_task(self.get_remote_tags(repo))
+            releases_task = tg.create_task(self.get_releases(repo))
+            pypi_task = tg.create_task(self.get_pypi(repo, flatten=True))
+            test_pypi_task = tg.create_task(
+                self.get_pypi(repo, testing=True, flatten=True),
+            )
+            # que hacemos con sadness?
+            tags, _ = await tags_task
+            releases, _ = await releases_task
+            pypi, _ = await pypi_task
+            test_pypi, _ = await test_pypi_task
 
         filtered_tags = _compare_versions.filter_versions(tags, "tag")
         filtered_releases = _compare_versions.filter_versions(releases, "tag")
+        filtered_pypi = _compare_versions.filter_versions(pypi, "tag")
+        filtered_test_pypi = _compare_versions.filter_versions(
+            test_pypi,
+            "tag",
+        )
 
-        versions = filtered_tags | filtered_releases
-
+        versions = (
+            filtered_tags | filtered_releases | filtered_pypi | filtered_test_pypi
+        )
+        yes = f"{colored.Fore.green}True{colored.Style.reset}"
+        no = f"{colored.Fore.red}False{colored.Style.reset}"
         result = _compare_versions.order_versions(
             [
                 {
                     "version": v,
-                    "tags": v in filtered_tags,
-                    "releases": v in filtered_releases,
+                    "tags": yes if v in filtered_tags else no,
+                    "releases": yes if v in filtered_releases else no,
+                    "pypi": yes if v in filtered_pypi else no,
+                    "test.pypi": yes if v in filtered_test_pypi else no,
                 }
                 for v in versions
             ],
             "version",
         )
-        return result, sadness
+        return result, 0  # TODO: no sadness for audit?
 
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""
