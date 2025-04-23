@@ -333,8 +333,9 @@ class GHApi:
             url = f"https://{prefix}pypi.org/pypi/{name}/json"
             _logger.debug(url)
             try:
+                # TODO: probably need to check that project exists first
                 jq_dir = (
-                    r".releases | "
+                    r".releases // {} | "
                     r"to_entries | map("
                     r"{tag: .key, files:"
                     r"[ .value[] | select(.yank != true) | .filename ]"

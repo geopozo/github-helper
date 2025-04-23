@@ -43,6 +43,8 @@ if not sys.stdout.isatty():
 
 
 def order_versions(versions: list[dict], key: str):
+    if not versions:
+        return versions
     return sorted(
         versions,
         key=lambda x: version.parse(x[key]),
