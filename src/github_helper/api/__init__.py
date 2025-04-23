@@ -155,7 +155,24 @@ class GHApi:
 
     async def _get_collaborators(self, owner, repo):
         """Return collaborators for a repo."""
-        collabs_jq = jq.compile(f'map(select(.login != "{owner}") | .login)')
+        permissions_enum = {
+            "admin": 4,
+            "maintain": 3,
+            "push": 2,
+            "triage": 1,
+            "pull": 0,
+        }
+        jq_expr = (
+            'map(select(.login != "{owner}") | '
+            "{ user: .login, permission: (["
+            + ", ".join(
+                f"(if .permissions.{perm} == true then {val} else empty end)"
+                for perm, val in permissions_enum.items()
+            )
+            + "] | max) })"
+        )
+        collabs_jq = jq.compile(jq_expr.replace("{owner}", owner))
+
         endpoint = f"repos/{owner}/{repo}/collaborators"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
@@ -262,7 +279,6 @@ class GHApi:
                 url=url,
             )
             repo["version"] = await r.describe(repo["default_branch"])
-            repo["_repo"] = r
 
         await asyncio.gather(*[query_version(repo) for repo in repos])
 
@@ -458,7 +474,7 @@ class GHApi:
         active_rulesets = rulesets_jq.input_value(orjson.loads(out)).first()
 
         if not active_rulesets:
-            return []
+            return [], 1
 
         excluded_keys = [
             "id",

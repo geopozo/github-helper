@@ -14,8 +14,10 @@ class GHAdapter:
     def _check_options(self, formatters):
         formats = {k for k, v in formatters.items() if v}
         invalid_formats = {"html", "url"} & formats
-        if (self._command == "auth-status" and formats) or (
-            self._command != "repos" and invalid_formats
+        if (
+            (self._command == "auth-status" and formats)
+            or (self._command != "repos" and invalid_formats)
+            or (self._command == "audit-releases" and self._json)
         ):
             raise NotImplementedError(
                 f"{', '.join(invalid_formats)} not valid flags for {self._command}",
@@ -89,8 +91,13 @@ class GHAdapter:
                     f"{'f-' if repo['fork'] else ''}{repo['visibility']}"
                     f"{'-ar' if repo['archived'] else ''}"
                 ),
-                ",".join(
-                    [str(s)[:6] for s in repo["collaborators"]],
+                ("\n" if self._pretty else ",").join(
+                    [
+                        f"{colab['user'][:6]}({colab['permission']})"
+                        if isinstance(colab, dict)
+                        else colab
+                        for colab in repo["collaborators"]
+                    ],
                 ),
                 f"{','.join(repo['topics'])}",
             ]
@@ -101,6 +108,7 @@ class GHAdapter:
             data,
             pretty=self._pretty,
             headers=("repo", "type", "people", "topics"),
+            colalign=("right",),
         )
 
     async def transform_tags_data(self, tags_data):
@@ -131,7 +139,7 @@ class GHAdapter:
         return to_table.format_table(
             [
                 [
-                    f"{name}-{release["tag"]}",
+                    f"{name}-{release['tag']}",
                     delim.join(release["files"]),
                 ]
                 for name, subobject in releases_data.items()
