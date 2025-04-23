@@ -22,6 +22,7 @@ How do I improve parsing?
 
 import copy
 import re
+import sys
 from dataclasses import field
 
 import colored
@@ -30,6 +31,15 @@ import semver
 from packaging import utils, version
 
 _logger = logistro.getLogger(__name__)
+
+if not sys.stdout.isatty():
+
+    class NoColor:
+        def __getattr__(self, name):
+            return ""
+
+    # Override colored's foreground, background, and style
+    colored.Fore = colored.Back = colored.Style = NoColor()
 
 
 def order_versions(versions: list[dict], key: str):
