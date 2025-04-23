@@ -318,7 +318,7 @@ class GHApi:
         sadness = int(not projects)
         return projects, sadness
 
-    async def get_pypi(self, repo):
+    async def get_pypi(self, repo, *, testing=False):
         """Get all pypi releases for a particular project."""
         project_configs, sadness = await self.get_project_configs(repo)
         project_names = set()
@@ -327,9 +327,10 @@ class GHApi:
                 name = config.get("object", {}).get("project", {}).get("name", {})
                 if name:
                     project_names.add(name)
+        prefix = "test." if testing else ""
 
         async def fetch_json(name):
-            url = f"https://pypi.org/pypi/{name}/json"
+            url = f"https://{prefix}pypi.org/pypi/{name}/json"
             _logger.debug(url)
             try:
                 jq_dir = (
