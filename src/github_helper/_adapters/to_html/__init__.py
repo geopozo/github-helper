@@ -141,7 +141,7 @@ async def repos(repos_data):
     _logger.debug("Building page.")
     scripts = [
         html.script(src="https://cdn.tailwindcss.com"),
-        html.script(html.SafeStr(html.SafeStr(await load_file(_JS_PATH / "repos.js")))),
+        html.script(html.SafeStr(await load_file(_JS_PATH / "repos.js"))),
     ]
     page = (
         html.DOCTYPE.html,
