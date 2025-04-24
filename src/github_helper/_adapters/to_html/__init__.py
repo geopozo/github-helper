@@ -179,6 +179,35 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
     return [RepoRow(repo=repo) for repo in repos]
 
 
+def modal_iframe():
+    return html.div(
+        html.div(
+            html.div(
+                html.button(
+                    "X",
+                    type="button",
+                    class_="-me-4 -mt-4 p-2 text-gray-500",
+                    onclick="closeModal()",
+                ),
+                class_="flex items-start justify-end",
+            ),
+            html.div(
+                html.iframe(
+                    id="modal-info",
+                    height="500",
+                    src="",
+                    class_="w-full",
+                ),
+            ),
+            class_="w-full max-w-md rounded-lg bg-white p-6 shadow-lg",
+        ),
+        id="my-modal",
+        class_="fixed inset-0 z-50 grid place-content-center bg-black/50 p-4",
+        role="dialog",
+        style="display: none;",
+    )
+
+
 async def repos(repos_data):
     _logger.debug("Building table.")
     table = html.table(repo_rows(repos_data), class_="mx-auto")
