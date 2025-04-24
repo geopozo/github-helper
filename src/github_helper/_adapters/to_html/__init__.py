@@ -5,6 +5,7 @@ from pathlib import Path
 import logistro
 from htmy import Component, Context, Renderer, component, html
 
+from github_helper._adapters.to_html import _components
 from github_helper._utils import load_file
 
 _logger = logistro.getLogger(__name__)
@@ -111,33 +112,15 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
     return [RepoRow(repo=repo) for repo in repos]
 
 
-def modal(modal_id: str, close_method: str) -> Component:
-    return html.div(
-        html.div(
-            html.div(
-                html.button(
-                    "X",
-                    type="button",
-                    class_="-me-4 -mt-4 p-2 text-gray-500",
-                    onclick=close_method,
-                ),
-                class_="flex items-start justify-end",
-            ),
-            html.div(html.iframe(src="", height="500", class_="w-full")),
-            class_="w-full max-w-md rounded-lg bg-white p-6 shadow-lg",
-        ),
-        id=modal_id,
-        class_="fixed inset-0 z-50 grid place-content-center bg-black/50 p-4",
-        role="dialog",
-        style="display: none;",
-    )
-
-
 async def repos(repos_data):
     _logger.debug("Building table.")
     style = html.style(await load_file(_STYLES_PATH / "repos.css"))
     table = html.table(repo_rows(repos_data), class_="mx-auto")
-    modal_iframe = modal("my-modal", "closeModal()")
+    modal_iframe = _components.modal(
+        "my-modal",
+        "closeModal()",
+        html.iframe(src="", height="500", class_="w-full"),
+    )
     _logger.debug("Building page.")
     scripts = [
         html.script(src="https://cdn.tailwindcss.com"),
