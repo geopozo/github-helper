@@ -2,25 +2,7 @@ from collections.abc import MutableMapping
 from dataclasses import dataclass
 
 import logistro
-from htmy import Component, Context, Renderer, component, core, html
-
-
-class iframe(core.Tag):  # noqa: N801
-    """
-    `<iframe>` element.
-
-    See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe.
-    """
-
-    __slots__ = ()
-
-
-if not isinstance(html.iframe(), core.Tag):
-    html.iframe = iframe
-else:
-    import warnings
-
-    warnings.warn("Ya han actualizado htmy y podemos quitar el hack", stacklevel=2)
+from htmy import Component, Context, Renderer, component, html
 
 _logger = logistro.getLogger(__name__)
 
