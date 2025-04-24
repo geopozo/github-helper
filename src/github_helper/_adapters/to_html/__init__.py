@@ -11,8 +11,8 @@ _logger = logistro.getLogger(__name__)
 
 github_com = r"https://www.github.com"
 _HTML_DIR = Path(__file__).resolve().parent
-_STYLES_PATH = _HTML_DIR / "styles"
-_JS_PATH = _HTML_DIR / "js"
+_STYLES_PATH = _HTML_DIR / "_styles"
+_JS_PATH = _HTML_DIR / "_js"
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
