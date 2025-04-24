@@ -211,6 +211,7 @@ def modal_iframe():
 async def repos(repos_data):
     _logger.debug("Building table.")
     table = html.table(repo_rows(repos_data), class_="mx-auto")
+    modal = modal_iframe()
     _logger.debug("Building page.")
     scripts = [
         html.script(src="https://cdn.tailwindcss.com"),
@@ -338,6 +339,7 @@ async def repos(repos_data):
                     id_="controls",
                 ),
                 table,
+                modal,
                 *scripts,
             ),
         ),
