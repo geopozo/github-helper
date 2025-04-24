@@ -43,6 +43,8 @@ if not sys.stdout.isatty():
 
 
 def order_versions(versions: list[dict], key: str):
+    if not versions:
+        return versions
     return sorted(
         versions,
         key=lambda x: version.parse(x[key]),
@@ -99,12 +101,16 @@ class ReleaseAudit:
     unknown_files: field(default_factory=set)
     ignore_counter: field(default_factory=dict[str, int])
 
-    def __init__(self, release):
+    def __init__(self, release, *, prerelease_respect=False):
         self.tag = release["tag"]
         self.version = self.explode_versions()
         if not self.version:
             return
-        self.prerelease_agree = self.version["is_prerelease"] == release["prerelease"]
+        self.prerelease_agree = (
+            (self.version["is_prerelease"] == release["prerelease"])
+            if "prerelease" in release
+            else prerelease_respect
+        )
 
         self.file_notes = {}
         self.unknown_files = set()
@@ -128,12 +134,12 @@ class ReleaseAudit:
             "major": v.major,
             "minor": v.minor,
             "patch": v.patch if hasattr(v, "patch") else v.micro,
-            "pre": v.prerelease if hasattr(v, "prerelese") else v.pre,
+            "pre": v.prerelease if hasattr(v, "prerelease") else v.pre,
             "dev": v.dev if hasattr(v, "dev") else None,
             "post": v.post if hasattr(v, "post") else None,
         }
         ret["is_prerelease"] = (
-            v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.pre)
+            v.is_prerelease if hasattr(v, "is_prerelease") else bool(ret["pre"])
         )
         return ret
 
