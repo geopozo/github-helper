@@ -237,6 +237,16 @@ async def repos(repos_data):
   const archivedCheckbox = document.getElementById('toggle-archive');
   const ownerInput = document.getElementById('owner-filter');
   const repoInput = document.getElementById('repo-filter');
+  const modal = document.getElementById("my-modal");
+  const modalInfo = document.getElementById("modal-info");
+
+  const openModal = (data) => {
+    modal.style.display = "grid";
+    modalInfo.src = data;
+  }
+
+  const closeModal = () => modal.style.display = "none";
+
   function filterAll() {
     console.log("Filtering All.")
     const ownerFilter = ownerInput.value.toLowerCase();
