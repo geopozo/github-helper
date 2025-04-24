@@ -254,16 +254,16 @@ dev = [
 
 [[package]]
 name = "htmy"
-version = "0.7.3"
+version = "0.7.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "async-lru" },
     { name = "markdown" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/e4/b0c12db3187de6f3d794939810d4b5d095c139aaa28238ae9f595025537e/htmy-0.7.3.tar.gz", hash = "sha256:228507a9346748c659b0d5a74cdebffe4fb882b019ab9306da4691aa9c3e8196", size = 33040 }
+sdist = { url = "https://files.pythonhosted.org/packages/99/ac/dcac7521958963ef16fe554c373abf75a343f017610ec798656236366898/htmy-0.7.4.tar.gz", hash = "sha256:93546c1d739aa55bdcca59b2639f825f88d0cf5705a6c68c1241cc52379cd100", size = 33040 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/15/ee/a9dc35606649c64918558c798dde2ec7a3aaff591b66d5d22316ee583352/htmy-0.7.3-py3-none-any.whl", hash = "sha256:7d49badb2ae471f1abd3e3d16a0e8c78371af74ce7a3b767fe72ad40ad74625b", size = 33296 },
+    { url = "https://files.pythonhosted.org/packages/5c/b3/4ee44fef5d582db550dbf9b10bb32c299c8d333e2e7081ef67732af3cf2e/htmy-0.7.4-py3-none-any.whl", hash = "sha256:c5ba928625f152f40f2551f1ce1dd23bd27f80660dc587e4689f1fb8332e9303", size = 33298 },
 ]
 
 [[package]]
