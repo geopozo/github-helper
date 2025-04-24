@@ -113,6 +113,7 @@ class RepoRow:
                 html.a(
                     repo["name"],
                     href=f"{github_com}/{repo['owner']}/{repo['name']}",
+                    target="_blank",
                 ),
                 class_="repo",
             ),
