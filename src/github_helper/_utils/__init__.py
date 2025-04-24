@@ -59,3 +59,12 @@ def strip_keys(obj):
         return [strip_keys(i) for i in obj]
     else:
         return obj
+
+
+async def load_file(path):
+    if not Path(path).is_file():
+        raise FileNotFoundError(f"{path} not exist")
+
+    async with aiofiles.open(path) as f:
+        file = await f.read()
+    return file
