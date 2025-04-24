@@ -135,6 +135,7 @@ def modal(modal_id: str, close_method: str) -> Component:
 
 async def repos(repos_data):
     _logger.debug("Building table.")
+    style = html.style(await load_file(_STYLES_PATH / "repos.css"))
     table = html.table(repo_rows(repos_data), class_="mx-auto")
     modal_iframe = modal("my-modal", "closeModal()")
     _logger.debug("Building page.")
@@ -145,7 +146,7 @@ async def repos(repos_data):
     page = (
         html.DOCTYPE.html,
         html.html(
-            html.head(html.style(await load_file(_STYLES_PATH / "repos.css"))),
+            html.head(style),
             html.body(
                 html.div(
                     html.label(
