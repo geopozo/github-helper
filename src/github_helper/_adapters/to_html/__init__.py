@@ -114,6 +114,7 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
 
 async def repos(repos_data):
     _logger.debug("Building table.")
+    tailwindcss_cdn = "https://cdn.tailwindcss.com"
     style = html.style(await load_file(_STYLES_PATH / "repos.css"))
     table = html.table(repo_rows(repos_data), class_="mx-auto")
     modal_iframe = _components.modal(
@@ -123,7 +124,7 @@ async def repos(repos_data):
     )
     _logger.debug("Building page.")
     scripts = [
-        html.script(src="https://cdn.tailwindcss.com"),
+        html.script(src=tailwindcss_cdn),
         html.script(html.SafeStr(await load_file(_JS_PATH / "repos.js"))),
     ]
     page = (
