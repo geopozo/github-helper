@@ -179,7 +179,7 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
     return [RepoRow(repo=repo) for repo in repos]
 
 
-def modal_iframe():
+def modal(modal_id: str, close_method: str) -> Component:
     return html.div(
         html.div(
             html.div(
@@ -187,21 +187,14 @@ def modal_iframe():
                     "X",
                     type="button",
                     class_="-me-4 -mt-4 p-2 text-gray-500",
-                    onclick="closeModal()",
+                    onclick=close_method,
                 ),
                 class_="flex items-start justify-end",
             ),
-            html.div(
-                html.iframe(
-                    id="modal-info",
-                    height="500",
-                    src="",
-                    class_="w-full",
-                ),
-            ),
+            html.div(html.iframe(src="", height="500", class_="w-full")),
             class_="w-full max-w-md rounded-lg bg-white p-6 shadow-lg",
         ),
-        id="my-modal",
+        id=modal_id,
         class_="fixed inset-0 z-50 grid place-content-center bg-black/50 p-4",
         role="dialog",
         style="display: none;",
@@ -211,7 +204,7 @@ def modal_iframe():
 async def repos(repos_data):
     _logger.debug("Building table.")
     table = html.table(repo_rows(repos_data), class_="mx-auto")
-    modal = modal_iframe()
+    modal_iframe = modal("my-modal", "closeModal()")
     _logger.debug("Building page.")
     scripts = [
         html.script(src="https://cdn.tailwindcss.com"),
@@ -239,11 +232,11 @@ async def repos(repos_data):
   const ownerInput = document.getElementById('owner-filter');
   const repoInput = document.getElementById('repo-filter');
   const modal = document.getElementById("my-modal");
-  const modalInfo = document.getElementById("modal-info");
 
   const openModal = (data) => {
+    const iframe = modal.querySelector("iframe");
     modal.style.display = "grid";
-    modalInfo.src = data;
+    iframe.src = data;
   }
 
   const closeModal = () => modal.style.display = "none";
@@ -339,7 +332,7 @@ async def repos(repos_data):
                     id_="controls",
                 ),
                 table,
-                modal,
+                modal_iframe,
                 *scripts,
             ),
         ),
