@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import logistro
-from htmy import Component, Context, Renderer, component, html
+from htmy import Component, Context, component, html
 
 from github_helper._adapters.to_html import _components
 from github_helper._utils import load_file
@@ -118,8 +118,7 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
 
 async def repos(repos_data):
     _logger.debug("Building table.")
-    tailwindcss_cdn = "https://cdn.tailwindcss.com"
-    style = html.style(await load_file(_STYLES_PATH / "repos.css"))
+    styles = html.style(await load_file(_STYLES_PATH / "repos.css"))
     table = html.table(repo_rows(repos_data), class_="mx-auto")
     modal_iframe = _components.modal(
         "my-modal",
@@ -139,71 +138,61 @@ async def repos(repos_data):
             ),
         ),
     ]
-    page = (
-        html.DOCTYPE.html,
-        html.html(
-            html.head(
-                html.script(src=tailwindcss_cdn),
-                style,
-            ),
-            html.body(
-                html.div(
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-public",
-                            checked=True,
-                        ),
-                        " Show Public",
-                    ),
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-private",
-                            checked=True,
-                            style="margin-left:1rem;",
-                        ),
-                        " Show Private",
-                    ),
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-archive",
-                            checked=True,
-                            style="margin-left:1rem;",
-                        ),
-                        " Show Archived",
-                    ),
-                    html.br(),
-                    html.label(
-                        " Owner",
-                        html.input_(
-                            type_="text",
-                            id_="owner-filter",
-                            name="owner-filter",
-                            placeholder="Owner",
-                            class_="rounded shadow-sm sm:text-sm p-1",
-                        ),
-                    ),
-                    html.label(
-                        " Repo",
-                        html.input_(
-                            type_="text",
-                            id_="repo-filter",
-                            name="repo-filter",
-                            placeholder="Repo",
-                            class_="rounded shadow-sm sm:text-sm p-1",
-                        ),
-                    ),
-                    style="margin-bottom: 1rem;",
-                    class_="mx-auto",
-                    id_="controls",
+    content = [
+        html.div(
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-public",
+                    checked=True,
                 ),
-                table,
-                modal_iframe,
-                *scripts,
+                " Show Public",
             ),
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-private",
+                    checked=True,
+                    style="margin-left:1rem;",
+                ),
+                " Show Private",
+            ),
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-archive",
+                    checked=True,
+                    style="margin-left:1rem;",
+                ),
+                " Show Archived",
+            ),
+            html.br(),
+            html.label(
+                " Owner",
+                html.input_(
+                    type_="text",
+                    id_="owner-filter",
+                    name="owner-filter",
+                    placeholder="Owner",
+                    class_="rounded shadow-sm sm:text-sm p-1",
+                ),
+            ),
+            html.label(
+                " Repo",
+                html.input_(
+                    type_="text",
+                    id_="repo-filter",
+                    name="repo-filter",
+                    placeholder="Repo",
+                    class_="rounded shadow-sm sm:text-sm p-1",
+                ),
+            ),
+            style="margin-bottom: 1rem;",
+            class_="mx-auto",
+            id_="controls",
         ),
-    )
-    _logger.debug("Rendering.")
-    return await Renderer().render(page)
+        table,
+        modal_iframe,
+        *scripts,
+    ]
+    return await _components.render_page([styles], content)
