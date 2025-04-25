@@ -42,6 +42,12 @@ if not sys.stdout.isatty():
     colored.Fore = colored.Back = colored.Style = NoColor()
 
 
+# maybe combine these functions into a "normal versions"
+# we talk a list of dictionaries, all have to have a "tag" key (version)
+# and what would we mark?
+# a) we'd sort.
+# b) we'd regulate how the tag is expressed (v or no)
+# c) we'd determine if its empty or malformed
 def order_versions(versions: list[dict], key: str):
     if not versions:
         return versions
@@ -52,12 +58,45 @@ def order_versions(versions: list[dict], key: str):
     )
 
 
-def filter_versions(versions: list[dict], key: str):
+def conform_versions(versions: list[dict]):
+    versions_dict = {}
+    for v in versions:
+        v["conformant"] = None
+        try:
+            version.Version(v["tag"])
+            v["conformant"] = "Python"
+        except version.InvalidVersion:
+            pass
+        try:
+            semver.Version.parse(v["tag"])
+            v["conformant"] = "SemVer (not Python)"
+        except ValueError:
+            pass
+        if v["conformant"]:
+            if v["tag"].startswith("V"):
+                v["tag"][0] = "v"
+            elif not v["tag"].startswith("v"):
+                v["tag"] = f"v{v['tag']}"
+        # always true for tag, use audit
+        _logger.debug2(f"Files in {v['tag']}: {len(v.get('files', []))}")
+        v["empty"] = not bool(v.get("files"))
+        _logger.debug2(f"Empty {v['empty']} from {v.get('files')}")
+        if v["tag"] in versions_dict:
+            cur = versions_dict[v["tag"]]
+            cur["empty"] = v["empty"]
+            cur["files"].extend(v["files"])
+        else:
+            versions_dict[v["tag"]] = v
+    return versions_dict
+
+
+def filter_versions(versions: list[dict]):
+    # this needs to return a list of dictionaries
     _regex = re.compile(
         r"^" + version.VERSION_PATTERN + r"$",
         re.VERBOSE,
     )
-    return {v[key] for v in versions if _regex.match(v[key])}
+    return [v for v in versions if _regex.match(v.get("tag"))]
 
 
 bdist_template = {

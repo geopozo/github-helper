@@ -286,19 +286,6 @@ class GHApi:
         sadness = int(not repos)
         return repos, sadness
 
-    async def get_remote_tags(self, repo):
-        """Return tags for a repo."""
-        _ = await self.get_user()
-        tags_jq = jq.compile("map({tag: .name})")
-        owner, repo = self._split_full_name(full_name=repo)
-        endpoint = f"repos/{owner}/{repo}/tags"
-        _logger.debug(f"Calling API: {endpoint}")
-        retval, out, err = await srv.gh_api(endpoint)
-        srv.check_retval(retval, err, endpoint=endpoint)
-        tags = tags_jq.input_value(orjson.loads(out)).first()
-        sadness = int(not tags)
-        return tags, sadness
-
     async def get_project_configs(self, repo):
         """Find all projects in a repo."""
         owner, repo = self._split_full_name(full_name=repo)
@@ -335,8 +322,23 @@ class GHApi:
         sadness = int(not projects)
         return projects, sadness
 
+    async def get_remote_tags(self, repo):
+        """Return tags ("tag":"name") for a repo."""
+        _ = await self.get_user()
+        tags_jq = jq.compile("map({tag: .name})")
+        owner, repo = self._split_full_name(full_name=repo)
+        endpoint = f"repos/{owner}/{repo}/tags"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
+        tags = tags_jq.input_value(orjson.loads(out)).first()
+        sadness = int(not tags)
+        return tags, sadness
+
+    # probably need to handle specific projects
+    # project metadata usually has github repo
     async def get_pypi(self, repo, *, testing=False, flatten=False):
-        """Get all pypi releases for a particular project."""
+        """Get all pypi releases for ALL projects in a repo."""
         project_configs, sadness = await self.get_project_configs(repo)
         project_names = set()
         if "py" in project_configs:
@@ -350,12 +352,11 @@ class GHApi:
             url = f"https://{prefix}pypi.org/pypi/{name}/json"
             _logger.debug(url)
             try:
-                # TODO: probably need to check that project exists first
                 jq_dir = (
                     r".releases // {} | "
                     r"to_entries | map("
                     r'{tag: "v\(.key)", files:'
-                    r"[ .value[] | select(.yank != true) | .filename ]"
+                    r"[ .value[] | select(.yanked != true) | .filename ]"
                     r"})"
                 )
                 pypi_jq = jq.compile(jq_dir)
@@ -373,6 +374,7 @@ class GHApi:
             releases[name] = await fetch_json(name)
         sadness = int(not releases)
         if flatten:
+            # two objects may have same tag
             releases = [release for project in releases.values() for release in project]
         return releases, sadness
 
@@ -418,6 +420,7 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
         obj = orjson.loads(out)
+        _logger.debug2("get_releases")
         _log_one_json(obj)
         releases = releases_jq.input_value(obj).first()
         sadness = int(not releases)
@@ -453,44 +456,64 @@ class GHApi:
         # todavia no probamos con mas de un projection en repositorio
         async with asyncio.TaskGroup() as tg:
             tags_task = tg.create_task(self.get_remote_tags(repo))
-            releases_task = tg.create_task(self.get_releases(repo))
-            pypi_task = tg.create_task(self.get_pypi(repo, flatten=True))
-            test_pypi_task = tg.create_task(
-                self.get_pypi(repo, testing=True, flatten=True),
-            )
+            releases_task = tg.create_task(self.audit_releases(repo))
+            pypi_task = tg.create_task(self.audit_pypi(repo))
+            test_pypi_task = tg.create_task(self.audit_pypi(repo, testing=True))
             # que hacemos con sadness?
             tags, _ = await tags_task
             releases, _ = await releases_task
             pypi, _ = await pypi_task
             test_pypi, _ = await test_pypi_task
 
-        filtered_tags = _compare_versions.filter_versions(tags, "tag")
-        filtered_releases = _compare_versions.filter_versions(releases, "tag")
-        filtered_pypi = _compare_versions.filter_versions(pypi, "tag")
-        filtered_test_pypi = _compare_versions.filter_versions(
-            test_pypi,
-            "tag",
+        c_tags = _compare_versions.conform_versions(
+            _compare_versions.filter_versions(tags),
+        )
+        c_releases = _compare_versions.conform_versions(releases)
+        c_pypi = _compare_versions.conform_versions(pypi)
+        c_test_pypi = _compare_versions.conform_versions(test_pypi)
+
+        all_versions = (
+            c_tags.keys() | c_releases.keys() | c_pypi.keys() | c_test_pypi.keys()
         )
 
-        versions = (
-            filtered_tags | filtered_releases | filtered_pypi | filtered_test_pypi
-        )
         yes = f"{colored.Fore.green}True{colored.Style.reset}"
         no = f"{colored.Fore.red}False{colored.Style.reset}"
+
+        def empty(x="Empty"):
+            return f"{colored.Fore.yellow}{x}{colored.Style.reset}"
+
         result = _compare_versions.order_versions(
             [
                 {
                     "version": v,
-                    "tags": yes if v in filtered_tags else no,
-                    "releases": yes if v in filtered_releases else no,
-                    "pypi": yes if v in filtered_pypi else no,
-                    "test.pypi": yes if v in filtered_test_pypi else no,
+                    "tags": (no if v not in c_tags else yes),
+                    "releases": (
+                        no
+                        if v not in c_releases
+                        else empty(empty)
+                        if c_releases[v]["empty"]
+                        else yes
+                    ),
+                    "pypi": (
+                        no
+                        if v not in c_pypi
+                        else empty("yanked")
+                        if c_pypi[v]["empty"]
+                        else yes
+                    ),
+                    "test.pypi": (
+                        no
+                        if v not in c_test_pypi
+                        else empty("yanked")
+                        if c_test_pypi[v]["empty"]
+                        else yes
+                    ),
                 }
-                for v in versions
+                for v in all_versions
             ],
             "version",
         )
-        return result, 0  # TODO: no sadness for audit?
+        return result, 0  # maybe no sadness for audit?
 
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""
