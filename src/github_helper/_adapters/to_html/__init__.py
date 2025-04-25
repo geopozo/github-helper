@@ -53,7 +53,7 @@ class RepoRow:
                 ),
                 class_="repo",
             ),
-            html.td(html.span(repo["version"])),
+            html.td(html.span(repo["version"]), class_="text-center"),
             html.td(html.span("⑂" if repo["fork"] else "")),
             html.td(
                 html.span(repo["description"] or ""),
