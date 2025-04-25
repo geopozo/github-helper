@@ -14,12 +14,8 @@ td.owner {
     text-align: right;
 }
 
-td.repo {
-    max-width: 15rem;
-}
-
 td.description {
-    max-width: 50rem;
+    max-width: 25rem;
 }
 
 tr.repo-row td a:link,
