@@ -130,13 +130,24 @@ async def repos(repos_data):
     )
     _logger.debug("Building page.")
     scripts = [
-        html.script(src=tailwindcss_cdn),
-        html.script(html.SafeStr(await load_file(_JS_PATH / "repos.js"))),
+        html.script(
+            html.SafeStr(
+                "\n".join(
+                    [
+                        await load_file(_JS_PATH / "repos.js"),
+                        await load_file(_JS_PATH / "modal.js"),
+                    ],
+                ),
+            ),
+        ),
     ]
     page = (
         html.DOCTYPE.html,
         html.html(
-            html.head(style),
+            html.head(
+                html.script(src=tailwindcss_cdn),
+                style,
+            ),
             html.body(
                 html.div(
                     html.label(
