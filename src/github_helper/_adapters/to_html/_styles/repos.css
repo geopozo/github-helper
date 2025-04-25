@@ -10,11 +10,11 @@ span.topic {
     margin: 0 .1rem;
 }
 
-span.owner {
+td.owner {
     text-align: right;
 }
 
-span.repo {
+td.repo {
     max-width: 15rem;
 }
 

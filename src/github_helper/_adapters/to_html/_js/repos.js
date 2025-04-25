@@ -11,10 +11,10 @@ function filterAll() {
     const rows = document.querySelectorAll('table tbody tr');
 
     rows.forEach(row => {
-        const matchOwner = [...row.querySelectorAll('span.owner')].some(td =>
+        const matchOwner = [...row.querySelectorAll('td.owner')].some(td =>
             td.textContent.toLowerCase().includes(ownerFilter)
         );
-        const matchRepo = [...row.querySelectorAll('span.repo')].some(td =>
+        const matchRepo = [...row.querySelectorAll('td.repo')].some(td =>
             td.textContent.toLowerCase().includes(repoFilter)
         );
         archived = !(!archivedCheckbox.checked && row.classList.contains('archived'))
