@@ -58,20 +58,30 @@ def order_versions(versions: list[dict], key: str):
     )
 
 
+def check_conformant(name):
+    try:
+        parsed = version.Version(name)
+        # we have to do this reverse check
+        # because python is flexible/tolerant with bad versions
+        if str(parsed) != name[1:] if name.startswith("v") else name:
+            raise version.InvalidVersion  # noqa: TRY301
+    except version.InvalidVersion:
+        pass
+    else:
+        return parsed, "Python"
+    try:
+        parsed = semver.Version.parse(name)
+    except ValueError:
+        pass
+    else:
+        return parsed, "SemVer"
+    return None, None
+
+
 def conform_versions(versions: list[dict]):
     versions_dict = {}
     for v in versions:
-        v["conformant"] = None
-        try:
-            version.Version(v["tag"])
-            v["conformant"] = "Python"
-        except version.InvalidVersion:
-            pass
-        try:
-            semver.Version.parse(v["tag"])
-            v["conformant"] = "SemVer (not Python)"
-        except ValueError:
-            pass
+        _, v["conformant"] = check_conformant(v["tag"])
         if v["conformant"]:
             if v["tag"].startswith("V"):
                 v["tag"][0] = "v"
@@ -158,15 +168,7 @@ class ReleaseAudit:
         [self.summarize_file(file) for file in release["files"]]
 
     def explode_versions(self):
-        v = None
-        try:
-            v = version.Version(self.tag)
-        except version.InvalidVersion:
-            pass
-        try:
-            v = semver.Version.parse(self.tag)
-        except ValueError:
-            pass
+        v, _ = check_conformant(self.tag)
         if not v:
             return None
         ret = {

@@ -476,8 +476,11 @@ class GHApi:
             c_tags.keys() | c_releases.keys() | c_pypi.keys() | c_test_pypi.keys()
         )
 
-        yes = f"{colored.Fore.green}True{colored.Style.reset}"
-        no = f"{colored.Fore.red}False{colored.Style.reset}"
+        def yes(x="True"):
+            return f"{colored.Fore.green}{x}{colored.Style.reset}"
+
+        def no(x="False"):
+            return f"{colored.Fore.red}{x}{colored.Style.reset}"
 
         def empty(x="Empty"):
             return f"{colored.Fore.yellow}{x}{colored.Style.reset}"
@@ -486,28 +489,29 @@ class GHApi:
             [
                 {
                     "version": v,
-                    "tags": (no if v not in c_tags else yes),
+                    "tags": (no() if v not in c_tags else yes()),
                     "releases": (
-                        no
+                        no()
                         if v not in c_releases
                         else empty(empty)
                         if c_releases[v]["empty"]
-                        else yes
+                        else yes()
                     ),
                     "pypi": (
-                        no
+                        no()
                         if v not in c_pypi
                         else empty("yanked")
                         if c_pypi[v]["empty"]
-                        else yes
+                        else yes()
                     ),
                     "test.pypi": (
-                        no
+                        no()
                         if v not in c_test_pypi
                         else empty("yanked")
                         if c_test_pypi[v]["empty"]
-                        else yes
+                        else yes()
                     ),
+                    "tag valid": (_compare_versions.check_conformant(v)[1] or no()),
                 }
                 for v in all_versions
             ],
