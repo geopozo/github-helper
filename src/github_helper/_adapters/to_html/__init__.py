@@ -37,17 +37,23 @@ class RepoRow:
         return html.tr(
             html.td(html.span("📌" if repo["pinned"] else "")),
             html.td(
-                html.a(repo["owner"], href=f"{github_com}/{repo['owner']}"),
-                class_="owner",
-            ),
-            html.td(html.span("/")),
-            html.td(
-                html.a(
-                    repo["name"],
-                    href=f"{github_com}/{repo['owner']}/{repo['name']}",
-                    target="_blank",
+                html.span(
+                    html.a(
+                        repo["owner"],
+                        href=f"{github_com}/{repo['owner']}",
+                        target="_blank",
+                    ),
+                    class_="owner",
                 ),
-                class_="repo",
+                html.span("/"),
+                html.span(
+                    html.a(
+                        repo["name"],
+                        href=f"{github_com}/{repo['owner']}/{repo['name']}",
+                        target="_blank",
+                    ),
+                    class_="repo",
+                ),
             ),
             html.td(html.span(repo["version"])),
             html.td(html.span("⑂" if repo["fork"] else "")),
