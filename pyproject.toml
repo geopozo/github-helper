@@ -10,8 +10,8 @@ enabled = true
 
 [tool.setuptools.package-data]
 gh_helper = [
-  'gh_helper/_adapters/to_html/_styles',
-  'gh_helper/_adapters/to_html/_js',
+  'gh_helper/_adapters/to_html/_styles/*.css',
+  'gh_helper/_adapters/to_html/_js/*.js',
 ]
 
 [project]
