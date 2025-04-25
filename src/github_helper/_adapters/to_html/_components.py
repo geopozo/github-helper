@@ -1,4 +1,7 @@
-from htmy import Component, core, html
+import logistro
+from htmy import Component, Renderer, core, html
+
+_logger = logistro.getLogger(__name__)
 
 
 def modal(
@@ -39,3 +42,22 @@ def table(
         id=table_id,
         class_=class_name,
     )
+
+
+async def render_page(
+    heads: core.BaseTag,
+    content: core.BaseTag,
+):
+    tailwindcss_cdn = "https://cdn.tailwindcss.com"
+    _logger.debug("Rendering.")
+    page = (
+        html.DOCTYPE.html,
+        html.html(
+            html.head(
+                html.script(src=tailwindcss_cdn),
+                *heads,
+            ),
+            html.body(*content),
+        ),
+    )
+    return await Renderer().render(page)
