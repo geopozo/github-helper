@@ -41,6 +41,15 @@ if not sys.stdout.isatty():
     Fore = Back = Style = NoColor()  # type: ignore[misc, assignment]
 
 
+def filter_versions(versions: list[dict]):
+    # this needs to return a list of dictionaries
+    _regex = re.compile(
+        r"^" + version.VERSION_PATTERN + r"$",
+        re.VERBOSE,
+    )
+    return [v for v in versions if _regex.match(v.get("tag", ""))]
+
+
 # maybe combine these functions into a "normal versions"
 # we talk a list of dictionaries, all have to have a "tag" key (version)
 # and what would we mark?
@@ -57,7 +66,7 @@ def order_versions(versions: list[dict], key: str):
     )
 
 
-def check_conformant(name):
+def get_version_info(name: str):
     try:
         parsed = version.Version(name)
         # we have to do this reverse check
@@ -86,7 +95,7 @@ def check_conformant(name):
 def conform_versions(versions: list[dict]):
     versions_dict: dict = {}
     for v in versions:
-        _, v["conformant"] = check_conformant(v["tag"])
+        _, v["conformant"] = get_version_info(v["tag"])
         if v["conformant"]:
             if v["tag"].startswith("V"):
                 v["tag"][0] = "v"
@@ -103,15 +112,6 @@ def conform_versions(versions: list[dict]):
         else:
             versions_dict[v["tag"]] = v
     return versions_dict
-
-
-def filter_versions(versions: list[dict]):
-    # this needs to return a list of dictionaries
-    _regex = re.compile(
-        r"^" + version.VERSION_PATTERN + r"$",
-        re.VERBOSE,
-    )
-    return [v for v in versions if _regex.match(v.get("tag", ""))]
 
 
 bdist_template = {
@@ -228,7 +228,7 @@ class ReleaseAudit:
         [self.summarize_file(file) for file in release["files"]]
 
     def explode_versions(self):
-        v, _ = check_conformant(self.tag)
+        v, _ = get_version_info(self.tag)
         if not v:
             return None
         ret = {
