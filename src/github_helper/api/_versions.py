@@ -23,7 +23,9 @@ How do I improve parsing?
 import copy
 import re
 import sys
+from dataclasses import dataclass
 from enum import StrEnum
+from functools import total_ordering
 
 import logistro
 import semver
@@ -65,6 +67,8 @@ def order_versions(versions: list[dict], key: str):
 _VersionTypes = semver.Version | pyversion.Version
 
 
+@total_ordering
+@dataclass(frozen=True, slots=True)
 class Version:
     """A unified version class."""
 
@@ -86,13 +90,13 @@ class Version:
     _parsed: _VersionTypes
 
     def __init__(self, tag: str):
-        self.tag = tag
+        object.__setattr__(self, "tag", tag)
         parsed_v, kind = self._test_parsers()
         if not parsed_v or not kind:
-            self.valid = False
+            object.__setattr__(self, "valid", False)
             return
-        self.valid = True
-        self.type = kind
+        object.__setattr__(self, "valid", True)
+        object.__setattr__(self, "type", kind)
         self._enumerate_version(parsed_v)
 
     def _test_parsers(
@@ -125,20 +129,68 @@ class Version:
 
     def _enumerate_version(self, v: _VersionTypes) -> None:
         """Break tag attributes into unified attributes."""
-        self._parsed = v
-        self.major = v.major
-        self.minor = v.minor
-        self.patch = v.patch if hasattr(v, "patch") else v.micro
-        self.pre = str(
-            v.prerelease
-            if hasattr(v, "prerelease")
-            else (f"{v.pre[0]}{v.pre[1]}" if v.pre else ""),
+        object.__setattr__(self, "_parsed", v)
+        object.__setattr__(self, "major", v.major)
+        object.__setattr__(self, "minor", v.minor)
+        object.__setattr__(
+            self,
+            "patch",
+            v.patch if hasattr(v, "patch") else v.micro,
         )
-        self.dev = str(v.dev) if hasattr(v, "dev") else ""
-        self.post = str(v.post) if hasattr(v, "post") else ""
-        self.is_prerelease = (
-            v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.prerelease)
+        object.__setattr__(
+            self,
+            "pre",
+            str(
+                v.prerelease
+                if hasattr(v, "prerelease")
+                else (f"{v.pre[0]}{v.pre[1]}" if v.pre else ""),
+            ),
         )
+        object.__setattr__(
+            self,
+            "dev",
+            str(v.dev) if hasattr(v, "dev") else "",
+        )
+        object.__setattr__(
+            self,
+            "post",
+            str(v.post) if hasattr(v, "post") else "",
+        )
+        object.__setattr__(
+            self,
+            "is_prerelease",
+            (v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.prerelease)),
+        )
+
+    def __str__(self):
+        return str(self._parsed)
+
+    def __repr__(self):
+        return str(self._parsed)
+
+    def _cmp_tuple(self) -> tuple:
+        return (
+            self.major,
+            self.minor,
+            self.patch,
+            self.pre,
+            self.dev,
+            self.post,
+        )
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, _VersionTypes):
+            other = Version(str(other))
+        elif not isinstance(other, Version):
+            raise NotImplementedError
+        return self._cmp_tuple() == other._cmp_tuple()
+
+    def __lt__(self, other: object) -> bool:
+        if isinstance(other, _VersionTypes):
+            other = Version(str(other))
+        elif not isinstance(other, Version):
+            raise NotImplementedError
+        return self._cmp_tuple() < other._cmp_tuple()
 
 
 #### HERE BE DRAGONS #####
