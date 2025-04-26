@@ -23,7 +23,6 @@ How do I improve parsing?
 import copy
 import re
 import sys
-from dataclasses import field
 
 import logistro
 import semver
@@ -85,7 +84,7 @@ def check_conformant(name):
 
 
 def conform_versions(versions: list[dict]):
-    versions_dict = {}
+    versions_dict: dict = {}
     for v in versions:
         _, v["conformant"] = check_conformant(v["tag"])
         if v["conformant"]:
@@ -112,7 +111,7 @@ def filter_versions(versions: list[dict]):
         r"^" + version.VERSION_PATTERN + r"$",
         re.VERBOSE,
     )
-    return [v for v in versions if _regex.match(v.get("tag"))]
+    return [v for v in versions if _regex.match(v.get("tag", ""))]
 
 
 bdist_template = {
@@ -187,13 +186,13 @@ class ReleaseAudit:
 
     prerelease_agree: bool
     """Does the version agree with the mark about prerelease."""
-    file_notes: field(default_factory=dict[str, dict])
+    file_notes: dict[str, dict]
     """A dict representing the first interpretation of any file."""
-    unknown_files: field(default_factory=set)
+    unknown_files: set
     """Files that couldn't be understood trying to calculate notes."""
-    ignore_counter: field(default_factory=dict[str, int])
+    ignore_counter: dict[str, int]
 
-    projects: field(default_factory=dict)
+    projects: dict
     """A list of the projects found in this release."""
 
     def __repr__(self):
