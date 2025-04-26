@@ -25,9 +25,9 @@ import re
 import sys
 from dataclasses import field
 
-import colored
 import logistro
 import semver
+from colored import Back, Fore, Style
 from packaging import utils, version
 
 _logger = logistro.getLogger(__name__)
@@ -39,7 +39,7 @@ if not sys.stdout.isatty():
             return ""
 
     # Override colored's foreground, background, and style
-    colored.Fore = colored.Back = colored.Style = NoColor()
+    Fore = Back = Style = NoColor()  # type: ignore[misc, assignment]
 
 
 # maybe combine these functions into a "normal versions"
@@ -248,9 +248,9 @@ class ReleaseAudit:
     def __str__(self):  # noqa: C901, PLR0912
         ret = ""
         if not self.prerelease_agree:
-            ret += f"{colored.Fore.red}PRERELEASE DISAGREEMENT{colored.Style.reset}\n"
+            ret += f"{Fore.red}PRERELEASE DISAGREEMENT{Style.reset}\n"
         if not self.projects:
-            ret += f"{colored.Fore.red}No Valid Projects Found.{colored.Style.reset}\n"
+            ret += f"{Fore.red}No Valid Projects Found.{Style.reset}\n"
         else:
             for k, v in self.projects.items():
                 if k.startswith("python/"):
@@ -260,20 +260,15 @@ class ReleaseAudit:
                         warn = "bdist"
                     if not v["sdist"]:
                         warn = ", sdist" if warn else "sdist"
-                    warn = (
-                        f", {colored.Fore.red}missing {warn}{colored.Style.reset}"
-                        if warn
-                        else ""
-                    )
+                    warn = f", {Fore.red}missing {warn}{Style.reset}" if warn else ""
 
                     pure = ""
                     if v["pure"]:
                         pure = (
-                            f", {colored.Fore.green}pure: {', '.join(v['pure'])}"
-                            f"{colored.Style.reset}"
+                            f", {Fore.green}pure: {', '.join(v['pure'])}{Style.reset}"
                         )
 
-                    ret += f"{colored.Style.bold}{k}{colored.Style.reset}{warn}{pure}\n"
+                    ret += f"{Style.bold}{k}{Style.reset}{warn}{pure}\n"
 
                     ## look at tags
                     ret += (
@@ -287,15 +282,15 @@ class ReleaseAudit:
                         ret += "\n ".join(v["unknown-tags"]) + "\n"
         if self.unknown_files:
             ret += (
-                f"{colored.Fore.yellow}{colored.Style.bold}"
+                f"{Fore.yellow}{Style.bold}"
                 f"{len(self.unknown_files)} Unknown Files:"
-                f"{colored.Style.reset}\n"
+                f"{Style.reset}\n"
             )
             for i, f in enumerate(self.unknown_files):
                 if i > 3:  # noqa: PLR2004
-                    ret += f" {colored.Fore.yellow}...{colored.Style.reset}\n"
+                    ret += f" {Fore.yellow}...{Style.reset}\n"
                     break
-                ret += f" {colored.Fore.yellow}{f}{colored.Style.reset}\n"
+                ret += f" {Fore.yellow}{f}{Style.reset}\n"
         if self.ignore_counter:
             ret += "ignored: "
             for k, v in self.ignore_counter.items():
@@ -491,12 +486,9 @@ class ReleaseAudit:
                 next_indent = indent + ("    " if is_last else "|   ")
                 lines.append(f"{indent}{branch}{key}")
                 if not value:
-                    lines[-1] += f" {colored.Fore.red}missing{colored.Style.reset}"
+                    lines[-1] += f" {Fore.red}missing{Style.reset}"
                 elif isinstance(value, dict):
                     lines.extend(self._build_tree_str(value, next_indent))
                 elif isinstance(value, (list, tuple)):
-                    lines[-1] += (
-                        f" {colored.Fore.green}>> "
-                        f"{', '.join(value)}{colored.Style.reset}"
-                    )
+                    lines[-1] += f" {Fore.green}>> {', '.join(value)}{Style.reset}"
         return lines
