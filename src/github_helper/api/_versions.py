@@ -62,7 +62,7 @@ def order_versions(versions: list[dict], key: str):
     )
 
 
-_InputVersions = semver.Version | pyversion.Version
+_VersionTypes = semver.Version | pyversion.Version
 
 
 class Version:
@@ -76,66 +76,68 @@ class Version:
     tag: str
     valid: bool
     type: Type
-    major: str
-    minor: str
-    patch: str
+    major: int
+    minor: int
+    patch: int
     pre: str
     dev: str
     post: str
     is_prerelease: bool
-    _parsed: _InputVersions
+    _parsed: _VersionTypes
 
     def __init__(self, tag: str):
         self.tag = tag
         parsed_v, kind = self._test_parsers()
-        self.valid = bool(parsed_v)
-        if not self.valid or not kind:
+        if not parsed_v or not kind:
+            self.valid = False
             return
+        self.valid = True
         self.type = kind
         self._enumerate_version(parsed_v)
 
     def _test_parsers(
         self,
-    ) -> (
-        _InputVersions | None,
-        Type | None,
-    ):
+    ) -> tuple[_VersionTypes | None, Type | None]:
         """See which parsers handle the tag."""
         tag = self.tag
         try:
-            parsed = pyversion.Version(tag)
+            parsed: _VersionTypes = pyversion.Version(tag)
 
             if str(parsed) != tag[1:] if tag.startswith("v") else tag:
                 old_parsed = parsed
                 try:
                     parsed = semver.Version.parse(tag)
                 except ValueError:
-                    return old_parsed, Version.Status.MALFORMED
+                    return old_parsed, Version.Type.MALFORMED
                 else:
-                    return parsed, Version.Status.PYTHON
+                    return parsed, Version.Type.PYTHON
         except pyversion.InvalidVersion:
             pass
         else:
-            return parsed, Version.Status.PYTHON
+            return parsed, Version.Type.PYTHON
         try:
             parsed = semver.Version.parse(tag)
         except ValueError:
             pass
         else:
-            return parsed, Version.Status.SemVer
+            return parsed, Version.Type.SEMVER
         return None, None
 
-    def _enumerate_version(self, v: _InputVersions) -> None:
+    def _enumerate_version(self, v: _VersionTypes) -> None:
         """Break tag attributes into unified attributes."""
         self._parsed = v
         self.major = v.major
         self.minor = v.minor
         self.patch = v.patch if hasattr(v, "patch") else v.micro
-        self.pre = v.prerelease if hasattr(v, "prerelease") else v.pre
-        self.dev = v.dev if hasattr(v, "dev") else None
-        self.post = v.post if hasattr(v, "post") else None
+        self.pre = str(
+            v.prerelease
+            if hasattr(v, "prerelease")
+            else (f"{v.pre[0]}{v.pre[1]}" if v.pre else ""),
+        )
+        self.dev = str(v.dev) if hasattr(v, "dev") else ""
+        self.post = str(v.post) if hasattr(v, "post") else ""
         self.is_prerelease = (
-            v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.pre)
+            v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.prerelease)
         )
 
 
