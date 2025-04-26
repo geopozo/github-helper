@@ -23,11 +23,13 @@ How do I improve parsing?
 import copy
 import re
 import sys
+from enum import StrEnum
 
 import logistro
 import semver
 from colored import Back, Fore, Style
-from packaging import utils, version
+from packaging import utils
+from packaging import version as pyversion
 
 _logger = logistro.getLogger(__name__)
 
@@ -44,58 +46,106 @@ if not sys.stdout.isatty():
 def filter_versions(versions: list[dict]):
     # this needs to return a list of dictionaries
     _regex = re.compile(
-        r"^" + version.VERSION_PATTERN + r"$",
+        r"^" + pyversion.VERSION_PATTERN + r"$",
         re.VERBOSE,
     )
     return [v for v in versions if _regex.match(v.get("tag", ""))]
 
 
-# maybe combine these functions into a "normal versions"
-# we talk a list of dictionaries, all have to have a "tag" key (version)
-# and what would we mark?
-# a) we'd sort.
-# b) we'd regulate how the tag is expressed (v or no)
-# c) we'd determine if its empty or malformed
 def order_versions(versions: list[dict], key: str):
     if not versions:
         return versions
     return sorted(
         versions,
-        key=lambda x: version.parse(x[key]),
+        key=lambda x: pyversion.parse(x[key]),
         reverse=True,
     )
 
 
-def get_version_info(name: str):
-    try:
-        parsed = version.Version(name)
-        # we have to do this reverse check
-        # because python is flexible/tolerant with bad versions
-        if str(parsed) != name[1:] if name.startswith("v") else name:
-            old_parsed = parsed
-            try:
-                parsed = semver.Version.parse(name)
-            except ValueError:
-                return old_parsed, "Malformed Python"
-            else:
-                return parsed, "SemVer"
-    except version.InvalidVersion:
-        pass
-    else:
-        return parsed, "Python"
-    try:
-        parsed = semver.Version.parse(name)
-    except ValueError:
-        pass
-    else:
-        return parsed, "SemVer"
-    return None, None
+_InputVersions = semver.Version | pyversion.Version
+
+
+class Version:
+    """A unified version class."""
+
+    class Type(StrEnum):
+        PYTHON = "Python"
+        SEMVER = "SemVer"
+        MALFORMED = "Malformed Python"
+
+    tag: str
+    valid: bool
+    type: Type
+    major: str
+    minor: str
+    patch: str
+    pre: str
+    dev: str
+    post: str
+    is_prerelease: bool
+    _parsed: _InputVersions
+
+    def __init__(self, tag: str):
+        self.tag = tag
+        parsed_v, kind = self._test_parsers()
+        self.valid = bool(parsed_v)
+        if not self.valid or not kind:
+            return
+        self.type = kind
+        self._enumerate_version()
+
+    def _test_parsers(
+        self,
+    ) -> (
+        _InputVersions | None,
+        Type | None,
+    ):
+        """See which parsers handle the tag."""
+        tag = self.tag
+        try:
+            parsed = pyversion.Version(tag)
+
+            if str(parsed) != tag[1:] if tag.startswith("v") else tag:
+                old_parsed = parsed
+                try:
+                    parsed = semver.Version.parse(tag)
+                except ValueError:
+                    return old_parsed, Version.Status.MALFORMED
+                else:
+                    return parsed, Version.Status.PYTHON
+        except pyversion.InvalidVersion:
+            pass
+        else:
+            return parsed, Version.Status.PYTHON
+        try:
+            parsed = semver.Version.parse(tag)
+        except ValueError:
+            pass
+        else:
+            return parsed, Version.Status.SemVer
+        return None, None
+
+    def _enumerate_version(self, v: _InputVersions) -> None:
+        """Break tag attributes into unified attributes."""
+        self._parsed = v
+        self.major = v.major
+        self.minor = v.minor
+        self.patch = v.patch if hasattr(v, "patch") else v.micro
+        self.pre = v.prerelease if hasattr(v, "prerelease") else v.pre
+        self.dev = v.dev if hasattr(v, "dev") else None
+        self.post = v.post if hasattr(v, "post") else None
+        self.is_prerelease = (
+            v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.pre)
+        )
+
+        #### HERE BE DRAGONS #####
 
 
 def conform_versions(versions: list[dict]):
     versions_dict: dict = {}
     for v in versions:
-        _, v["conformant"] = get_version_info(v["tag"])
+        temp = Version(v["tag"])
+        v["conformant"] = temp.type
         if v["conformant"]:
             if v["tag"].startswith("V"):
                 v["tag"][0] = "v"
@@ -226,23 +276,6 @@ class ReleaseAudit:
         )
 
         [self.summarize_file(file) for file in release["files"]]
-
-    def explode_versions(self):
-        v, _ = get_version_info(self.tag)
-        if not v:
-            return None
-        ret = {
-            "major": v.major,
-            "minor": v.minor,
-            "patch": v.patch if hasattr(v, "patch") else v.micro,
-            "pre": v.prerelease if hasattr(v, "prerelease") else v.pre,
-            "dev": v.dev if hasattr(v, "dev") else None,
-            "post": v.post if hasattr(v, "post") else None,
-        }
-        ret["is_prerelease"] = (
-            v.is_prerelease if hasattr(v, "is_prerelease") else bool(ret["pre"])
-        )
-        return ret
 
     def __str__(self):  # noqa: C901, PLR0912
         ret = ""
