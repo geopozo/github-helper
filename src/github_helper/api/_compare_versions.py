@@ -64,7 +64,13 @@ def check_conformant(name):
         # we have to do this reverse check
         # because python is flexible/tolerant with bad versions
         if str(parsed) != name[1:] if name.startswith("v") else name:
-            raise version.InvalidVersion  # noqa: TRY301
+            old_parsed = parsed
+            try:
+                parsed = semver.Version.parse(name)
+            except ValueError:
+                return old_parsed, "Malformed Python"
+            else:
+                return parsed, "SemVer"
     except version.InvalidVersion:
         pass
     else:
