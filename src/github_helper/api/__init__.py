@@ -322,7 +322,7 @@ class GHApi:
         sadness = int(not projects)
         return projects, sadness
 
-    async def get_remote_tags(self, repo):
+    async def get_remote_tags(self, repo, count=None, *, order_by_version=False):
         """Return tags ("tag":"name") for a repo."""
         _ = await self.get_user()
         tags_jq = jq.compile("map({tag: .name})")
@@ -333,7 +333,12 @@ class GHApi:
         srv.check_retval(retval, err, endpoint=endpoint)
         tags = tags_jq.input_value(orjson.loads(out)).first()
         sadness = int(not tags)
-        return tags, sadness
+        if order_by_version:
+            tags = _compare_versions.order_versions(
+                _compare_versions.filter_versions(tags),
+                "tag",
+            )
+        return tags[:count], sadness
 
     # probably need to handle specific projects
     # project metadata usually has github repo
@@ -442,23 +447,28 @@ class GHApi:
             sadness,
         )
 
-    async def audit_versions(self, repo):
+    async def audit_versions(self, repo, count=15):
         """
         Verify that version of a repository have differences.
 
         Args:
             repo: the name of the repo to verify. Can be "owner/repo" or just
             "repo" and owner is assumed to be the current user.
+            count: the number of versions to look at
 
         """
         # puede mezclar proyectos acá
         # Ignoramos nombre de proyecto
         # todavia no probamos con mas de un projection en repositorio
         async with asyncio.TaskGroup() as tg:
-            tags_task = tg.create_task(self.get_remote_tags(repo))
+            tags_task = tg.create_task(
+                self.get_remote_tags(repo, order_by_version=True),
+            )
             releases_task = tg.create_task(self.audit_releases(repo))
             pypi_task = tg.create_task(self.audit_pypi(repo))
-            test_pypi_task = tg.create_task(self.audit_pypi(repo, testing=True))
+            test_pypi_task = tg.create_task(
+                self.audit_pypi(repo, testing=True),
+            )
             # que hacemos con sadness?
             tags, _ = await tags_task
             releases, _ = await releases_task
@@ -512,9 +522,15 @@ class GHApi:
                         else yes()
                     ),
                     "tag valid": (_compare_versions.check_conformant(v)[1] or no()),
+                    "incongruency": _compare_versions.compare_audits(
+                        v,
+                        releases=c_releases,
+                        pypi=c_pypi,
+                        test_pypi=c_test_pypi,
+                    ),
                 }
                 for v in all_versions
-            ],
+            ][:count],
             "version",
         )
         return result, 0  # maybe no sadness for audit?

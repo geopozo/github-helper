@@ -149,17 +149,76 @@ bdist_template = {
 }
 
 
+def compare_audits(v, **audits):  # noqa: C901
+    all_tags = set()
+    for a in audits.values():
+        audit = a.get(v, {}).get("audit", None)
+        if not audit:
+            continue
+        for project in audit.projects.values():
+            all_tags.update(project.get("all_tags", {}))
+    results = {}
+
+    # this inversion sucks
+    # what to do if project is missing
+    for tag in all_tags:
+        results[tag] = set()
+        for name, a in audits.items():
+            audit = a.get(v, {}).get("audit", None)
+            if not audit:
+                results[tag].add(name)
+                continue
+            for project in audit.projects.values():
+                if tag in project.get("all_tags", {}):
+                    break
+            else:
+                results[tag].add(name)
+        if not results[tag]:
+            del results[tag]
+    output = ""
+    for tag, problems in results.items():
+        output += f"{tag}: {', '.join(problems)}\n"
+
+    return output
+
+
 class ReleaseAudit:
+    """Release audit turns a release object into a summary."""
+
     prerelease_agree: bool
-    projects: field(default_factory=dict)
+    """Does the version agree with the mark about prerelease."""
     file_notes: field(default_factory=dict[str, dict])
+    """A dict representing the first interpretation of any file."""
     unknown_files: field(default_factory=set)
+    """Files that couldn't be understood trying to calculate notes."""
     ignore_counter: field(default_factory=dict[str, int])
+
+    projects: field(default_factory=dict)
+    """A list of the projects found in this release."""
+
+    def __repr__(self):
+        ignore_len = sum(self.ignore_counter.values())
+        project_tag_count = [
+            f"{k}: {len(v['all_tags'])}" for k, v in self.projects.items()
+        ]
+
+        return (
+            f"pre-agree: {self.prerelease_agree}; "
+            f"projects: {', '.join(project_tag_count)}; "
+            f"{len(self.file_notes)} files w/ notes; "
+            f"{len(self.unknown_files)} unknown files; "
+            f"{ignore_len} ignored files."
+        )
 
     def __init__(self, release, *, prerelease_respect=False):
         self.tag = release["tag"]
         self.version = self.explode_versions()
+        self.file_notes = {}
+        self.unknown_files = set()
+        self.ignore_counter = {}
+        self.projects = {}
         if not self.version:
+            self.prerelease_agree = None
             return
         self.prerelease_agree = (
             (self.version["is_prerelease"] == release["prerelease"])
@@ -167,10 +226,6 @@ class ReleaseAudit:
             else prerelease_respect
         )
 
-        self.file_notes = {}
-        self.unknown_files = set()
-        self.ignore_counter = {}
-        self.projects = {}
         [self.summarize_file(file) for file in release["files"]]
 
     def explode_versions(self):
@@ -258,6 +313,7 @@ class ReleaseAudit:
                 self._build_python_project_summary(notes)
             case _:
                 self.unknown_files.add(filename)
+        self.file_notes[filename] = notes
         return notes
 
     # the action you return will trigger behavior above
@@ -305,12 +361,14 @@ class ReleaseAudit:
                 "pure": [],
                 "bdist-tree": None,
                 "unknown-tags": [],
+                "all_tags": set(),
             }
         ref = self.projects[name]
         if notes.get("type") == "sdist":
             ref["sdist"] = True
         elif notes.get("type") == "bdist":
             ref["bdist"] = True
+            ref["all_tags"].update(notes.get("tags"))
             for t in notes.get("tags"):
                 pair = f"{t.interpreter}-{t.abi}"
                 # t.abi, t.interpreter, t.platform
