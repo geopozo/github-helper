@@ -92,7 +92,7 @@ class Version:
         if not self.valid or not kind:
             return
         self.type = kind
-        self._enumerate_version()
+        self._enumerate_version(parsed_v)
 
     def _test_parsers(
         self,
@@ -138,7 +138,8 @@ class Version:
             v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.pre)
         )
 
-        #### HERE BE DRAGONS #####
+
+#### HERE BE DRAGONS #####
 
 
 def conform_versions(versions: list[dict]):
