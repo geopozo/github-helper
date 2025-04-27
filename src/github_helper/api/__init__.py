@@ -17,7 +17,7 @@ from github_helper._services import repos as repo_srv
 from github_helper._services import ssh_srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
-from github_helper.api import _audit, _versions
+from github_helper.api import _audit, versions
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
@@ -334,8 +334,8 @@ class GHApi:
         tags = tags_jq.input_value(orjson.loads(out)).first()
         sadness = int(not tags)
         if order_by_version:
-            tags = _versions.order_versions(
-                _versions.filter_versions(tags),
+            tags = versions.order_versions(
+                versions.filter_versions(tags),
                 "tag",
             )
         return tags[:count], sadness
@@ -369,7 +369,7 @@ class GHApi:
                 response = await session.get(url)
                 pypi_json = await response.json()
                 data = pypi_jq.input_value(pypi_json).first()
-                return _versions.order_versions(data, "tag")
+                return versions.order_versions(data, "tag")
             finally:
                 await response.release()
                 await session.close()
@@ -394,7 +394,7 @@ class GHApi:
             return None, sadness
 
         for release in releases:
-            release["audit"] = _versions.ReleaseAudit(
+            release["audit"] = versions.ReleaseAudit(
                 release,
                 prerelease_respect=True,
             )
@@ -402,7 +402,7 @@ class GHApi:
         # I want count to be the API call or something
         # but it has to be ordered first.
         return (
-            _versions.order_versions(releases, "tag")[:count],
+            versions.order_versions(releases, "tag")[:count],
             sadness,
         )
 
@@ -438,12 +438,12 @@ class GHApi:
             return None, sadness
 
         for release in releases:
-            release["audit"] = _versions.ReleaseAudit(release)
+            release["audit"] = versions.ReleaseAudit(release)
 
         # I want count to be the API call or something
         # but it has to be ordered first.
         return (
-            _versions.order_versions(releases, "tag")[:count],
+            versions.order_versions(releases, "tag")[:count],
             sadness,
         )
 
@@ -475,12 +475,12 @@ class GHApi:
             pypi, _ = await pypi_task
             test_pypi, _ = await test_pypi_task
 
-        c_tags = _versions.conform_versions(
-            _versions.filter_versions(tags),
+        c_tags = versions.conform_versions(
+            versions.filter_versions(tags),
         )
-        c_releases = _versions.conform_versions(releases)
-        c_pypi = _versions.conform_versions(pypi)
-        c_test_pypi = _versions.conform_versions(test_pypi)
+        c_releases = versions.conform_versions(releases)
+        c_pypi = versions.conform_versions(pypi)
+        c_test_pypi = versions.conform_versions(test_pypi)
 
         all_versions = (
             c_tags.keys() | c_releases.keys() | c_pypi.keys() | c_test_pypi.keys()
@@ -495,7 +495,7 @@ class GHApi:
         def empty(x="Empty"):
             return f"{colored.Fore.yellow}{x}{colored.Style.reset}"
 
-        result = _versions.order_versions(
+        result = versions.order_versions(
             [
                 {
                     "version": v,
@@ -521,8 +521,8 @@ class GHApi:
                         if c_test_pypi[v]["empty"]
                         else yes()
                     ),
-                    "tag valid": (_versions.get_version_info(v)[1] or no()),
-                    "incongruency": _versions.compare_audits(
+                    "tag valid": (versions.get_version_info(v)[1] or no()),
+                    "incongruency": versions.compare_audits(
                         v,
                         releases=c_releases,
                         pypi=c_pypi,
