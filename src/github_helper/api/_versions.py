@@ -64,25 +64,73 @@ def order_versions(versions: list[dict], key: str):
     )
 
 
-_VersionTypes = semver.Version | pyversion.Version
+_tag_part_re = re.compile(r"^(\d*)(?:\.(.*))?$")
+
+
+@dataclass(frozen=True, slots=True)
+class BadVersion:
+    """A weak parse that looks for instances where someone tried to tag."""
+
+    major: int
+    minor: int
+    patch: int  # semver name
+    prerelease = ""  # semver name
+
+    def __init__(self, tag: str):
+        """Look for tag-like structures that parsers won't return."""
+        object.__setattr__(self, "tag", tag)
+        object.__setattr__(self, "major", 0)
+        object.__setattr__(self, "minor", 0)
+        object.__setattr__(self, "patch", 0)
+        if not tag.startswith(("v", "V")):
+            raise ValueError
+        else:
+            major_match = _tag_part_re.search(tag[1:])
+            if not major_match:
+                raise ValueError
+            # else
+            object.__setattr__(self, "major", int(major_match.group(1)))
+            if not major_match.group(2):
+                return
+            # else
+            minor_match = _tag_part_re.search(major_match.group(2))
+            if not minor_match:
+                object.__setattr__(self, "prerelease", major_match.group(2))
+                return
+            # else
+            object.__setattr__(self, "minor", int(minor_match.group(1)))
+            if not minor_match.group(2):
+                return
+            # else
+            patch_match = _tag_part_re.search(minor_match.group(2))
+            if not patch_match:
+                object.__setattr__(self, "prerelease", minor_match.group(2))
+                return
+            # else
+            object.__setattr__(self, "patch", patch_match.group(1))
+            object.__setattr__(self, "prerelease", patch_match.group(2) or "")
+
+
+_VersionTypes = semver.Version | pyversion.Version | BadVersion
 
 
 @total_ordering
 @dataclass(frozen=True, slots=True)
 class Version:
-    """A unified version class."""
+    """A unified version class. Most similar to Python, not SemVer."""
 
     class Type(StrEnum):
         PYTHON = "Python"
         SEMVER = "SemVer"
         MALFORMED = "Malformed Python"
+        UNPARSABLE = "Unparsable"
 
     tag: str
     valid: bool
     type: Type
     major: int
     minor: int
-    patch: int
+    micro: int
     pre: str
     dev: str
     post: str
@@ -134,16 +182,16 @@ class Version:
         object.__setattr__(self, "minor", v.minor)
         object.__setattr__(
             self,
-            "patch",
-            v.patch if hasattr(v, "patch") else v.micro,
+            "micro",
+            v.micro if hasattr(v, "micro") else v.patch,
         )
         object.__setattr__(
             self,
             "pre",
             str(
-                v.prerelease
-                if hasattr(v, "prerelease")
-                else (f"{v.pre[0]}{v.pre[1]}" if v.pre else ""),
+                (f"{v.pre[0]}{v.pre[1]}" if v.pre else "")
+                if hasattr(v, "pre")
+                else v.prerelease,
             ),
         )
         object.__setattr__(
@@ -172,7 +220,7 @@ class Version:
         return (
             self.major,
             self.minor,
-            self.patch,
+            self.micro,
             self.pre,
             self.dev,
             self.post,
