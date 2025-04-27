@@ -45,6 +45,29 @@ if not sys.stdout.isatty():
     Fore = Back = Style = NoColor()  # type: ignore[misc, assignment]
 
 
+def conform_versions(versions: list[dict]):
+    versions_dict: dict = {}
+    for v in versions:
+        temp = Version(v["tag"])
+        v["conformant"] = temp.type
+        if v["conformant"]:
+            if v["tag"].startswith("V"):
+                v["tag"][0] = "v"
+            elif not v["tag"].startswith("v"):
+                v["tag"] = f"v{v['tag']}"
+        # always true for tag, use audit
+        _logger.debug2(f"Files in {v['tag']}: {len(v.get('files', []))}")
+        v["empty"] = not bool(v.get("files"))
+        _logger.debug2(f"Empty {v['empty']} from {v.get('files')}")
+        if v["tag"] in versions_dict:
+            cur = versions_dict[v["tag"]]
+            cur["empty"] = v["empty"]
+            cur["files"].extend(v["files"])
+        else:
+            versions_dict[v["tag"]] = v
+    return versions_dict
+
+
 def filter_versions(versions: list[dict]):
     # this needs to return a list of dictionaries
     _regex = re.compile(
@@ -244,29 +267,6 @@ class Version:
 #### HERE BE DRAGONS #####
 
 
-def conform_versions(versions: list[dict]):
-    versions_dict: dict = {}
-    for v in versions:
-        temp = Version(v["tag"])
-        v["conformant"] = temp.type
-        if v["conformant"]:
-            if v["tag"].startswith("V"):
-                v["tag"][0] = "v"
-            elif not v["tag"].startswith("v"):
-                v["tag"] = f"v{v['tag']}"
-        # always true for tag, use audit
-        _logger.debug2(f"Files in {v['tag']}: {len(v.get('files', []))}")
-        v["empty"] = not bool(v.get("files"))
-        _logger.debug2(f"Empty {v['empty']} from {v.get('files')}")
-        if v["tag"] in versions_dict:
-            cur = versions_dict[v["tag"]]
-            cur["empty"] = v["empty"]
-            cur["files"].extend(v["files"])
-        else:
-            versions_dict[v["tag"]] = v
-    return versions_dict
-
-
 bdist_template = {
     "Windows": {
         "x86_64": [],
@@ -464,7 +464,12 @@ class ReleaseAudit:
                 }
         elif filename.endswith(".whl"):
             try:
-                name, version, build, compat_tags = utils.parse_wheel_filename(filename)
+                (
+                    name,
+                    version,
+                    build,
+                    compat_tags,
+                ) = utils.parse_wheel_filename(filename)
             except utils.InvalidWheelFilename:
                 _logger.debug(f"Invalid Wheel Filename: {filename}")
                 return {"error": "invalid name", "value": filename}
