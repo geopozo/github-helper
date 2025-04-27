@@ -5,6 +5,7 @@ import re
 import tomllib
 import warnings
 from pathlib import Path
+from typing import TypedDict, TypeVar
 
 import aiohttp
 import colored
@@ -49,6 +50,11 @@ def _log_one_json(obj):
             option=orjson.OPT_INDENT_2,
         ).decode()
         _logger.debug2(f"gh result:\n {raw!s}")
+
+
+_T = TypeVar("_T")
+RetVal = tuple[_T, int]
+"""Return type for api's that can exit the program."""
 
 
 class GHApi:
@@ -286,6 +292,7 @@ class GHApi:
         sadness = int(not repos)
         return repos, sadness
 
+    # this should take a name TODO (or several)
     async def get_project_configs(self, repo):
         """Find all projects in a repo."""
         owner, repo = self._split_full_name(full_name=repo)
@@ -322,7 +329,12 @@ class GHApi:
         sadness = int(not projects)
         return projects, sadness
 
-    async def get_remote_tags(self, repo, count=None, *, order_by_version=False):
+    class Tags(TypedDict):
+        """Return type for get_remote_tags."""  # noqa: D204 blank line ugly
+
+        tag: str
+
+    async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tags]]:
         """Return tags ("tag":"name") for a repo."""
         _ = await self.get_user()
         tags_jq = jq.compile("map({tag: .name})")
@@ -333,16 +345,22 @@ class GHApi:
         srv.check_retval(retval, err, endpoint=endpoint)
         tags = tags_jq.input_value(orjson.loads(out)).first()
         sadness = int(not tags)
-        if order_by_version:
-            tags = versions.order_versions(
-                versions.filter_versions(tags),
-                "tag",
-            )
         return tags[:count], sadness
 
-    # probably need to handle specific projects
-    # project metadata usually has github repo
-    async def get_pypi(self, repo, *, testing=False, flatten=False):
+    class Release(TypedDict):
+        """Release object containing version and files."""  # noqa: D204 ugly
+
+        tag: str
+        files: list[str]
+
+    # TODO: take project name, not repo
+    async def get_pypi(
+        self,
+        repo: str,
+        *,
+        testing: bool = False,
+        flatten: bool = False,
+    ) -> RetVal[dict[str, list[Release]] | list[Release]]:
         """Get all pypi releases for ALL projects in a repo."""
         project_configs, sadness = await self.get_project_configs(repo)
         project_names = set()
@@ -380,7 +398,10 @@ class GHApi:
         sadness = int(not releases)
         if flatten:
             # two objects may have same tag
-            releases = [release for project in releases.values() for release in project]
+            return (
+                [release for project in releases.values() for release in project],
+                sadness,
+            )
         return releases, sadness
 
     async def audit_pypi(self, repo, count=7, *, testing=False):
