@@ -330,9 +330,10 @@ class GHApi:
         return projects, sadness
 
     class Tags(TypedDict):
-        """Return type for get_remote_tags."""  # noqa: D204 blank line ugly
+        """Return type for get_remote_tags."""
 
         tag: str
+        # end
 
     async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tags]]:
         """Return tags ("tag":"name") for a repo."""
@@ -348,10 +349,11 @@ class GHApi:
         return tags[:count], sadness
 
     class Release(TypedDict):
-        """Release object containing version and files."""  # noqa: D204 ugly
+        """Release object containing version and files."""
 
         tag: str
         files: list[str]
+        # end
 
     # TODO: take project name, not repo
     async def get_pypi(
@@ -483,7 +485,7 @@ class GHApi:
         # todavia no probamos con mas de un projection en repositorio
         async with asyncio.TaskGroup() as tg:
             tags_task = tg.create_task(
-                self.get_remote_tags(repo, order_by_version=True),
+                self.get_remote_tags(repo),
             )
             releases_task = tg.create_task(self.audit_releases(repo))
             pypi_task = tg.create_task(self.audit_pypi(repo))
