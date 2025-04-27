@@ -364,11 +364,12 @@ class ReleaseAudit:
 
     def __init__(self, release, *, prerelease_respect=False):
         self.tag = release["tag"]
-        self.version = self.explode_versions()
         self.file_notes = {}
         self.unknown_files = set()
         self.ignore_counter = {}
         self.projects = {}
+
+        self.version = Version(self.tag)
         if not self.version:
             self.prerelease_agree = None
             return
