@@ -7,7 +7,7 @@ import tomllib
 import warnings
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TypeVar
+from typing import Any, TypedDict, TypeVar
 
 import aiohttp
 import jq  # type: ignore [import-not-found]
@@ -295,13 +295,23 @@ class GHApi:
         return repos, sadness
 
     # this should take a name TODO (or several)
+    class ConfigDescription(TypedDict):
+        """Description of a config."""
+
+        object: Any
+        _original: str
+
+    ConfigSet = dict[str, ConfigDescription]
+
     async def get_project_configs(
         self,
         repo: str,
-        *name: str,
+        *filenames: str,
         ref: str | None = None,
-    ):
+    ) -> RetVal[ConfigSet]:
         """Find all projects in a repo."""
+        if not filenames:
+            raise ValueError("A least one filename must be supplied.")
         owner, repo = self._split_full_name(full_name=repo)
         folder_repos = repo_srv.RepoFolder()
         projects: dict = {}
@@ -312,29 +322,25 @@ class GHApi:
             repo,
             url="ssh://git@github.com",
         )
-        ref = "main" if "main" in await r.list_branches() else "master"
-        py_files = await r.get_files_by_name("pyproject.toml", ref=ref)
-        js_files = await r.get_files_by_name("package.json", ref=ref)
-        if py_files:
-            projects["py"] = {}
-            for f in py_files:
-                _logger.debug2(f"Found py: {f['path']}")
-                projects["py"][f["path"]] = {
-                    "object": tomllib.loads(f["content"].decode()),
-                    "_original": f["content"].decode(),
-                }
-        if js_files:
-            projects["js"] = {}
-            for f in js_files:
-                _logger.debug2(f"Found js: {f['path']}")
+        if not ref:
+            ref = "main" if "main" in await r.list_branches() else "master"
+        files = []
+        for name in filenames:
+            files.extend(await r.get_files_by_name(name, ref=ref))
+        configs: GHApi.ConfigSet = {}
+        for f in files:
+            obj = None
+            if f["path"].endswith(".json"):
                 obj = orjson.loads(f["content"])
-                projects["js"][f["path"]] = {
-                    "object": obj,
-                    "_original": f["content"].decode(),
-                }
+            elif f["path"].endswith(".toml"):
+                obj = tomllib.loads(f["content"].decode())
+            configs[f["path"]] = {
+                "object": obj,
+                "_original": f["content"].decode(),
+            }
 
         sadness = int(not projects)
-        return projects, sadness
+        return configs, sadness
 
     @dataclass(slots=True, kw_only=True)
     class Tag:
@@ -382,13 +388,17 @@ class GHApi:
         testing: bool = False,
     ) -> RetVal[list[Release]]:
         """Get all pypi releases for ALL projects in a repo."""
-        project_configs, sadness = await self.get_project_configs(repo)
+        project_configs, sadness = await self.get_project_configs(
+            repo,
+            "pyproject.toml",
+        )
         project_names = set()
-        if "py" in project_configs:
-            for config in project_configs["py"].values():
-                name = config.get("object", {}).get("project", {}).get("name", {})
-                if name:
-                    project_names.add(name)
+        for path, config in project_configs.items():
+            if not path.endswith("pyproject.toml"):
+                continue
+            name = config.get("object", {}).get("project", {}).get("name", {})
+            if name:
+                project_names.add(name)
         prefix = "test." if testing else ""
 
         async def fetch_json(name):
