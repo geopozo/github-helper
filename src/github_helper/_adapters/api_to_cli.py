@@ -123,8 +123,8 @@ class GHAdapter:
         return to_table.format_table(
             [
                 [
-                    release["tag"],
-                    delim.join(release["files"]),
+                    release.tag,
+                    delim.join(release.files),
                 ]
                 for release in releases_data
             ],
@@ -139,11 +139,10 @@ class GHAdapter:
         return to_table.format_table(
             [
                 [
-                    f"{name}-{release['tag']}",
-                    delim.join(release["files"]),
+                    f"{release.tag}",
+                    delim.join(release.files),
                 ]
-                for name, subobject in releases_data.items()
-                for release in subobject
+                for release in releases_data
             ],
             pretty=self._pretty,
             headers=("version", "files"),

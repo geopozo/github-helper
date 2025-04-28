@@ -1,17 +1,19 @@
 """A CLI dashboard for github status."""
 
 import asyncio
+import itertools
 import re
 import tomllib
 import warnings
+from dataclasses import dataclass
 from pathlib import Path
-from typing import TypedDict, TypeVar
+from typing import TypeVar
 
 import aiohttp
-import colored
 import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
+from colored import Fore, Style
 
 from github_helper._services import gh as srv
 from github_helper._services import repos as repo_srv
@@ -293,11 +295,16 @@ class GHApi:
         return repos, sadness
 
     # this should take a name TODO (or several)
-    async def get_project_configs(self, repo):
+    async def get_project_configs(
+        self,
+        repo: str,
+        *name: str,
+        ref: str | None = None,
+    ):
         """Find all projects in a repo."""
         owner, repo = self._split_full_name(full_name=repo)
         folder_repos = repo_srv.RepoFolder()
-        projects = {}
+        projects: dict = {}
 
         _logger.debug(f"Downloading repo {owner}/{repo}")
         r = await folder_repos.add_repo(
@@ -329,13 +336,20 @@ class GHApi:
         sadness = int(not projects)
         return projects, sadness
 
-    class Tags(TypedDict):
+    @dataclass(slots=True, kw_only=True)
+    class Tag:
         """Return type for get_remote_tags."""
 
         tag: str
+        _with_v: bool = False
+
+        def tag_eq(self, cannon):
+            """Check if tag is equal to another tag."""
+            return self.tag == (f"v{cannon}" if self._with_v else cannon)
+
         # end
 
-    async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tags]]:
+    async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tag]]:
         """Return tags ("tag":"name") for a repo."""
         _ = await self.get_user()
         tags_jq = jq.compile("map({tag: .name})")
@@ -344,16 +358,21 @@ class GHApi:
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
-        tags = tags_jq.input_value(orjson.loads(out)).first()
+        tags_dict = tags_jq.input_value(orjson.loads(out)).first()
+        tags = [GHApi.Tag(**tag, _with_v=True) for tag in tags_dict]
         sadness = int(not tags)
         return tags[:count], sadness
 
-    class Release(TypedDict):
+    @dataclass(slots=True, kw_only=True)
+    class Release(Tag):
         """Release object containing version and files."""
 
-        tag: str
+        prerelease: bool
+        """Does the source mark it as prerelease?"""
         files: list[str]
-        # end
+        """Files that came with it."""
+        version: versions.Version
+        """Calculated version."""
 
     # TODO: take project name, not repo
     async def get_pypi(
@@ -361,8 +380,7 @@ class GHApi:
         repo: str,
         *,
         testing: bool = False,
-        flatten: bool = False,
-    ) -> RetVal[dict[str, list[Release]] | list[Release]]:
+    ) -> RetVal[list[Release]]:
         """Get all pypi releases for ALL projects in a repo."""
         project_configs, sadness = await self.get_project_configs(repo)
         project_names = set()
@@ -380,7 +398,7 @@ class GHApi:
                 jq_dir = (
                     r".releases // {} | "
                     r"to_entries | map("
-                    r'{tag: "v\(.key)", files:'
+                    r"{tag: .key, files:"
                     r"[ .value[] | select(.yanked != true) | .filename ]"
                     r"})"
                 )
@@ -388,48 +406,27 @@ class GHApi:
                 session = aiohttp.ClientSession()
                 response = await session.get(url)
                 pypi_json = await response.json()
-                data = pypi_jq.input_value(pypi_json).first()
-                return versions.order_versions(data, "tag")
+                return pypi_jq.input_value(pypi_json).first()
             finally:
                 await response.release()
                 await session.close()
 
-        releases = {}
+        releases: dict = {}
         for name in project_names:
             releases[name] = await fetch_json(name)
         sadness = int(not releases)
-        if flatten:
-            # two objects may have same tag
-            return (
-                [release for project in releases.values() for release in project],
-                sadness,
+        flat_releases: list[GHApi.Release] = [
+            GHApi.Release(
+                **r,
+                version=(v := versions.Version(r["tag"])),
+                prerelease=v.is_prerelease,
             )
-        return releases, sadness
+            for project in releases.values()
+            for r in project
+        ]
+        return flat_releases, sadness
 
-    async def audit_pypi(self, repo, count=7, *, testing=False):
-        """Get all pypi releases for a project and audit it."""
-        releases, sadness = await self.get_pypi(
-            repo,
-            testing=testing,
-            flatten=True,
-        )
-        if sadness:
-            return None, sadness
-
-        for release in releases:
-            release["audit"] = versions.ReleaseAudit(
-                release,
-                prerelease_respect=True,
-            )
-
-        # I want count to be the API call or something
-        # but it has to be ordered first.
-        return (
-            versions.order_versions(releases, "tag")[:count],
-            sadness,
-        )
-
-    async def get_releases(self, repo):
+    async def get_releases(self, repo: str) -> RetVal[list[Release]]:
         """Return releases for a repo."""
         _ = await self.get_user()
         releases_jq = jq.compile(
@@ -452,25 +449,21 @@ class GHApi:
         _log_one_json(obj)
         releases = releases_jq.input_value(obj).first()
         sadness = int(not releases)
-        return releases, sadness
+        coerced_releases: list[GHApi.Release] = [
+            GHApi.Release(
+                **r,
+                version=versions.Version(r["tag"]),
+                _with_v=True,
+            )
+            for r in releases
+        ]
+        return coerced_releases, sadness
 
-    async def audit_releases(self, repo, count=7):
-        """Run get_releases and process information."""
-        releases, sadness = await self.get_releases(repo)
-        if sadness:
-            return None, sadness
-
-        for release in releases:
-            release["audit"] = versions.ReleaseAudit(release)
-
-        # I want count to be the API call or something
-        # but it has to be ordered first.
-        return (
-            versions.order_versions(releases, "tag")[:count],
-            sadness,
-        )
-
-    async def audit_versions(self, repo, count=15):
+    async def audit_versions(
+        self,
+        repo: str,
+        count: int = 15,
+    ) -> RetVal[list[dict]]:
         """
         Verify that version of a repository have differences.
 
@@ -480,82 +473,76 @@ class GHApi:
             count: the number of versions to look at
 
         """
-        # puede mezclar proyectos acá
-        # Ignoramos nombre de proyecto
-        # todavia no probamos con mas de un projection en repositorio
-        async with asyncio.TaskGroup() as tg:
-            tags_task = tg.create_task(
-                self.get_remote_tags(repo),
-            )
-            releases_task = tg.create_task(self.audit_releases(repo))
-            pypi_task = tg.create_task(self.audit_pypi(repo))
-            test_pypi_task = tg.create_task(
-                self.audit_pypi(repo, testing=True),
-            )
-            # que hacemos con sadness?
-            tags, _ = await tags_task
-            releases, _ = await releases_task
-            pypi, _ = await pypi_task
-            test_pypi, _ = await test_pypi_task
 
-        c_tags = versions.conform_versions(
-            versions.filter_versions(tags),
+        # should this be a dictionary so we can iterate through names?
+        @dataclass(slots=True)
+        class VersionSet:
+            gh_tags: GHApi.Tag | None = None
+            gh_releases: GHApi.Release | None = None
+            pypi: GHApi.Release | None = None
+            test_pypi: GHApi.Release | None = None
+
+            # maybe audits should carry their own adapters
+            # this is an adapter
+            def print_source_status(self, name: str, canonical: str) -> str:
+                attr = getattr(self, name)
+                if not attr:
+                    return ""
+                if not isinstance(attr, GHApi.Release) or attr.files:
+                    empty = ""
+                else:
+                    empty = f"{Fore.red}Yanked/Empty{Style.reset}"
+                if not attr.tag_eq(canonical):
+                    return f"{empty}{Fore.yellow}({attr.tag}){Style.reset}"
+                elif empty:
+                    return f"{empty}"
+                else:
+                    return f"{Fore.green}True{Style.reset}"
+
+        (
+            (tags, _),
+            (release, _),
+            (pypi, _),
+            (test_pypi, _),
+        ) = await asyncio.gather(
+            self.get_remote_tags(repo),
+            self.get_releases(repo),
+            self.get_pypi(repo),
+            self.get_pypi(repo, testing=True),
         )
-        c_releases = versions.conform_versions(releases)
-        c_pypi = versions.conform_versions(pypi)
-        c_test_pypi = versions.conform_versions(test_pypi)
 
-        all_versions = (
-            c_tags.keys() | c_releases.keys() | c_pypi.keys() | c_test_pypi.keys()
-        )
+        all_versions: dict[
+            versions.Version,
+            VersionSet,
+        ] = {}
 
-        def yes(x="True"):
-            return f"{colored.Fore.green}{x}{colored.Style.reset}"
+        for attrname, o in itertools.chain(
+            (("gh_tags", t) for t in tags),
+            (("gh_releases", r) for r in release),
+            (("pypi", r) for r in pypi),
+            (("test_pypi", r) for r in test_pypi),
+        ):
+            v = getattr(o, "version", None) or versions.Version(o.tag)
+            # TODO: this is where we have to check for doubles
+            if not v.valid:
+                continue
+            if v not in all_versions:
+                all_versions[v] = VersionSet()
+            setattr(all_versions[v], attrname, o)
 
-        def no(x="False"):
-            return f"{colored.Fore.red}{x}{colored.Style.reset}"
+        all_versions = dict(sorted(all_versions.items(), reverse=True))
 
-        def empty(x="Empty"):
-            return f"{colored.Fore.yellow}{x}{colored.Style.reset}"
-
-        result = versions.order_versions(
-            [
-                {
-                    "version": v,
-                    "tags": (no() if v not in c_tags else yes()),
-                    "releases": (
-                        no()
-                        if v not in c_releases
-                        else empty(empty)
-                        if c_releases[v]["empty"]
-                        else yes()
-                    ),
-                    "pypi": (
-                        no()
-                        if v not in c_pypi
-                        else empty("yanked")
-                        if c_pypi[v]["empty"]
-                        else yes()
-                    ),
-                    "test.pypi": (
-                        no()
-                        if v not in c_test_pypi
-                        else empty("yanked")
-                        if c_test_pypi[v]["empty"]
-                        else yes()
-                    ),
-                    "tag valid": (versions.get_version_info(v)[1] or no()),
-                    "incongruency": versions.compare_audits(
-                        v,
-                        releases=c_releases,
-                        pypi=c_pypi,
-                        test_pypi=c_test_pypi,
-                    ),
-                }
-                for v in all_versions
-            ][:count],
-            "version",
-        )
+        result = [
+            {
+                "version": str(v),
+                "gh_tags": r.print_source_status("gh_tags", str(v)),
+                "gh_releases": r.print_source_status("gh_releases", str(v)),
+                "pypi": r.print_source_status("pypi", str(v)),
+                "test.pypi": r.print_source_status("test_pypi", str(v)),
+                "validity": (v.kind),
+            }
+            for v, r in list(all_versions.items())[:count]  # count
+        ]
         return result, 0  # maybe no sadness for audit?
 
     async def _get_ruleset(self, owner, repo, ruleset_id):

@@ -23,13 +23,14 @@ How do I improve parsing?
 import copy
 import re
 import sys
+import warnings
 from dataclasses import dataclass
 from enum import StrEnum
 from functools import total_ordering
 
 import logistro
 import semver
-from colored import Back, Fore, Style
+from colored import Fore, Style
 from packaging import utils
 from packaging import version as pyversion
 
@@ -37,67 +38,24 @@ _logger = logistro.getLogger(__name__)
 
 if not sys.stdout.isatty():
 
-    class NoColor:
+    class _NoColor:
         def __getattr__(self, name):
             return ""
 
     # Override colored's foreground, background, and style
-    Fore = Back = Style = NoColor()  # type: ignore[misc, assignment]
-
-
-def conform_versions(versions: list[dict]):
-    versions_dict: dict = {}
-    for v in versions:
-        temp = Version(v["tag"])
-        v["conformant"] = temp.type
-        if v["conformant"]:
-            if v["tag"].startswith("V"):
-                v["tag"][0] = "v"
-            elif not v["tag"].startswith("v"):
-                v["tag"] = f"v{v['tag']}"
-        # always true for tag, use audit
-        _logger.debug2(f"Files in {v['tag']}: {len(v.get('files', []))}")
-        v["empty"] = not bool(v.get("files"))
-        _logger.debug2(f"Empty {v['empty']} from {v.get('files')}")
-        if v["tag"] in versions_dict:
-            cur = versions_dict[v["tag"]]
-            cur["empty"] = v["empty"]
-            cur["files"].extend(v["files"])
-        else:
-            versions_dict[v["tag"]] = v
-    return versions_dict
-
-
-def filter_versions(versions: list[dict]):
-    # this needs to return a list of dictionaries
-    _regex = re.compile(
-        r"^" + pyversion.VERSION_PATTERN + r"$",
-        re.VERBOSE,
-    )
-    return [v for v in versions if _regex.match(v.get("tag", ""))]
-
-
-def order_versions(versions: list[dict], key: str):
-    if not versions:
-        return versions
-    return sorted(
-        versions,
-        key=lambda x: pyversion.parse(x[key]),
-        reverse=True,
-    )
-
-
-_tag_part_re = re.compile(r"^(\d*)(?:\.(.*))?$")
+    Fore = Style = _NoColor()  # type: ignore[misc, assignment]
 
 
 @dataclass(frozen=True, slots=True)
 class BadVersion:
-    """A weak parse that looks for instances where someone tried to tag."""
+    """A weak parser that looks for instances where someone tried to tag."""
 
+    _tag_part_re = re.compile(r"^(\d*)(?:\.(.*))?$")
     major: int
     minor: int
     patch: int  # semver name
-    prerelease = ""  # semver name
+    prerelease: None = None
+    build: str = ""  # semver name
 
     def __init__(self, tag: str):
         """Look for tag-like structures that parsers won't return."""
@@ -105,10 +63,10 @@ class BadVersion:
         object.__setattr__(self, "major", 0)
         object.__setattr__(self, "minor", 0)
         object.__setattr__(self, "patch", 0)
-        if not tag.startswith(("v", "V")):
-            raise ValueError
+        if tag.startswith(("v", "V")):
+            tag = tag[1:]
         else:
-            major_match = _tag_part_re.search(tag[1:])
+            major_match = self._tag_part_re.search(tag[1:])
             if not major_match:
                 raise ValueError
             # else
@@ -116,22 +74,22 @@ class BadVersion:
             if not major_match.group(2):
                 return
             # else
-            minor_match = _tag_part_re.search(major_match.group(2))
+            minor_match = self._tag_part_re.search(major_match.group(2))
             if not minor_match:
-                object.__setattr__(self, "prerelease", major_match.group(2))
+                object.__setattr__(self, "build", major_match.group(2))
                 return
             # else
             object.__setattr__(self, "minor", int(minor_match.group(1)))
             if not minor_match.group(2):
                 return
             # else
-            patch_match = _tag_part_re.search(minor_match.group(2))
+            patch_match = self._tag_part_re.search(minor_match.group(2))
             if not patch_match:
-                object.__setattr__(self, "prerelease", minor_match.group(2))
+                object.__setattr__(self, "build", minor_match.group(2))
                 return
             # else
             object.__setattr__(self, "patch", patch_match.group(1))
-            object.__setattr__(self, "prerelease", patch_match.group(2) or "")
+            object.__setattr__(self, "build", patch_match.group(2) or None)
 
 
 _VersionTypes = semver.Version | pyversion.Version | BadVersion
@@ -143,35 +101,44 @@ class Version:
     """A unified version class. Most similar to Python, not SemVer."""
 
     class Type(StrEnum):
+        """The possible types of version formats."""
+
         PYTHON = "Python"
         SEMVER = "SemVer"
-        MALFORMED = "Malformed Python"
+        MALFORMED_PY = "Malformed Python"
+        MALFORMED = "Malformed"
         UNPARSABLE = "Unparsable"
 
     tag: str
     valid: bool
-    type: Type
+    kind: Type
     major: int
     minor: int
     micro: int
-    pre: str
-    dev: str
-    post: str
+    pre: tuple[str, int] | None
+    dev: int | None
+    post: int | None
+    local: str | None
     is_prerelease: bool
     _parsed: _VersionTypes
 
-    def __init__(self, tag: str):
+    def __init__(self, tag: str, *, raise_parse_exc: bool = False):
+        """Convert a tag into a Version object, collecting info."""
+        if not isinstance(tag, str):
+            raise TypeError("tag argument must be string.")
         object.__setattr__(self, "tag", tag)
-        parsed_v, kind = self._test_parsers()
-        if not parsed_v or not kind:
+        parsed_v, kind = self._test_parsers(rpe=raise_parse_exc)
+        object.__setattr__(self, "kind", kind)
+        if not parsed_v:
             object.__setattr__(self, "valid", False)
             return
         object.__setattr__(self, "valid", True)
-        object.__setattr__(self, "type", kind)
         self._enumerate_version(parsed_v)
 
     def _test_parsers(
         self,
+        *,
+        rpe: bool = False,
     ) -> tuple[_VersionTypes | None, Type | None]:
         """See which parsers handle the tag."""
         tag = self.tag
@@ -183,23 +150,29 @@ class Version:
                 try:
                     parsed = semver.Version.parse(tag)
                 except ValueError:
-                    return old_parsed, Version.Type.MALFORMED
+                    return old_parsed, Version.Type.MALFORMED_PY
                 else:
                     return parsed, Version.Type.PYTHON
-        except pyversion.InvalidVersion:
-            pass
+        except Exception:
+            if rpe:
+                raise
         else:
             return parsed, Version.Type.PYTHON
         try:
             parsed = semver.Version.parse(tag)
-        except ValueError:
-            pass
+        except Exception:
+            if rpe:
+                raise
         else:
             return parsed, Version.Type.SEMVER
-        return None, None
+        return None, Version.Type.UNPARSABLE
 
     def _enumerate_version(self, v: _VersionTypes) -> None:
         """Break tag attributes into unified attributes."""
+        if hasattr(v, "epoch") and v.epoch:
+            raise NotImplementedError(
+                "Not working with versions with epochs, but would be easy tbh.",
+            )
         object.__setattr__(self, "_parsed", v)
         object.__setattr__(self, "major", v.major)
         object.__setattr__(self, "minor", v.minor)
@@ -208,24 +181,42 @@ class Version:
             "micro",
             v.micro if hasattr(v, "micro") else v.patch,
         )
+        if hasattr(v, "prerelease"):
+            if not v.prerelease:
+                pre = None
+            else:
+                match = re.match(r"([a-zA-Z]+)(?:[.\-]?(\d+))?", v.prerelease)
+                if not match:
+                    warnings.warn(
+                        "Prerelease string parsed but is not valid",
+                        stacklevel=1,
+                    )
+                    pre = (v.prerelease, 0)
+                else:
+                    label = match.group(1).lower()
+                    number = int(match.group(2)) if match.group(2) else 0
+                    pre = (label, number)
+        else:
+            pre = v.pre
         object.__setattr__(
             self,
             "pre",
-            str(
-                (f"{v.pre[0]}{v.pre[1]}" if v.pre else "")
-                if hasattr(v, "pre")
-                else v.prerelease,
-            ),
+            pre,
         )
         object.__setattr__(
             self,
             "dev",
-            str(v.dev) if hasattr(v, "dev") else "",
+            v.dev if hasattr(v, "dev") else None,
         )
         object.__setattr__(
             self,
             "post",
-            str(v.post) if hasattr(v, "post") else "",
+            v.post if hasattr(v, "post") else None,
+        )
+        object.__setattr__(
+            self,
+            "local",
+            v.local if hasattr(v, "local") else v.build,
         )
         object.__setattr__(
             self,
@@ -234,34 +225,108 @@ class Version:
         )
 
     def __str__(self):
-        return str(self._parsed)
+        """Print Version as string."""
+        return self.__repr__()
 
     def __repr__(self):
-        return str(self._parsed)
+        """Print Version as python-compatible string if possible."""
+        if not self.valid:
+            return ""
+        post = f".post{self.post}" if self.post else ""
+        dev = f".dev{self.dev}" if self.dev else ""
+        pre = f"{self.pre[0]}{self.pre[1]}" if self.pre else ""
+        local = f"+{self.local}" if self.local else ""
+        return f"{self.major}.{self.minor}.{self.micro}{pre}{post}{dev}{local}"
 
     def _cmp_tuple(self) -> tuple:
+        if not self.valid:
+            return (float("NaN"),)
         return (
             self.major,
             self.minor,
             self.micro,
             self.pre,
-            self.dev,
             self.post,
+            self.dev,
+            self.local,
         )
 
-    def __eq__(self, other: object) -> bool:
-        if isinstance(other, _VersionTypes):
-            other = Version(str(other))
-        elif not isinstance(other, Version):
-            raise NotImplementedError
-        return self._cmp_tuple() == other._cmp_tuple()
+    def _compare(  # noqa: C901, PLR0911, PLR0912
+        self,
+        other,
+    ) -> int:  # intrinsically special NotImplemented accepted as return
+        """
+        Compare two versions with major, minor, micro, pre, post, dev.
 
-    def __lt__(self, other: object) -> bool:
+        Returns:
+            -1 if self < other
+            0 if self == other
+            1 if self > other
+            NotImplemented if wrong type
+
+        """
+        if not self.valid:
+            return NotImplemented
         if isinstance(other, _VersionTypes):
             other = Version(str(other))
         elif not isinstance(other, Version):
-            raise NotImplementedError
-        return self._cmp_tuple() < other._cmp_tuple()
+            return NotImplemented
+        # Compare major, minor, micro
+        if (c := (self.major - other.major)) != 0:
+            return (c > 0) - (c < 0)
+        if (c := (self.minor - other.minor)) != 0:
+            return (c > 0) - (c < 0)
+        if (c := (self.micro - other.micro)) != 0:
+            return (c > 0) - (c < 0)
+
+        # Compare pre-releases
+        if self.pre is None and other.pre is not None:
+            return 1  # final > pre
+        if self.pre is not None and other.pre is None:
+            return -1  # pre < final
+        if self.pre and other.pre:
+            if self.pre[0] != other.pre[0]:
+                return (self.pre[0] > other.pre[0]) - (self.pre[0] < other.pre[0])
+            if self.pre[1] != other.pre[1]:
+                return (self.pre[1] > other.pre[1]) - (self.pre[1] < other.pre[1])
+
+        # Compare post-releases (before dev!)
+        if self.post is None and other.post is not None:
+            return -1  # no post < post
+        if self.post is not None and other.post is None:
+            return 1  # post > no post
+        if self.post and other.post:  # noqa: SIM102 clarity
+            if self.post != other.post:
+                return (self.post > other.post) - (self.post < other.post)
+
+        # Compare dev-releases (only if same pre/post/final)
+        if self.dev is None and other.dev is not None:
+            return 1  # no dev > dev
+        if self.dev is not None and other.dev is None:
+            return -1  # dev < no dev
+        if self.dev and other.dev:  # noqa: SIM102 clarity
+            if self.dev != other.dev:
+                return (self.dev > other.dev) - (self.dev < other.dev)
+
+        return 0
+
+    def __eq__(self, other) -> bool:
+        """Check if equal."""
+        c = self._compare(other)
+        if c is NotImplemented:
+            return NotImplemented
+        return c == 0
+
+    def __lt__(self, other) -> bool:
+        """Check if less than."""
+        c = self._compare(other)
+        if c is NotImplemented:
+            return NotImplemented
+        return c < 0
+
+    def __hash__(self):
+        """Return hash based on normalized value."""
+        return self._cmp_tuple().__hash__()
 
 
 #### HERE BE DRAGONS #####
@@ -302,6 +367,7 @@ bdist_template = {
 
 
 def compare_audits(v, **audits):  # noqa: C901
+    """Produce a diff between several audits."""
     all_tags = set()
     for a in audits.values():
         audit = a.get(v, {}).get("audit", None)
@@ -349,6 +415,7 @@ class ReleaseAudit:
     """A list of the projects found in this release."""
 
     def __repr__(self):
+        """Return a summary of the audit."""
         ignore_len = sum(self.ignore_counter.values())
         project_tag_count = [
             f"{k}: {len(v['all_tags'])}" for k, v in self.projects.items()
@@ -363,6 +430,7 @@ class ReleaseAudit:
         )
 
     def __init__(self, release, *, prerelease_respect=False):
+        """Audit a release object."""
         self.tag = release["tag"]
         self.file_notes = {}
         self.unknown_files = set()
@@ -374,7 +442,7 @@ class ReleaseAudit:
             self.prerelease_agree = None
             return
         self.prerelease_agree = (
-            (self.version["is_prerelease"] == release["prerelease"])
+            (self.version.is_prerelease == release["prerelease"])
             if "prerelease" in release
             else prerelease_respect
         )
@@ -382,6 +450,7 @@ class ReleaseAudit:
         [self.summarize_file(file) for file in release["files"]]
 
     def __str__(self):  # noqa: C901, PLR0912
+        """Return a string diff of a python project."""
         ret = ""
         if not self.prerelease_agree:
             ret += f"{Fore.red}PRERELEASE DISAGREEMENT{Style.reset}\n"
@@ -435,6 +504,7 @@ class ReleaseAudit:
         return ret
 
     def summarize_file(self, filename: str):
+        """Analyze filename and dispatch analysis for further processing."""
         notes = self._get_file_notes(filename)
         match notes.get("action"):
             case "ignore":
