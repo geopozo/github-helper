@@ -380,61 +380,44 @@ class GHApi:
         version: versions.Version
         """Calculated version."""
 
-    # TODO: take project name, not repo
     async def get_pypi(
         self,
-        repo: str,
+        project_name: str,
         *,
         testing: bool = False,
     ) -> RetVal[list[Release]]:
         """Get all pypi releases for ALL projects in a repo."""
-        project_configs, sadness = await self.get_project_configs(
-            repo,
-            "pyproject.toml",
-        )
-        project_names = set()
-        for path, config in project_configs.items():
-            if not path.endswith("pyproject.toml"):
-                continue
-            name = config.get("object", {}).get("project", {}).get("name", {})
-            if name:
-                project_names.add(name)
         prefix = "test." if testing else ""
 
-        async def fetch_json(name):
-            url = f"https://{prefix}pypi.org/pypi/{name}/json"
-            _logger.debug(url)
-            try:
-                jq_dir = (
-                    r".releases // {} | "
-                    r"to_entries | map("
-                    r"{tag: .key, files:"
-                    r"[ .value[] | select(.yanked != true) | .filename ]"
-                    r"})"
-                )
-                pypi_jq = jq.compile(jq_dir)
-                session = aiohttp.ClientSession()
-                response = await session.get(url)
-                pypi_json = await response.json()
-                return pypi_jq.input_value(pypi_json).first()
-            finally:
-                await response.release()
-                await session.close()
+        url = f"https://{prefix}pypi.org/pypi/{project_name}/json"
+        _logger.debug(url)
+        try:
+            jq_dir = (
+                r".releases // {} | "
+                r"to_entries | map("
+                r"{tag: .key, files:"
+                r"[ .value[] | select(.yanked != true) | .filename ]"
+                r"})"
+            )
+            pypi_jq = jq.compile(jq_dir)
+            session = aiohttp.ClientSession()
+            response = await session.get(url)
+            pypi_json = await response.json()
+            releases = pypi_jq.input_value(pypi_json).first()
+        finally:
+            await response.release()
+            await session.close()
 
-        releases: dict = {}
-        for name in project_names:
-            releases[name] = await fetch_json(name)
         sadness = int(not releases)
-        flat_releases: list[GHApi.Release] = [
+        coerced_releases: list[GHApi.Release] = [
             GHApi.Release(
                 **r,
                 version=(v := versions.Version(r["tag"])),
                 prerelease=v.is_prerelease,
             )
-            for project in releases.values()
-            for r in project
+            for r in releases
         ]
-        return flat_releases, sadness
+        return coerced_releases, sadness
 
     async def get_releases(self, repo: str) -> RetVal[list[Release]]:
         """Return releases for a repo."""
@@ -469,7 +452,7 @@ class GHApi:
         ]
         return coerced_releases, sadness
 
-    async def audit_versions(
+    async def audit_versions(  # noqa: C901
         self,
         repo: str,
         count: int = 15,
@@ -509,6 +492,21 @@ class GHApi:
                 else:
                     return f"{Fore.green}True{Style.reset}"
 
+        project_configs, sadness = await self.get_project_configs(
+            repo,
+            "pyproject.toml",
+        )
+
+        project_names = []
+        for path, config in project_configs.items():
+            if not path.endswith("pyproject.toml"):
+                continue
+            name = config.get("object", {}).get("project", {}).get("name", {})
+            if name:
+                project_names.append(name)
+        if len(project_names) > 1:
+            raise NotImplementedError("Repo has more than one project :-(")
+
         (
             (tags, _),
             (release, _),
@@ -517,8 +515,8 @@ class GHApi:
         ) = await asyncio.gather(
             self.get_remote_tags(repo),
             self.get_releases(repo),
-            self.get_pypi(repo),
-            self.get_pypi(repo, testing=True),
+            self.get_pypi(project_names[0]),
+            self.get_pypi(project_names[0], testing=True),
         )
 
         all_versions: dict[
@@ -533,11 +531,15 @@ class GHApi:
             (("test_pypi", r) for r in test_pypi),
         ):
             v = getattr(o, "version", None) or versions.Version(o.tag)
-            # TODO: this is where we have to check for doubles
             if not v.valid:
                 continue
             if v not in all_versions:
                 all_versions[v] = VersionSet()
+            if getattr(all_versions[v], attrname, None):
+                warnings.warn(
+                    "Looks like conflicting poorly-written versions caused overwrite.",
+                    stacklevel=2,
+                )
             setattr(all_versions[v], attrname, o)
 
         all_versions = dict(sorted(all_versions.items(), reverse=True))
