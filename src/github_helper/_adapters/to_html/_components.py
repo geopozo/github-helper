@@ -39,10 +39,7 @@ async def render_page(
     page = (
         html.DOCTYPE.html,
         html.html(
-            html.head(
-                html.script(src=tailwindcss_cdn),
-                *heads,
-            ),
+            html.head(html.script(src=tailwindcss_cdn), *heads),
             html.body(*content),
         ),
     )

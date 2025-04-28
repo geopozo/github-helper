@@ -41,6 +41,12 @@ function updateVisibleRowClasses() {
     });
 }
 
+const openModalIframe = (data) => {
+    const iframe = modal.querySelector("iframe");
+    iframe.src = data;
+    openModal();
+}
+
 publicCheckbox.addEventListener('change', filterAll);
 privateCheckbox.addEventListener('change', filterAll);
 archivedCheckbox.addEventListener('change', filterAll);
