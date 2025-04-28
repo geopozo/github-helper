@@ -3,6 +3,7 @@
 import asyncio
 import itertools
 import re
+import sys
 import tomllib
 import warnings
 from dataclasses import dataclass
@@ -26,6 +27,16 @@ _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
 
+# could just put this in CLI and be done with it
+# could also force
+if not sys.stdout.isatty():
+
+    class _NoColor:
+        def __getattr__(self, name):
+            return ""
+
+    # Override colored's foreground, background, and style
+    Fore = Style = _NoColor()  # type: ignore[misc, assignment]
 
 _check_ran = False
 
@@ -478,7 +489,7 @@ class GHApi:
             test_pypi: GHApi.Release | None = None
 
             # maybe audits should carry their own adapters
-            # this is an adapter
+            # this is an adapter, colors is an adapter
             def print_source_status(self, name: str, canonical: str) -> str:
                 attr = getattr(self, name)
                 if not attr:
@@ -544,7 +555,6 @@ class GHApi:
                     stacklevel=2,
                 )
             setattr(all_versions[v], attrname, o)
-
         all_versions = dict(sorted(all_versions.items(), reverse=True))
 
         result = [
