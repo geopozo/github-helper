@@ -403,6 +403,8 @@ class GHApi:
             session = aiohttp.ClientSession()
             response = await session.get(url)
             pypi_json = await response.json()
+            if pypi_json.get("message", None) == "Not Found":
+                return [], 1
             releases = pypi_jq.input_value(pypi_json).first()
         finally:
             await response.release()
