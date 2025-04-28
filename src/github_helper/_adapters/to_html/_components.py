@@ -30,20 +30,6 @@ def modal(
     )
 
 
-# Este componente es experimental
-def table(
-    data: list,
-    *,
-    table_id: str = "",
-    class_name: str = "",
-):
-    return html.table(
-        *[html.tr(*[html.td(v) for v in row.values()]) for row in data],
-        id=table_id,
-        class_=class_name,
-    )
-
-
 async def render_page(
     heads: core.BaseTag,
     content: core.BaseTag,
