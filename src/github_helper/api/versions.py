@@ -50,46 +50,49 @@ if not sys.stdout.isatty():
 class BadVersion:
     """A weak parser that looks for instances where someone tried to tag."""
 
-    _tag_part_re = re.compile(r"^(\d*)(?:\.(.*))?$")
+    _tag_part_re = re.compile(r"^(\d*)(?:\.?(.*))?$")
+    tag: str
     major: int
     minor: int
-    patch: int  # semver name
-    prerelease: None = None
-    build: str = ""  # semver name
+    micro: int
+    pre: None = None
+    local: str | None = None
+    is_prerelease: bool = False
 
     def __init__(self, tag: str):
         """Look for tag-like structures that parsers won't return."""
         object.__setattr__(self, "tag", tag)
         object.__setattr__(self, "major", 0)
         object.__setattr__(self, "minor", 0)
-        object.__setattr__(self, "patch", 0)
-        if tag.startswith(("v", "V")):
-            tag = tag[1:]
-        else:
-            major_match = self._tag_part_re.search(tag[1:])
-            if not major_match:
-                raise ValueError
-            # else
-            object.__setattr__(self, "major", int(major_match.group(1)))
-            if not major_match.group(2):
-                return
-            # else
-            minor_match = self._tag_part_re.search(major_match.group(2))
-            if not minor_match:
-                object.__setattr__(self, "build", major_match.group(2))
-                return
-            # else
-            object.__setattr__(self, "minor", int(minor_match.group(1)))
-            if not minor_match.group(2):
-                return
-            # else
-            patch_match = self._tag_part_re.search(minor_match.group(2))
-            if not patch_match:
-                object.__setattr__(self, "build", minor_match.group(2))
-                return
-            # else
-            object.__setattr__(self, "patch", patch_match.group(1))
-            object.__setattr__(self, "build", patch_match.group(2) or None)
+        object.__setattr__(self, "micro", 0)
+        object.__setattr__(self, "pre", None)
+        object.__setattr__(self, "local", None)
+        object.__setattr__(self, "is_prerelease", False)
+        tag = tag.removeprefix("v")
+        major_match = self._tag_part_re.search(tag)
+        if not major_match or not major_match.group(1):
+            raise ValueError
+        # else
+        object.__setattr__(self, "major", int(major_match.group(1)))
+        if not major_match.group(2):
+            return
+        # else
+        minor_match = self._tag_part_re.search(major_match.group(2))
+        if not minor_match or not minor_match.group(1):
+            object.__setattr__(self, "local", major_match.group(2))
+            return
+        # else
+        object.__setattr__(self, "minor", int(minor_match.group(1)))
+        if not minor_match.group(2):
+            return
+        # else
+        micro_match = self._tag_part_re.search(minor_match.group(2))
+        if not micro_match or not micro_match.group(1):
+            object.__setattr__(self, "local", minor_match.group(2))
+            return
+        # else
+        object.__setattr__(self, "micro", int(micro_match.group(1)))
+        object.__setattr__(self, "local", micro_match.group(2) or None)
 
 
 _VersionTypes = semver.Version | pyversion.Version | BadVersion
@@ -135,7 +138,7 @@ class Version:
         object.__setattr__(self, "valid", True)
         self._enumerate_version(parsed_v)
 
-    def _test_parsers(
+    def _test_parsers(  # noqa: C901
         self,
         *,
         rpe: bool = False,
@@ -145,7 +148,7 @@ class Version:
         try:
             parsed: _VersionTypes = pyversion.Version(tag)
 
-            if str(parsed) != tag[1:] if tag.startswith("v") else tag:
+            if str(parsed) != tag.removeprefix("v"):
                 old_parsed = parsed
                 try:
                     parsed = semver.Version.parse(tag)
@@ -165,6 +168,12 @@ class Version:
                 raise
         else:
             return parsed, Version.Type.SEMVER
+        try:
+            parsed = BadVersion(tag)
+        except ValueError:
+            pass
+        else:
+            return parsed, Version.Type.MALFORMED
         return None, Version.Type.UNPARSABLE
 
     def _enumerate_version(self, v: _VersionTypes) -> None:
@@ -251,6 +260,9 @@ class Version:
             self.local,
         )
 
+    # this could def be simplified to tuple comparison
+    # but some values would need to be normalized first
+    # thx ai
     def _compare(  # noqa: C901, PLR0911, PLR0912
         self,
         other,
@@ -308,7 +320,19 @@ class Version:
             if self.dev != other.dev:
                 return (self.dev > other.dev) - (self.dev < other.dev)
 
-        return 0
+        # local is not used in official sorting
+        # but if we do not provide some arbitrary tie breaking
+        # python will sometimes think two versions are equal
+        # in some instances (like when physical sorting)
+        # and disequal in others (like when looking for keys)
+        # so functions like sorted() which do both will break
+        # so just sort arbitrarily unless they _really_ _are_ _equal_
+        if self.local == other.local:
+            return 0
+        elif self.local is not None and other.local is None:
+            return 1
+        else:
+            return -1
 
     def __eq__(self, other) -> bool:
         """Check if equal."""

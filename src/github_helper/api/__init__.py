@@ -572,7 +572,7 @@ class GHApi:
                     if not test_pypi_sadness
                     else {}
                 ),
-                "validity": (v.kind),
+                "validity": v.kind,
             }
             for v, r in list(all_versions.items())[:count]  # count
         ]
