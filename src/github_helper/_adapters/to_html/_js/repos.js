@@ -3,15 +3,6 @@ const privateCheckbox = document.getElementById('toggle-private');
 const archivedCheckbox = document.getElementById('toggle-archive');
 const ownerInput = document.getElementById('owner-filter');
 const repoInput = document.getElementById('repo-filter');
-const modal = document.getElementById("my-modal");
-
-const openModal = (data) => {
-    const iframe = modal.querySelector("iframe");
-    modal.style.display = "grid";
-    iframe.src = data;
-}
-
-const closeModal = () => modal.style.display = "none";
 
 function filterAll() {
     console.log("Filtering All.")
@@ -48,6 +39,12 @@ function updateVisibleRowClasses() {
             visibleIndex++;
         }
     });
+}
+
+const openModalIframe = (data) => {
+    const iframe = modal.querySelector("iframe");
+    iframe.src = data;
+    openModal();
 }
 
 publicCheckbox.addEventListener('change', filterAll);
