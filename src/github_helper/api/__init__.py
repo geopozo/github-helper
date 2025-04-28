@@ -512,8 +512,8 @@ class GHApi:
         (
             (tags, _),
             (release, _),
-            (pypi, _),
-            (test_pypi, _),
+            (pypi, pypi_sadness),
+            (test_pypi, test_pypi_sadness),
         ) = await asyncio.gather(
             self.get_remote_tags(repo),
             self.get_releases(repo),
@@ -531,6 +531,7 @@ class GHApi:
             (("gh_releases", r) for r in release),
             (("pypi", r) for r in pypi),
             (("test_pypi", r) for r in test_pypi),
+            [],
         ):
             v = getattr(o, "version", None) or versions.Version(o.tag)
             if not v.valid:
@@ -551,8 +552,16 @@ class GHApi:
                 "version": str(v),
                 "gh_tags": r.print_source_status("gh_tags", str(v)),
                 "gh_releases": r.print_source_status("gh_releases", str(v)),
-                "pypi": r.print_source_status("pypi", str(v)),
-                "test.pypi": r.print_source_status("test_pypi", str(v)),
+                **(
+                    {"pypi": r.print_source_status("pypi", str(v))}
+                    if not pypi_sadness
+                    else {}
+                ),
+                **(
+                    {"test.pypi": r.print_source_status("test_pypi", str(v))}
+                    if not test_pypi_sadness
+                    else {}
+                ),
                 "validity": (v.kind),
             }
             for v, r in list(all_versions.items())[:count]  # count
