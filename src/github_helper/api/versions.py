@@ -94,6 +94,10 @@ class BadVersion:
         object.__setattr__(self, "micro", int(micro_match.group(1)))
         object.__setattr__(self, "local", micro_match.group(2) or None)
 
+    def __str__(self):
+        """Return string rep of broken version."""
+        return "BROKEN"
+
 
 _VersionTypes = semver.Version | pyversion.Version | BadVersion
 
@@ -109,8 +113,8 @@ class Version:
         PYTHON = "Python"
         SEMVER = "SemVer"
         MALFORMED_PY = "Malformed Python"
-        MALFORMED = "Malformed"
-        UNPARSABLE = "Unparsable"
+        MALFORMED = f"{Fore.red}Malformed{Style.reset}"
+        UNPARSABLE = f"{Fore.red}Unparsable{Style.reset}"
 
     tag: str
     valid: bool
@@ -241,6 +245,8 @@ class Version:
         """Print Version as python-compatible string if possible."""
         if not self.valid:
             return ""
+        if self.kind == Version.Type.MALFORMED:
+            return f"{Fore.red}BROKEN{Style.reset}"
         post = f".post{self.post}" if self.post else ""
         dev = f".dev{self.dev}" if self.dev else ""
         pre = f"{self.pre[0]}{self.pre[1]}" if self.pre else ""

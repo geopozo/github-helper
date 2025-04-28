@@ -468,7 +468,7 @@ class GHApi:
     async def audit_versions(  # noqa: C901
         self,
         repo: str,
-        count: int = 15,
+        count: int = 10,
     ) -> RetVal[list[dict]]:
         """
         Verify that version of a repository have differences.
