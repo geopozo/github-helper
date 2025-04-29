@@ -94,7 +94,7 @@ class PythonAudit:
 class Project:
     sdist: bool = False
     bdist: bool = False
-    weird_version: bool = False
+    version_weird: bool = False
     pure_tags: set[tags.Tag] = field(default_factory=set)
     all_tags: set[tags.Tag] = field(default_factory=set)
     unknown_tags: set[tags.Tag] = field(default_factory=set)
