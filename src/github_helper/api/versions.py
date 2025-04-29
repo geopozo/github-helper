@@ -219,10 +219,10 @@ class Version:
         """Print Version as python-compatible string if possible."""
         if not self.valid:
             return ""
-        post = f".post{self.post}" if self.post else ""
-        dev = f".dev{self.dev}" if self.dev else ""
-        pre = f"{self.pre[0]}{self.pre[1]}" if self.pre else ""
-        local = f"+{self.local}" if self.local else ""
+        post = f".post{self.post}" if self.post is not None else ""
+        dev = f".dev{self.dev}" if self.dev is not None else ""
+        pre = f"{self.pre[0]}{self.pre[1]}" if self.pre is not None else ""
+        local = f"+{self.local}" if self.local is not None else ""
         return f"{self.major}.{self.minor}.{self.micro}{pre}{post}{dev}{local}"
 
     def _cmp_tuple(self) -> tuple:
