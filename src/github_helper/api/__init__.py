@@ -360,12 +360,6 @@ class GHApi:
         """Return type for get_remote_tags."""
 
         tag: str
-        _with_v: bool = False
-
-        def tag_eq(self, cannon):
-            """Check if tag is equal to another tag."""
-            return self.tag == (f"v{cannon}" if self._with_v else cannon)
-
         # end
 
     async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tag]]:
@@ -378,7 +372,7 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
         tags_dict = tags_jq.input_value(orjson.loads(out)).first()
-        tags = [GHApi.Tag(**tag, _with_v=True) for tag in tags_dict]
+        tags = [GHApi.Tag(**tag) for tag in tags_dict]
         sadness = int(not tags)
         return tags[:count], sadness
 
@@ -462,7 +456,6 @@ class GHApi:
             GHApi.Release(
                 **r,
                 version=versions.Version(r["tag"]),
-                _with_v=True,
             )
             for r in releases
         ]
@@ -488,6 +481,7 @@ class GHApi:
         # should this be a dictionary so we can iterate through names?
         @dataclass(slots=True)
         class VersionSet:
+            v: versions.Version
             gh_tags: GHApi.Tag | None = None
             gh_releases: GHApi.Release | None = None
             pypi: GHApi.Release | None = None
@@ -495,7 +489,7 @@ class GHApi:
 
             # maybe audits should carry their own adapters
             # this is an adapter, colors is an adapter
-            def print_source_status(self, name: str, canonical: str) -> str:
+            def print_attr_diff(self, name: str) -> str:
                 attr = getattr(self, name)
                 if not attr:
                     return ""
@@ -503,7 +497,7 @@ class GHApi:
                     empty = ""
                 else:
                     empty = f"{Fore.red}Yanked/Empty{Style.reset}"
-                if not attr.tag_eq(canonical):
+                if attr.tag.removeprefix("v") != str(v).removeprefix("v"):
                     return f"{empty}{Fore.yellow}({attr.tag}){Style.reset}"
                 elif empty:
                     return f"{empty}"
@@ -552,7 +546,7 @@ class GHApi:
             v = getattr(o, "version", None) or versions.Version(o.tag)
             if not v.valid:
                 continue
-            vset = all_versions.setdefault(v, VersionSet())
+            vset = all_versions.setdefault(v, VersionSet(v))
             if getattr(vset, attrname, None):
                 warnings.warn(
                     "Looks like conflicting poorly-written versions caused overwrite.",
@@ -561,27 +555,28 @@ class GHApi:
             if isinstance(o, GHApi.Release):
                 o.audit = ReleaseAudit(o)
             setattr(vset, attrname, o)
+
+        if version:
+            v = versions.Version(version)
+            r = all_versions.get(v)
+            if not r:
+                return [], 1
+            all_versions = {v: r}
+
         all_versions = dict(sorted(all_versions.items(), reverse=True))
 
         result = [
             {
                 "version": str(v),
-                "gh_tags": r.print_source_status("gh_tags", str(v)),
-                "gh_releases": r.print_source_status("gh_releases", str(v)),
-                **(
-                    {"pypi": r.print_source_status("pypi", str(v))}
-                    if not pypi_sadness
-                    else {}
-                ),
-                **(
-                    {"test.pypi": r.print_source_status("test_pypi", str(v))}
-                    if not test_pypi_sadness
-                    else {}
-                ),
+                "gh_tags": r.print_attr_diff("gh_tags"),
+                "gh_releases": r.print_attr_diff("gh_releases"),
+                "pypi": r.print_attr_diff("pypi"),
+                "test.pypi": r.print_attr_diff("test_pypi"),
                 "validity": v.kind,
             }
             for v, r in list(all_versions.items())[:count]  # count
         ]
+
         return result, 0  # maybe no sadness for audit?
 
     async def _get_ruleset(self, owner, repo, ruleset_id):

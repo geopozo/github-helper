@@ -28,6 +28,18 @@ class ReleaseAudit:
     projects: dict
     """A list of the projects found in this release."""
 
+    def full_print(self):
+        ret = ""
+        if self.unknown_files:
+            ret += "Unknown Files: \n "
+            ret += "\n ".join(self.unknown_files)
+        if self.ignored_files:
+            ret += "Ignored Files: \n"
+            for k, v in self.ignored_files:
+                ret += f" {k}:\n  "
+                ret += "\n  ".join(v)
+        return ret
+
     def __init__(self, release):
         """Audit a release object."""
         self.tag = release.tag
