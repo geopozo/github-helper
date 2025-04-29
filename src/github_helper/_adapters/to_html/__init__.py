@@ -1,69 +1,19 @@
 from collections.abc import MutableMapping
 from dataclasses import dataclass
+from pathlib import Path
 
 import logistro
-from htmy import Component, Context, Renderer, component, html
+from htmy import Component, Context, component, html
+
+from github_helper._adapters.to_html import _components
+from github_helper._utils import load_file
 
 _logger = logistro.getLogger(__name__)
 
 github_com = r"https://www.github.com"
-style = """
-
-a.collaborator:link,
-a.collaborator:hover,
-a.collaborator:visited,
-a.collaborator:focus,
-a.collaborator:active,
-span.topic
-{
-  border: 1px solid black;
-  padding: 0rem .5rem;
-  border-radius: 10px;
-  margin: 0 .1rem;
-}
-td.owner {
-  text-align: right;
-}
-td.repo {
-  max-width: 15rem;
-}
-td.description {
-  max-width: 50rem;
-}
-tr.repo-row td a:link,
-tr.repo-row td a:hover,
-tr.repo-row td a:visited,
-tr.repo-row td a:focus,
-tr.repo-row td a:active {
-  color: black;
-}
-body {
-  overflow-x: auto;
-  width: 100%;
-}
-table {
-  width: max-content;
-}
-
-tr.even { background-color: #f0f0f0; }
-tr.odd { background-color: #ffffff; }
-
-tr.repo-row.private {
-    font-weight: 350;
-}
-
-tr.repo-row.public {
-    font-weight: 500;
-}
-
-tr.repo-row.archived td{
-   background-color: rgba(255, 0, 0, 0.04);
-}
-
-#controls {
-    width:max-content;
-}
-"""
+_HTML_DIR = Path(__file__).resolve().parent
+_STYLES_PATH = _HTML_DIR / "_styles"
+_JS_PATH = _HTML_DIR / "_js"
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -87,7 +37,11 @@ class RepoRow:
         return html.tr(
             html.td(html.span("📌" if repo["pinned"] else "")),
             html.td(
-                html.a(repo["owner"], href=f"{github_com}/{repo['owner']}"),
+                html.a(
+                    repo["owner"],
+                    href=f"{github_com}/{repo['owner']}",
+                    target="_blank",
+                ),
                 class_="owner",
             ),
             html.td(html.span("/")),
@@ -99,7 +53,7 @@ class RepoRow:
                 ),
                 class_="repo",
             ),
-            html.td(html.span(repo["version"])),
+            html.td(html.span(repo["version"]), class_="text-center"),
             html.td(html.span("⑂" if repo["fork"] else "")),
             html.td(
                 html.span(repo["description"] or ""),
@@ -162,163 +116,83 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
     return [RepoRow(repo=repo) for repo in repos]
 
 
-def modal(modal_id: str, close_method: str) -> Component:
-    return html.div(
-        html.div(
-            html.div(
-                html.button(
-                    "X",
-                    type="button",
-                    class_="-me-4 -mt-4 p-2 text-gray-500",
-                    onclick=close_method,
-                ),
-                class_="flex items-start justify-end",
-            ),
-            html.div(html.iframe(src="", height="500", class_="w-full")),
-            class_="w-full max-w-md rounded-lg bg-white p-6 shadow-lg",
-        ),
-        id=modal_id,
-        class_="fixed inset-0 z-50 grid place-content-center bg-black/50 p-4",
-        role="dialog",
-        style="display: none;",
-    )
-
-
 async def repos(repos_data):
     _logger.debug("Building table.")
+    styles = html.style(await load_file(_STYLES_PATH / "repos.css"))
     table = html.table(repo_rows(repos_data), class_="mx-auto")
-    modal_iframe = modal("my-modal", "closeModal()")
+    modal_iframe = _components.modal(
+        "my-modal",
+        "closeModal()",
+        html.iframe(src="", height="500", class_="w-full"),
+    )
     _logger.debug("Building page.")
     scripts = [
-        html.script(src="https://cdn.tailwindcss.com"),
         html.script(
-            html.SafeStr("""
-    function updateVisibleRowClasses() {
-        const rows = [...document.querySelectorAll('table tbody tr')];
-        let visibleIndex = 0;
-
-        rows.forEach(row => {
-          row.classList.remove('odd', 'even');
-
-          if (row.style.display !== 'none') {
-            row.classList.add(visibleIndex % 2 === 0 ? 'even' : 'odd');
-            visibleIndex++;
-          }
-    });
-  }"""),
-        ),
-        html.script(
-            html.SafeStr(r"""
-  const publicCheckbox = document.getElementById('toggle-public');
-  const privateCheckbox = document.getElementById('toggle-private');
-  const archivedCheckbox = document.getElementById('toggle-archive');
-  const ownerInput = document.getElementById('owner-filter');
-  const repoInput = document.getElementById('repo-filter');
-  const modal = document.getElementById("my-modal");
-
-  const openModal = (data) => {
-    const iframe = modal.querySelector("iframe");
-    modal.style.display = "grid";
-    iframe.src = data;
-  }
-
-  const closeModal = () => modal.style.display = "none";
-
-  function filterAll() {
-    console.log("Filtering All.")
-    const ownerFilter = ownerInput.value.toLowerCase();
-    const repoFilter = repoInput.value.toLowerCase();
-    const rows = document.querySelectorAll('table tbody tr');
-
-    rows.forEach(row => {
-      const matchOwner = [...row.querySelectorAll('td.owner')].some(td =>
-        td.textContent.toLowerCase().includes(ownerFilter)
-      );
-      const matchRepo = [...row.querySelectorAll('td.repo')].some(td =>
-        td.textContent.toLowerCase().includes(repoFilter)
-      );
-      archived = !(!archivedCheckbox.checked && row.classList.contains('archived'))
-      private  = !(!privateCheckbox.checked && row.classList.contains('private'))
-      public   = !(!publicCheckbox.checked && row.classList.contains('public'))
-
-      toDisplay = matchOwner && matchRepo && archived && private && public
-      row.style.display = toDisplay ? '' : 'none';
-    });
-    updateVisibleRowClasses();
-  }
-  publicCheckbox.addEventListener('change', filterAll);
-  privateCheckbox.addEventListener('change', filterAll);
-  archivedCheckbox.addEventListener('change', filterAll);
-  ownerInput.addEventListener('input', filterAll);
-  repoInput.addEventListener('input', filterAll);
-  filterAll();
-  """),
+            html.SafeStr(
+                "\n".join(
+                    [
+                        await load_file(_JS_PATH / "repos.js"),
+                        await load_file(_JS_PATH / "modal.js"),
+                    ],
+                ),
+            ),
         ),
     ]
-    page = (
-        html.DOCTYPE.html,
-        html.html(
-            html.head(
-                html.style(style),
-            ),
-            html.body(
-                html.div(
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-public",
-                            checked=True,
-                        ),
-                        " Show Public",
-                    ),
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-private",
-                            checked=True,
-                            style="margin-left:1rem;",
-                        ),
-                        " Show Private",
-                    ),
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-archive",
-                            checked=True,
-                            style="margin-left:1rem;",
-                        ),
-                        " Show Archived",
-                    ),
-                    html.br(),
-                    html.label(
-                        " Owner",
-                        html.input_(
-                            type_="text",
-                            id_="owner-filter",
-                            name="owner-filter",
-                            placeholder="Owner",
-                            class_="rounded shadow-sm sm:text-sm p-1",
-                        ),
-                    ),
-                    html.label(
-                        " Repo",
-                        html.input_(
-                            type_="text",
-                            id_="repo-filter",
-                            name="repo-filter",
-                            placeholder="Repo",
-                            class_="rounded shadow-sm sm:text-sm p-1",
-                        ),
-                    ),
-                    style="margin-bottom: 1rem;",
-                    class_="mx-auto",
-                    id_="controls",
+    content = [
+        html.div(
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-public",
+                    checked=True,
                 ),
-                table,
-                modal_iframe,
-                *scripts,
+                " Show Public",
             ),
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-private",
+                    checked=True,
+                    style="margin-left:1rem;",
+                ),
+                " Show Private",
+            ),
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-archive",
+                    checked=True,
+                    style="margin-left:1rem;",
+                ),
+                " Show Archived",
+            ),
+            html.br(),
+            html.label(
+                " Owner",
+                html.input_(
+                    type_="text",
+                    id_="owner-filter",
+                    name="owner-filter",
+                    placeholder="Owner",
+                    class_="rounded shadow-sm sm:text-sm p-1",
+                ),
+            ),
+            html.label(
+                " Repo",
+                html.input_(
+                    type_="text",
+                    id_="repo-filter",
+                    name="repo-filter",
+                    placeholder="Repo",
+                    class_="rounded shadow-sm sm:text-sm p-1",
+                ),
+            ),
+            style="margin-bottom: 1rem;",
+            class_="mx-auto",
+            id_="controls",
         ),
-    )
-    _logger.debug("Rendering.")
-    return await Renderer().render(page)
+        table,
+        modal_iframe,
+        *scripts,
+    ]
+    return await _components.render_page([styles], content)

@@ -12,12 +12,17 @@ import orjson
 _logger = logistro.getLogger(__name__)
 
 
-async def load_json(path):
+async def load_file(path):
     if not Path(path).is_file():
         raise FileNotFoundError(f"{path} not exist")
 
     async with aiofiles.open(path) as f:
         file = await f.read()
+    return file
+
+
+async def load_json(path):
+    file = await load_file(path)
     return orjson.loads(file)
 
 

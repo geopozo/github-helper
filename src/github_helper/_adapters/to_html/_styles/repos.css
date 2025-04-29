@@ -1,0 +1,60 @@
+a.collaborator:link,
+a.collaborator:hover,
+a.collaborator:visited,
+a.collaborator:focus,
+a.collaborator:active,
+span.topic {
+    border: 1px solid black;
+    padding: 0rem .5rem;
+    border-radius: 10px;
+    margin: 0 .1rem;
+}
+
+td.owner {
+    text-align: right;
+}
+
+td.description {
+    max-width: 25rem;
+}
+
+tr.repo-row td a:link,
+tr.repo-row td a:hover,
+tr.repo-row td a:visited,
+tr.repo-row td a:focus,
+tr.repo-row td a:active {
+    color: black;
+}
+
+body {
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    width: max-content;
+}
+
+tr.even {
+    background-color: #f0f0f0;
+}
+
+tr.odd {
+    background-color: #ffffff;
+}
+
+tr.repo-row.private {
+    font-weight: 350;
+}
+
+tr.repo-row.public {
+    font-weight: 500;
+}
+
+tr.repo-row.archived td {
+    background-color: rgba(255, 0, 0, 0.04);
+}
+
+#controls {
+    width: max-content;
+}
