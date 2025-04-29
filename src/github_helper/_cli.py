@@ -150,24 +150,6 @@ Permissions:
         help="Use testing pypi, not regular.",
     )
 
-    pypi_audit_parser = subparsers.add_parser(
-        "audit-pypi",
-        description="Show all pypi packages from a repo with comments.",
-        help="Return all pypi releases of a repo.",
-    )
-    pypi_audit_parser.add_argument(
-        "-r",
-        "--repo",
-        help="Name of repository required.",
-        required=True,
-    )
-    pypi_audit_parser.add_argument(
-        "-t",
-        "--testing",
-        action="store_true",
-        help="Use testing pypi, not regular.",
-    )
-
     audit_repo = subparsers.add_parser(
         "audit-repo",
         description="",
@@ -272,9 +254,6 @@ async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
         case "pypi":
             data, sadness = await gh.get_pypi(repo, testing=testing)
             data = await adpt.transform_pypi_data(data)
-        case "audit-pypi":
-            data, sadness = await gh.audit_pypi(repo, testing=testing)
-            data = await adpt.transform_audit_releases_data(data)
         case "audit-repo":
             data, sadness = await gh.audit_rulesets(repo)
             data = await adpt.transform_audit_rulesets_data(data)
