@@ -23,6 +23,8 @@ from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
 from github_helper.api import _audit, versions
 
+from ._pkg_audit import ReleaseAudit
+
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
@@ -390,6 +392,7 @@ class GHApi:
         """Files that came with it."""
         version: versions.Version
         """Calculated version."""
+        audit: ReleaseAudit | None = None
 
     async def get_pypi(
         self,
@@ -547,14 +550,15 @@ class GHApi:
             v = getattr(o, "version", None) or versions.Version(o.tag)
             if not v.valid:
                 continue
-            if v not in all_versions:
-                all_versions[v] = VersionSet()
-            if getattr(all_versions[v], attrname, None):
+            vset = all_versions.setdefault(v, VersionSet())
+            if getattr(vset, attrname, None):
                 warnings.warn(
                     "Looks like conflicting poorly-written versions caused overwrite.",
                     stacklevel=2,
                 )
-            setattr(all_versions[v], attrname, o)
+            if isinstance(o, GHApi.Release):
+                o.audit = ReleaseAudit(o)
+            setattr(vset, attrname, o)
         all_versions = dict(sorted(all_versions.items(), reverse=True))
 
         result = [

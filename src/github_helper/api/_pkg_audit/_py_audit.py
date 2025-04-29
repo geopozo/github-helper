@@ -128,7 +128,7 @@ class Project:
         elif linuxtag := self._parse_linux_platform(t.platform):
             arch_default: dict = {"Glibc": {"2.17": []}, "musl": {}}
             x = self.bdist_tree["Linux"].setdefault(linuxtag.arch, arch_default)
-            x[linuxtag.arch].setdefault(linuxtag.version, []).append(pair)
+            x.setdefault(linuxtag.version, []).append(pair)
         else:
             self.unknown_tags.add(t)
 
