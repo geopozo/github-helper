@@ -40,6 +40,15 @@ if not sys.stdout.isatty():
     # Override colored's foreground, background, and style
     Fore = Style = _NoColor()  # type: ignore[misc, assignment]
 
+
+async def _noop(tup=0, ret=None):
+    ### Allows us to fake async noops
+    if not tup:
+        return ret
+    else:
+        return (ret,) * tup
+
+
 _check_ran = False
 
 
@@ -339,7 +348,7 @@ class GHApi:
             ref = "main" if "main" in await r.list_branches() else "master"
         files = []
         for name in filenames:
-            files.extend(await r.get_files_by_name(name, ref=ref))
+            files.extend(await r.get_files_by_name(name, ref=ref) or [])
         configs: GHApi.ConfigSet = {}
         for f in files:
             obj = None
@@ -527,8 +536,12 @@ class GHApi:
         ) = await asyncio.gather(
             self.get_remote_tags(repo),
             self.get_releases(repo),
-            self.get_pypi(project_names[0]),
-            self.get_pypi(project_names[0], testing=True),
+            (self.get_pypi(project_names[0]) if project_names else _noop(2, [])),
+            (
+                self.get_pypi(project_names[0], testing=True)
+                if project_names
+                else _noop(2, [])
+            ),
         )
 
         @dataclass(slots=True)
