@@ -9,6 +9,7 @@ from ._types import ReturnMessages
 
 _logger = logistro.getLogger(__name__)
 
+
 class ReleaseAudit:
     """
     Release audit turns a release object into a summary.
@@ -35,14 +36,11 @@ class ReleaseAudit:
         self.version = Version(self.tag)
         self.python_audit = PythonAudit(self.version)
 
-
-        if not self.version.valid: # we should not audit not valid
+        if not self.version.valid:  # we should not audit not valid
             self.prerelease_agree = None
             return
 
-        self.prerelease_agree = (
-            self.version.is_prerelease == release.prerelease
-        )
+        self.prerelease_agree = self.version.is_prerelease == release.prerelease
 
         for filename in release.files:
             notes = self.process_file(filename)
@@ -56,7 +54,6 @@ class ReleaseAudit:
                 case _:
                     self.unknown_files.add(filename)
 
-
     # move these to python
     # create specific types that can be returned
     # python-compat to audit-projects and use language
@@ -68,8 +65,6 @@ class ReleaseAudit:
             return {"type": "gh-archive", "action": "ignore"}
         elif filename.endswith(("sigstore.json", ".sha256")):
             return {"type": "metadata", "action": "ignore"}
-        elif (note := self.python_audit.check_file(filename)):
+        elif note := self.python_audit.check_file(filename):
             return note
         return {"error": "unrecognized name", "value": filename}
-
-

@@ -46,6 +46,7 @@ bdist_template = {
     },
 }
 
+
 class PythonAudit:
     projects: dict[str, "Project"]
     version: Version
@@ -64,8 +65,10 @@ class PythonAudit:
             else:
                 self.projects.setdefault(name, Project())
                 self.projects[name].add_sdist(filename)
-                # TODO check version against tag
-                return { "name": name, "action": "resolved" }
+                self.projects[name].version_weird = (
+                    self.version != version or self.projects[name].version_weird
+                )
+                return {"name": name, "action": "resolved"}
         elif filename.endswith(".whl"):
             try:
                 (
@@ -80,8 +83,10 @@ class PythonAudit:
             else:
                 self.projects.setdefault(name, Project())
                 self.projects[name].add_bdist(filename, tags)
-                # TODO check version against
-                return { "name": name, "action": "resolved" }
+                self.projects[name].version_weird = (
+                    self.version != version or self.projects[name].version_weird
+                )
+                return {"name": name, "action": "resolved"}
         return None
 
 
@@ -115,13 +120,13 @@ class Project:
         if t.platform == "any":
             x = self.bdist_tree.setdefault("All OS", [])
             x.append(pair)
-        elif (mactag := self._parse_mac_platform(t.platform)):
+        elif mactag := self._parse_mac_platform(t.platform):
             x = self.bdist_tree["Mac"][mactag.arch].setdefault("version", [])
             x.append(pair)
-        elif (arch := self._parse_win_platform(t.platform)):
+        elif arch := self._parse_win_platform(t.platform):
             self.bdist_tree["Windows"][arch].append(pair)
-        elif (linuxtag := self._parse_linux_platform(t.platform)):
-            arch_default: dict = { "Glibc": {"2.17": []}, "musl": {} }
+        elif linuxtag := self._parse_linux_platform(t.platform):
+            arch_default: dict = {"Glibc": {"2.17": []}, "musl": {}}
             x = self.bdist_tree["Linux"].setdefault(linuxtag.arch, arch_default)
             x[linuxtag.arch].setdefault(linuxtag.version, []).append(pair)
         else:
@@ -131,6 +136,7 @@ class Project:
     class MacTag:
         version: str
         arch: str
+
     def _parse_mac_platform(self, tag) -> MacTag | None:
         pattern = r"^macosx_(\d+)(?:_(\d+))?_(.+)$"
         m = re.match(pattern, tag)
@@ -140,10 +146,11 @@ class Project:
         major = int(m.group(1))
         minor = int(m.group(2) or 0)  # Default minor version to 0 if omitted
         arch = m.group(3)
-        return Project.MacTag(version=f"{major!s}.{minor!s}", arch= arch)
+        return Project.MacTag(version=f"{major!s}.{minor!s}", arch=arch)
 
     def _parse_win_platform(
-            self, tag: str
+        self,
+        tag: str,
     ) -> Literal["win32", "x86_64", "arm64"] | None:
         tag = tag.lower()
         if tag == "win32":
@@ -191,7 +198,7 @@ class Project:
                 version = "2.17"
             else:
                 return None
-        elif (m := re.match(r"^musllinux_([0-9]+)_([0-9]+)_(.+)$", tag)):
+        elif m := re.match(r"^musllinux_([0-9]+)_([0-9]+)_(.+)$", tag):
             libc = "musl"
             musl_major = int(m.group(1))
             musl_minor = int(m.group(2))
@@ -200,7 +207,7 @@ class Project:
         else:
             return None
         return Project.LinuxTag(
-            version= version,
-            arch = arch,
-            libc = libc,
+            version=version,
+            arch=arch,
+            libc=libc,
         )
