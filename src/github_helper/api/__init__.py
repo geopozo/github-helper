@@ -569,7 +569,6 @@ class GHApi:
             if not r:
                 return [], 1
             all_versions = {v: r}
-
         all_versions = dict(sorted(all_versions.items(), reverse=True))
         ok = f"{Fore.green}OK{Style.reset}"
         result = [

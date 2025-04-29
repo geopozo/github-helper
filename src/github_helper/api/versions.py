@@ -274,7 +274,7 @@ class Version:
             return 1  # final > pre
         if self.pre is not None and other.pre is None:
             return -1  # pre < final
-        if self.pre and other.pre:
+        if self.pre is not None and other.pre is not None:
             if self.pre[0] != other.pre[0]:
                 return (self.pre[0] > other.pre[0]) - (self.pre[0] < other.pre[0])
             if self.pre[1] != other.pre[1]:
@@ -285,7 +285,7 @@ class Version:
             return -1  # no post < post
         if self.post is not None and other.post is None:
             return 1  # post > no post
-        if self.post and other.post:  # noqa: SIM102 clarity
+        if self.post is not None and other.post is not None:  # noqa: SIM102 clarity
             if self.post != other.post:
                 return (self.post > other.post) - (self.post < other.post)
 
@@ -294,7 +294,7 @@ class Version:
             return 1  # no dev > dev
         if self.dev is not None and other.dev is None:
             return -1  # dev < no dev
-        if self.dev and other.dev:  # noqa: SIM102 clarity
+        if self.dev is not None and other.dev is not None:  # noqa: SIM102 clarity
             if self.dev != other.dev:
                 return (self.dev > other.dev) - (self.dev < other.dev)
 
