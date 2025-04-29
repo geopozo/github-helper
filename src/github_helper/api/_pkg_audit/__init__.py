@@ -54,11 +54,6 @@ class ReleaseAudit:
                 case _:
                     self.unknown_files.add(filename)
 
-    # move these to python
-    # create specific types that can be returned
-    # python-compat to audit-projects and use language
-    # use glom
-
     # the action you return will trigger behavior above
     def process_file(self, filename: str) -> ReturnMessages:
         if filename in (f"{self.tag}.zip", f"{self.tag}.tar.gz"):
