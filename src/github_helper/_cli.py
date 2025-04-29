@@ -297,7 +297,7 @@ async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
             data, sadness = await gh.audit_versions(
                 repo,
                 count=count,
-                version=version,
+                only_version=version,
             )
             data = await adpt.transform_audit_versions_data(data)
         case _:

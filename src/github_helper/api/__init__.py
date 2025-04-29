@@ -448,8 +448,6 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
         obj = orjson.loads(out)
-        _logger.debug2("get_releases")
-        _log_one_json(obj)
         releases = releases_jq.input_value(obj).first()
         sadness = int(not releases)
         coerced_releases: list[GHApi.Release] = [
@@ -465,7 +463,7 @@ class GHApi:
         self,
         repo: str,
         count: int = 20,
-        version: str | None = None,
+        only_version: str | None = None,
     ) -> RetVal[list[dict]]:
         """
         Verify that version of a repository have differences.
@@ -474,7 +472,7 @@ class GHApi:
             repo: the name of the repo to verify. Can be "owner/repo" or just
             "repo" and owner is assumed to be the current user.
             count: the number of versions to look at
-            version: deep dive on one version
+            only_version: deep dive on one version
 
         """
 
@@ -544,6 +542,7 @@ class GHApi:
             [],
         ):
             v = getattr(o, "version", None) or versions.Version(o.tag)
+            _logger.debug2(str(v))
             if not v.valid:
                 continue
             vset = all_versions.setdefault(v, VersionSet(v))
@@ -556,8 +555,8 @@ class GHApi:
                 o.audit = ReleaseAudit(o)
             setattr(vset, attrname, o)
 
-        if version:
-            v = versions.Version(version)
+        if only_version:
+            v = versions.Version(only_version)
             r = all_versions.get(v)
             if not r:
                 return [], 1
