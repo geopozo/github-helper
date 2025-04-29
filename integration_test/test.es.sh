@@ -38,7 +38,6 @@ run_basic_commands() {
     "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
-    "audit-releases -r $REPO"
     "audit-repo -r $REPO"
     "audit-versions -r $REPO"
   )
@@ -60,7 +59,6 @@ run_pretty_commands() {
     "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
-    "audit-releases -r $REPO"
     "audit-repo -r $REPO"
     "audit-versions -r $REPO"
   )
@@ -84,7 +82,6 @@ run_pretty_json_commands() {
     "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
-    "audit-releases -r $REPO"
     "audit-repo -r $REPO"
     "audit-versions -r $REPO"
   )
