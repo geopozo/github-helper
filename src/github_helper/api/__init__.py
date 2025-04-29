@@ -360,7 +360,14 @@ class GHApi:
         """Return type for get_remote_tags."""
 
         tag: str
-        # end
+        """Tag"""
+
+        version: versions.Version = None
+        """Calculated version."""
+
+        def __post_init__(self):
+            """Initialize derivative values."""
+            self.version = versions.Version(self.tag)
 
     async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tag]]:
         """Return tags ("tag":"name") for a repo."""
@@ -384,8 +391,6 @@ class GHApi:
         """Does the source mark it as prerelease?"""
         files: list[str]
         """Files that came with it."""
-        version: versions.Version
-        """Calculated version."""
         audit: ReleaseAudit | None = None
 
     async def get_pypi(
@@ -422,8 +427,7 @@ class GHApi:
         coerced_releases: list[GHApi.Release] = [
             GHApi.Release(
                 **r,
-                version=(v := versions.Version(r["tag"])),
-                prerelease=v.is_prerelease,
+                prerelease=versions.Version(r["tag"]).is_prerelease,
             )
             for r in releases
         ]
@@ -453,7 +457,6 @@ class GHApi:
         coerced_releases: list[GHApi.Release] = [
             GHApi.Release(
                 **r,
-                version=versions.Version(r["tag"]),
             )
             for r in releases
         ]
