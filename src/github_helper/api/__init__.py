@@ -369,6 +369,18 @@ class GHApi:
             """Initialize derivative values."""
             self.version = versions.Version(self.tag)
 
+        def tag_diff(self) -> str:
+            """Check if our version tag correctly formatted."""
+            # NOTE: this is biased towards python, semver is different!
+            if self.tag.removeprefix("v") != str(self.version).removeprefix("v"):
+                return f"{Fore.yellow}({self.tag}){Style.reset}"
+            return ""
+
+        def return_status(self) -> list[str]:
+            """Return all printed status in array."""
+            td = self.tag_diff()
+            return [td] if td else []
+
     async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tag]]:
         """Return tags ("tag":"name") for a repo."""
         _ = await self.get_user()
@@ -392,6 +404,20 @@ class GHApi:
         files: list[str]
         """Files that came with it."""
         audit: ReleaseAudit | None = None
+
+        def is_empty(self) -> str:
+            """Check if our release empty."""
+            if not self.files:
+                return f"{Fore.red}Yanked/Empty{Style.reset}"
+            return ""
+
+        def return_status(self) -> list[str]:
+            """Return all printed status in array."""
+            # can use super() once not subclass
+            ret = GHApi.Tag.return_status(self)
+            if ie := self.is_empty():
+                ret.append(ie)
+            return ret
 
     async def get_pypi(
         self,
@@ -478,36 +504,6 @@ class GHApi:
             only_version: deep dive on one version
 
         """
-
-        # should this be a dictionary so we can iterate through names?
-        @dataclass(slots=True)
-        class VersionSet:
-            v: versions.Version
-            gh_tags: GHApi.Tag | None = None
-            gh_releases: GHApi.Release | None = None
-            pypi: GHApi.Release | None = None
-            test_pypi: GHApi.Release | None = None
-
-            # maybe audits should carry their own adapters
-            # this is an adapter, colors is an adapter
-            def print_attr_diff(self, name: str) -> str:
-                attr = getattr(self, name)
-                if not attr:
-                    return ""
-                if not isinstance(attr, GHApi.Release) or attr.files:
-                    empty = ""
-                else:
-                    empty = f"{Fore.red}Yanked/Empty{Style.reset}"
-                if attr.tag.removeprefix("v") != str(self.v).removeprefix("v"):
-                    _logger.debug2(
-                        f"{attr.tag.removeprefix('v')}={str(v).removeprefix('v')}",
-                    )
-                    return f"{empty}{Fore.yellow}({attr.tag}){Style.reset}"
-                elif empty:
-                    return f"{empty}"
-                else:
-                    return f"{Fore.green}True{Style.reset}"
-
         project_configs, sadness = await self.get_project_configs(
             repo,
             "pyproject.toml",
@@ -535,6 +531,13 @@ class GHApi:
             self.get_pypi(project_names[0], testing=True),
         )
 
+        @dataclass(slots=True)
+        class VersionSet:
+            gh_tags: GHApi.Tag | None = None
+            gh_releases: GHApi.Release | None = None
+            pypi: GHApi.Release | None = None
+            test_pypi: GHApi.Release | None = None
+
         all_versions: dict[
             versions.Version,
             VersionSet,
@@ -551,7 +554,7 @@ class GHApi:
             _logger.debug2(str(v))
             if not v.valid:
                 continue
-            vset = all_versions.setdefault(v, VersionSet(v))
+            vset = all_versions.setdefault(v, VersionSet())
             if getattr(vset, attrname, None):
                 warnings.warn(
                     "Looks like conflicting poorly-written versions caused overwrite.",
@@ -569,14 +572,24 @@ class GHApi:
             all_versions = {v: r}
 
         all_versions = dict(sorted(all_versions.items(), reverse=True))
-
+        ok = f"{Fore.green}OK{Style.reset}"
         result = [
             {
                 "version": str(v),
-                "gh_tags": r.print_attr_diff("gh_tags"),
-                "gh_releases": r.print_attr_diff("gh_releases"),
-                "pypi": r.print_attr_diff("pypi"),
-                "test.pypi": r.print_attr_diff("test_pypi"),
+                "gh_tags": (
+                    (", ".join(r.gh_tags.return_status()) or ok) if r.gh_tags else ""
+                ),
+                "gh_releases": (
+                    (", ".join(r.gh_releases.return_status()) or ok)
+                    if r.gh_releases
+                    else ""
+                ),
+                "pypi": ((", ".join(r.pypi.return_status()) or ok) if r.pypi else ""),
+                "test.pypi": (
+                    (", ".join(r.test_pypi.return_status()) or ok)
+                    if r.test_pypi
+                    else ""
+                ),
                 "validity": v.kind,
             }
             for v, r in list(all_versions.items())[:count]  # count
