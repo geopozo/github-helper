@@ -551,7 +551,6 @@ class GHApi:
             [],
         ):
             v = getattr(o, "version", None) or versions.Version(o.tag)
-            _logger.debug2(str(v))
             if not v.valid:
                 continue
             vset = all_versions.setdefault(v, VersionSet())
