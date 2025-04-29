@@ -472,6 +472,7 @@ class GHApi:
         self,
         repo: str,
         count: int = 20,
+        version: str | None = None,
     ) -> RetVal[list[dict]]:
         """
         Verify that version of a repository have differences.
@@ -480,6 +481,7 @@ class GHApi:
             repo: the name of the repo to verify. Can be "owner/repo" or just
             "repo" and owner is assumed to be the current user.
             count: the number of versions to look at
+            version: deep dive on one version
 
         """
 
