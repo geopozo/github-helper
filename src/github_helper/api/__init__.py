@@ -495,7 +495,10 @@ class GHApi:
                     empty = ""
                 else:
                     empty = f"{Fore.red}Yanked/Empty{Style.reset}"
-                if attr.tag.removeprefix("v") != str(v).removeprefix("v"):
+                if attr.tag.removeprefix("v") != str(self.v).removeprefix("v"):
+                    _logger.debug2(
+                        f"{attr.tag.removeprefix('v')}={str(v).removeprefix('v')}",
+                    )
                     return f"{empty}{Fore.yellow}({attr.tag}){Style.reset}"
                 elif empty:
                     return f"{empty}"
