@@ -371,7 +371,7 @@ class GHApi:
         tag: str
         """Tag"""
 
-        version: versions.Version = None
+        version: versions.Version | None = None
         """Calculated version."""
 
         def __post_init__(self):
@@ -389,6 +389,13 @@ class GHApi:
             """Return all printed status in array."""
             td = self.tag_diff()
             return [td] if td else []
+
+        def __json__(self):
+            """Convert to json."""
+            return {
+                "tag": self.tag,
+                "version": self.version.__json__() if self.version else None,
+            }
 
     async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tag]]:
         """Return tags ("tag":"name") for a repo."""
