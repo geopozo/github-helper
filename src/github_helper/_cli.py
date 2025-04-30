@@ -119,6 +119,12 @@ Permissions:
         help="Name of repository required.",
         required=True,
     )
+    configs_parser.add_argument(
+        "-f",
+        "--filename",
+        help="Name of the file required.",
+        required=True,
+    )
 
     releases_parser = subparsers.add_parser(
         "releases",
@@ -216,6 +222,7 @@ def run_cli():
 async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
     parser, cli_args = _get_cli_args()
     repo = cli_args.pop("repo", None)
+    filename = cli_args.pop("filename", None)
     paginate = cli_args.pop("all", False)  # Internamente en gh api es un --paginate
     command = cli_args.pop("command", None)
     count = cli_args.pop("count", None)
@@ -246,7 +253,7 @@ async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
             data, sadness = await gh.get_remote_tags(repo)
             data = await adpt.transform_tags_data(data)
         case "project-configs":
-            data, sadness = await gh.get_project_configs(repo)
+            data, sadness = await gh.get_project_configs(repo, filename)
             data = await adpt.transform_project_configs_data(data)
         case "releases":
             data, sadness = await gh.get_releases(repo)
