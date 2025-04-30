@@ -211,6 +211,10 @@ class Version:
             (v.is_prerelease if hasattr(v, "is_prerelease") else bool(v.prerelease)),
         )
 
+    def __json__(self):
+        """Convert to json."""
+        return self.__str__()
+
     def __str__(self):
         """Print Version as string."""
         return self.__repr__()
