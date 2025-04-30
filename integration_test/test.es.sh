@@ -10,6 +10,7 @@ REPO="$1"
 total=0
 success=0
 fail=0
+failed_cmds=()
 
 print_and_run() {
   echo -e "\n=============================="
@@ -19,7 +20,8 @@ print_and_run() {
     ((success++))
   else
     ((fail++))
-    echo -e "\033[0;31m❌ Falló el commando:\033[0m"
+    failed_cmds+=("$*")
+    echo -e "\033[0;31m❌ Falló el comando:\033[0m"
     echo -e "\033[0;31m$*\033[0m"
   fi
 }
@@ -33,10 +35,8 @@ run_basic_commands() {
 
   local repo_cmds=(
     "tags -r $REPO"
-    "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
-    "audit-releases -r $REPO"
     "audit-repo -r $REPO"
     "audit-versions -r $REPO"
   )
@@ -55,10 +55,8 @@ run_pretty_commands() {
 
   local repo_cmds=(
     "tags -r $REPO"
-    "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
-    "audit-releases -r $REPO"
     "audit-repo -r $REPO"
     "audit-versions -r $REPO"
   )
@@ -66,6 +64,8 @@ run_pretty_commands() {
   for cmd in "${repo_cmds[@]}"; do
     print_and_run "$base_cmd $cmd"
   done
+
+  print_and_run "$base_cmd audit-versions -r $REPO -c 3"
 }
 
 run_pretty_json_commands() {
@@ -77,10 +77,8 @@ run_pretty_json_commands() {
 
   local repo_cmds=(
     "tags -r $REPO"
-    "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
-    "audit-releases -r $REPO"
     "audit-repo -r $REPO"
     "audit-versions -r $REPO"
   )
@@ -96,6 +94,13 @@ run_pretty_json_commands
 
 echo -e "\n=============================="
 echo -e "Resumen de ejecución:"
-printf "Total de commandos : %d\n" "$total"
-printf "Commandos exitosos : \033[0;32m%d\033[0m\n" "$success"
-printf "Commandos fallidos : \033[0;31m%d\033[0m\n" "$fail"
+printf "Total de comandos : %d\n" "$total"
+printf "Comandos exitosos : \033[0;32m%d\033[0m\n" "$success"
+printf "Comandos fallidos : \033[0;31m%d\033[0m\n" "$fail"
+
+if (( fail > 0 )); then
+  echo -e "\n\033[0;31m❌ Lista de comandos fallidos:\033[0m"
+  for cmd in "${failed_cmds[@]}"; do
+    echo -e "\033[0;31m$cmd\033[0m"
+  done
+fi
