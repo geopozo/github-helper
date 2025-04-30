@@ -35,7 +35,6 @@ run_basic_commands() {
 
   local repo_cmds=(
     "tags -r $REPO"
-    "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
     "audit-repo -r $REPO"
@@ -56,7 +55,6 @@ run_pretty_commands() {
 
   local repo_cmds=(
     "tags -r $REPO"
-    "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
     "audit-repo -r $REPO"
@@ -79,7 +77,6 @@ run_pretty_json_commands() {
 
   local repo_cmds=(
     "tags -r $REPO"
-    "project-configs -r $REPO"
     "releases -r $REPO"
     "pypi -r $REPO"
     "audit-repo -r $REPO"
