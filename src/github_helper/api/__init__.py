@@ -435,6 +435,17 @@ class GHApi:
                 ret.append(ie)
             return ret
 
+        def __json__(self):
+            """Convert to json."""
+            old = GHApi.Tag.__json__(self)
+            old.update(
+                {
+                    "prerelease": self.prerelease,
+                    "files": self.files,
+                },
+            )
+            return old
+
     async def get_pypi(
         self,
         project_name: str,
