@@ -34,7 +34,7 @@ class ReleaseAudit:
             ret += "Prerelease Disagreement.\n"
         if self.unknown_files:
             ret += "Unknown Files: \n "
-            ret += "\n ".join(self.unknown_files)
+            ret += "\n".join(self.unknown_files)
             ret += "\n"
         if self.ignored_files:
             ret += "Ignored Files:\n"
