@@ -28,16 +28,18 @@ class ReleaseAudit:
     projects: dict
     """A list of the projects found in this release."""
 
-    def full_print(self):
+    def status(self):
         ret = ""
+        if not self.prerelease_agree:
+            ret += "Prerelease Disagreement.\n"
         if self.unknown_files:
             ret += "Unknown Files: \n "
             ret += "\n ".join(self.unknown_files)
+            ret += "\n"
         if self.ignored_files:
-            ret += "Ignored Files: \n"
-            for k, v in self.ignored_files:
-                ret += f" {k}:\n  "
-                ret += "\n  ".join(v)
+            ret += "Ignored Files:\n"
+            for k, v in self.ignored_files.items():
+                ret += f" {k}: {v!s}\n"
         return ret
 
     def __init__(self, release):

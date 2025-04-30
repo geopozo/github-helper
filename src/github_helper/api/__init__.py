@@ -446,6 +446,12 @@ class GHApi:
             )
             return old
 
+        def audit_status(self) -> list[str]:
+            """Get the audit status of the object."""
+            if self.audit:
+                return "\n" + self.audit.status()
+            return ""
+
     async def get_pypi(
         self,
         project_name: str,
@@ -609,7 +615,10 @@ class GHApi:
                     (", ".join(r.gh_tags.return_status()) or ok) if r.gh_tags else ""
                 ),
                 "gh_releases": (
-                    (", ".join(r.gh_releases.return_status()) or ok)
+                    (
+                        (", ".join(r.gh_releases.return_status()) or ok)
+                        + r.gh_releases.audit_status()
+                    )
                     if r.gh_releases
                     else ""
                 ),
