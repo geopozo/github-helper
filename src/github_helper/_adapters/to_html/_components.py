@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 import logistro
 from htmy import Component, Renderer, core, html
 
@@ -31,8 +33,8 @@ def modal(
 
 
 async def render_page(
-    heads: core.BaseTag,
-    content: core.BaseTag,
+    heads: Iterable[core.BaseTag],
+    content: Iterable[core.BaseTag],
 ):
     tailwindcss_cdn = "https://cdn.tailwindcss.com"
     _logger.debug("Rendering.")

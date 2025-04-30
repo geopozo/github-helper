@@ -346,7 +346,7 @@ class GHApi:
         )
         if not ref:
             ref = "main" if "main" in await r.list_branches() else "master"
-        files = []
+        files: list[dict] = []
         for name in filenames:
             files.extend(await r.get_files_by_name(name, ref=ref) or [])
         configs: GHApi.ConfigSet = {}
@@ -446,7 +446,7 @@ class GHApi:
             )
             return old
 
-        def audit_status(self) -> list[str]:
+        def audit_status(self) -> str:
             """Get the audit status of the object."""
             if self.audit:
                 return "\n" + self.audit.status()
