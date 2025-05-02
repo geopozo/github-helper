@@ -159,6 +159,7 @@ async def repos(repos_data):
                     [
                         await load_file(_JS_PATH / "repos.js"),
                         await load_file(_JS_PATH / "modal.js"),
+                        await load_file(_JS_PATH / "utils.js"),
                     ],
                 ),
             ),
