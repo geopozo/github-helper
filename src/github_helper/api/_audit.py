@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import Any
 
 from github_helper._services.gh import GHError
 from github_helper._utils import load_json
@@ -53,13 +52,3 @@ def remove_excluded_keys(ruleset, excluded_keys):
     for key in excluded_keys:
         if key in ruleset:
             ruleset.pop(key)
-
-
-async def json_diff(original: Any, target: Any, algo="jsondiff"):
-    match algo:
-        case "jsondiff":
-            import jsondiff
-
-            return jsondiff.diff(original, target, marshal=True)
-        case _:
-            raise NotImplementedError(f"{algo} is not implemented.")

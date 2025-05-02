@@ -11,6 +11,7 @@ import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
 
+from github_helper import cmp
 from github_helper._services import gh as srv
 from github_helper._services import repos as repo_srv
 from github_helper._services import ssh_srv
@@ -527,7 +528,7 @@ class GHApi:
             _audit.remove_excluded_keys(current_rulset, excluded_keys)
             _audit.remove_excluded_keys(expected_ruleset, excluded_keys)
 
-            diffs = await _audit.json_diff(
+            diffs = await cmp.json_diff(
                 current_rulset,
                 expected_ruleset,
             )
