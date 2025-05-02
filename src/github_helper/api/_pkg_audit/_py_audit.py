@@ -4,7 +4,6 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 import logistro
-from colored import Fore, Style
 from packaging import tags, utils
 
 from github_helper.api.versions import Version
@@ -89,6 +88,9 @@ class PythonAudit:
                 return {"name": name, "action": "resolved"}
         return None
 
+    def __json__(self):
+        return {k: v.__json__() for k, v in self.projects.items()}
+
 
 @dataclass(slots=True, kw_only=True)
 class Project:
@@ -100,6 +102,23 @@ class Project:
     unknown_tags: set[tags.Tag] = field(default_factory=set)
     files: set[str] = field(default_factory=set)
     bdist_tree: dict | None = None
+
+    def _tags_to_strlist(self, tags):
+        return [str(t) for t in tags]
+
+    def __json__(self):
+        return {
+            "sdist": self.sdist,
+            "bdist": self.bdist,
+            "versions_match": not (self.version_weird),
+            "pure_tags": self._tags_to_strlist(self.pure_tags),
+            "unknown_tags": self._tags_to_strlist(self.unknown_tags),
+            "other_tags": self._tags_to_strlist(
+                self.all_tags - self.pure_tags - self.unknown_tags,
+            ),
+            "files": list(self.files),
+            "compat_tree": self.bdist_tree,
+        }
 
     def add_sdist(self, file: str):
         self.sdist = True

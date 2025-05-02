@@ -19,28 +19,18 @@ class ReleaseAudit:
     understand them.
     """
 
-    prerelease_agree: bool
-    """Does the version agree with the mark about prerelease."""
+    tag: str
+    """The original tag."""
     unknown_files: set
     """Files that couldn't be understood trying to calculate notes."""
     ignored_files: dict[str, int]
-
-    projects: dict
-    """A list of the projects found in this release."""
-
-    def status(self):
-        ret = ""
-        if not self.prerelease_agree:
-            ret += "Prerelease Disagreement.\n"
-        if self.unknown_files:
-            ret += "Unknown Files: \n "
-            ret += "\n".join(self.unknown_files)
-            ret += "\n"
-        if self.ignored_files:
-            ret += "Ignored Files:\n"
-            for k, v in self.ignored_files.items():
-                ret += f" {k}: {v!s}\n"
-        return ret
+    """Files that we don't care about ."""
+    prerelease_agree: bool
+    """Does the version agree with the mark about prerelease."""
+    version: Version
+    """The parsed Version."""
+    python_audit: PythonAudit
+    """A python audit."""
 
     def __init__(self, release):
         """Audit a release object."""
@@ -77,3 +67,15 @@ class ReleaseAudit:
         elif note := self.python_audit.check_file(filename):
             return note
         return {"error": "unrecognized name", "value": filename}
+
+    def __json__(self):
+        return {
+            "tag": self.tag,
+            "version": self.version.__json__(),
+            "prerelease_agree": self.prerelease_agree,
+            "ignored_files": self.ignored_files,
+            "unknown_files": list(self.unknown_files),
+            "audits": {
+                "python": self.python_audit.__json__(),
+            },
+        }

@@ -378,17 +378,10 @@ class GHApi:
             """Initialize derivative values."""
             self.version = versions.Version(self.tag)
 
-        def tag_diff(self) -> str:
+        def tag_diff(self) -> bool:
             """Check if our version tag correctly formatted."""
             # NOTE: this is biased towards python, semver is different!
-            if self.tag.removeprefix("v") != str(self.version).removeprefix("v"):
-                return f"{Fore.yellow}({self.tag}){Style.reset}"
-            return ""
-
-        def return_status(self) -> list[str]:
-            """Return all printed status in array."""
-            td = self.tag_diff()
-            return [td] if td else []
+            return self.tag.removeprefix("v") != str(self.version).removeprefix("v")
 
         def __json__(self):
             """Convert to json."""
@@ -421,20 +414,6 @@ class GHApi:
         """Files that came with it."""
         audit: ReleaseAudit | None = None
 
-        def is_empty(self) -> str:
-            """Check if our release empty."""
-            if not self.files:
-                return f"{Fore.red}Yanked/Empty{Style.reset}"
-            return ""
-
-        def return_status(self) -> list[str]:
-            """Return all printed status in array."""
-            # can use super() once not subclass
-            ret = GHApi.Tag.return_status(self)
-            if ie := self.is_empty():
-                ret.append(ie)
-            return ret
-
         def __json__(self):
             """Convert to json."""
             old = GHApi.Tag.__json__(self)
@@ -442,15 +421,10 @@ class GHApi:
                 {
                     "prerelease": self.prerelease,
                     "files": self.files,
+                    "audit": self.audit.__json__() if self.audit else None,
                 },
             )
             return old
-
-        def audit_status(self) -> str:
-            """Get the audit status of the object."""
-            if self.audit:
-                return "\n" + self.audit.status()
-            return ""
 
     async def get_pypi(
         self,
@@ -607,28 +581,14 @@ class GHApi:
                 return [], 1
             all_versions = {v: r}
         all_versions = dict(sorted(all_versions.items(), reverse=True))
-        ok = f"{Fore.green}OK{Style.reset}"
         result = [
             {
-                "version": str(v),
-                "gh_tags": (
-                    (", ".join(r.gh_tags.return_status()) or ok) if r.gh_tags else ""
-                ),
-                "gh_releases": (
-                    (
-                        (", ".join(r.gh_releases.return_status()) or ok)
-                        + r.gh_releases.audit_status()
-                    )
-                    if r.gh_releases
-                    else ""
-                ),
-                "pypi": ((", ".join(r.pypi.return_status()) or ok) if r.pypi else ""),
-                "test.pypi": (
-                    (", ".join(r.test_pypi.return_status()) or ok)
-                    if r.test_pypi
-                    else ""
-                ),
-                "validity": v.kind,
+                "version": v.__json__(),
+                "gh_tags": r.gh_tags.__json__() if r.gh_tags else None,
+                "gh_releases": (r.gh_releases.__json__() if r.gh_releases else None),
+                "pypi": r.pypi.__json__() if r.pypi else None,
+                "test.pypi": (r.test_pypi.__json__() if r.test_pypi else None),
+                "validity": str(v.kind),
             }
             for v, r in list(all_versions.items())[:count]  # count
         ]
