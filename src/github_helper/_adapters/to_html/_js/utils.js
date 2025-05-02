@@ -1,4 +1,4 @@
-const sortBy = (btnId, filter) => {
+const sortTableBy = (btnId, filter) => {
     const filterBtn = document.getElementById(btnId);
     const order = filterBtn.dataset.order === "asc" ? "desc" : "asc";
     filterBtn.dataset.order = order;

@@ -130,7 +130,7 @@ async def repos(repos_data):
                             id_="sort-repo",
                             class_="cursor-pointer",
                             data_order="asc",
-                            onclick="sortBy('sort-repo', '.repo')",
+                            onclick="sortTableBy('sort-repo', '.repo')",
                             title="Sort by asc",
                         ),
                         class_="flex justify-evenly",
