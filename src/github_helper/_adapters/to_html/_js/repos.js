@@ -3,6 +3,7 @@ const privateCheckbox = document.getElementById('toggle-private');
 const archivedCheckbox = document.getElementById('toggle-archive');
 const ownerInput = document.getElementById('owner-filter');
 const repoInput = document.getElementById('repo-filter');
+const tbody = document.querySelector("tbody");
 
 function filterAll() {
     console.log("Filtering All.")
@@ -53,3 +54,25 @@ archivedCheckbox.addEventListener('change', filterAll);
 ownerInput.addEventListener('input', filterAll);
 repoInput.addEventListener('input', filterAll);
 filterAll();
+
+
+const sortByRepo = () => {
+    const repoFilter = document.getElementById("sort-button");
+    const order = repoFilter.dataset.order === "asc" ? "desc" : "asc";
+    repoFilter.dataset.order = order;
+    repoFilter.textContent = order === "asc" ? "⬆️" : "⬇️";
+    repoFilter.title = `Sort by ${order === "asc" ? "asc" : "desc"}`;
+
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    rows.sort((a, b) => {
+        const nameA = a.querySelector(".repo").textContent.trim().toLowerCase();
+        const nameB = b.querySelector(".repo").textContent.trim().toLowerCase();
+        return order === "asc"
+            ? nameA.localeCompare(nameB)
+            : nameB.localeCompare(nameA);
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+    updateVisibleRowClasses();
+}
