@@ -1,3 +1,4 @@
+import fnmatch
 from pathlib import Path
 
 from github_helper._services.gh import GHError
@@ -27,12 +28,12 @@ def get_required_rulesets(configs, repo_full_name):
         if "include" in cfg:
             if not isinstance(cfg["include"], list):
                 raise TypeError("'include' must be a list")
-            if cfg["repo"] == "*" or cfg["repo"] == repo_full_name:
+            if fnmatch.fnmatch(repo_full_name, cfg["repo"]):
                 rulesets_files = rulesets_files | set(cfg["include"])
         if "exclude" in cfg:
             if not isinstance(cfg["exclude"], list):
                 raise TypeError("'exclude' must be a list")
-            if cfg["repo"] == repo_full_name:
+            if fnmatch.fnmatch(repo_full_name, cfg["repo"]):
                 rulesets_files = rulesets_files - set(cfg["exclude"])
     return rulesets_files
 

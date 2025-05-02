@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import logistro
-from htmy import Component, Context, Renderer, component, html
+from htmy import Component, Context, component, html
 
 from github_helper._adapters.to_html import _components
 from github_helper._utils import load_file
@@ -37,7 +37,11 @@ class RepoRow:
         return html.tr(
             html.td(html.span("📌" if repo["pinned"] else "")),
             html.td(
-                html.a(repo["owner"], href=f"{github_com}/{repo['owner']}"),
+                html.a(
+                    repo["owner"],
+                    href=f"{github_com}/{repo['owner']}",
+                    target="_blank",
+                ),
                 class_="owner",
             ),
             html.td(html.span("/")),
@@ -49,7 +53,7 @@ class RepoRow:
                 ),
                 class_="repo",
             ),
-            html.td(html.span(repo["version"])),
+            html.td(html.span(repo["version"]), class_="text-center"),
             html.td(html.span("⑂" if repo["fork"] else "")),
             html.td(
                 html.span(repo["description"] or ""),
@@ -114,8 +118,7 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
 
 async def repos(repos_data):
     _logger.debug("Building table.")
-    tailwindcss_cdn = "https://cdn.tailwindcss.com"
-    style = html.style(await load_file(_STYLES_PATH / "repos.css"))
+    styles = html.style(await load_file(_STYLES_PATH / "repos.css"))
     table = html.table(repo_rows(repos_data), class_="mx-auto")
     modal_iframe = _components.modal(
         "my-modal",
@@ -124,71 +127,72 @@ async def repos(repos_data):
     )
     _logger.debug("Building page.")
     scripts = [
-        html.script(src=tailwindcss_cdn),
-        html.script(html.SafeStr(await load_file(_JS_PATH / "repos.js"))),
-    ]
-    page = (
-        html.DOCTYPE.html,
-        html.html(
-            html.head(style),
-            html.body(
-                html.div(
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-public",
-                            checked=True,
-                        ),
-                        " Show Public",
-                    ),
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-private",
-                            checked=True,
-                            style="margin-left:1rem;",
-                        ),
-                        " Show Private",
-                    ),
-                    html.label(
-                        html.input_(
-                            type_="checkbox",
-                            id_="toggle-archive",
-                            checked=True,
-                            style="margin-left:1rem;",
-                        ),
-                        " Show Archived",
-                    ),
-                    html.br(),
-                    html.label(
-                        " Owner",
-                        html.input_(
-                            type_="text",
-                            id_="owner-filter",
-                            name="owner-filter",
-                            placeholder="Owner",
-                            class_="rounded shadow-sm sm:text-sm p-1",
-                        ),
-                    ),
-                    html.label(
-                        " Repo",
-                        html.input_(
-                            type_="text",
-                            id_="repo-filter",
-                            name="repo-filter",
-                            placeholder="Repo",
-                            class_="rounded shadow-sm sm:text-sm p-1",
-                        ),
-                    ),
-                    style="margin-bottom: 1rem;",
-                    class_="mx-auto",
-                    id_="controls",
+        html.script(
+            html.SafeStr(
+                "\n".join(
+                    [
+                        await load_file(_JS_PATH / "repos.js"),
+                        await load_file(_JS_PATH / "modal.js"),
+                    ],
                 ),
-                table,
-                modal_iframe,
-                *scripts,
             ),
         ),
-    )
-    _logger.debug("Rendering.")
-    return await Renderer().render(page)
+    ]
+    content = [
+        html.div(
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-public",
+                    checked=True,
+                ),
+                " Show Public",
+            ),
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-private",
+                    checked=True,
+                    style="margin-left:1rem;",
+                ),
+                " Show Private",
+            ),
+            html.label(
+                html.input_(
+                    type_="checkbox",
+                    id_="toggle-archive",
+                    checked=True,
+                    style="margin-left:1rem;",
+                ),
+                " Show Archived",
+            ),
+            html.br(),
+            html.label(
+                " Owner",
+                html.input_(
+                    type_="text",
+                    id_="owner-filter",
+                    name="owner-filter",
+                    placeholder="Owner",
+                    class_="rounded shadow-sm sm:text-sm p-1",
+                ),
+            ),
+            html.label(
+                " Repo",
+                html.input_(
+                    type_="text",
+                    id_="repo-filter",
+                    name="repo-filter",
+                    placeholder="Repo",
+                    class_="rounded shadow-sm sm:text-sm p-1",
+                ),
+            ),
+            style="margin-bottom: 1rem;",
+            class_="mx-auto",
+            id_="controls",
+        ),
+        table,
+        modal_iframe,
+        *scripts,
+    ]
+    return await _components.render_page([styles], content)
