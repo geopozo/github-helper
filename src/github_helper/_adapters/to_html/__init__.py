@@ -75,7 +75,7 @@ class RepoRow:
                             class_="badge",
                         ),
                         href=f"{github_com}/{s['user']}",
-                        class_="collaborator",
+                        class_="collaborator bg-white hover:bg-slate-200",
                         target="_blank",
                         title=permission_msg[s["permission"]],
                     )
@@ -101,7 +101,7 @@ class RepoRow:
                     target="_blank",
                 ),
                 *[html.span(s, class_=f"topic {s}") for s in repo["topics"]],
-                class_="topics",
+                class_="topics bg-white hover:bg-slate-200",
             ),
             class_=(
                 "repo-row "
