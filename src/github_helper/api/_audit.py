@@ -1,6 +1,5 @@
 from pathlib import Path
-
-import jsondiff as jd
+from typing import Any
 
 from github_helper._services.gh import GHError
 from github_helper._utils import load_json
@@ -56,15 +55,11 @@ def remove_excluded_keys(ruleset, excluded_keys):
             ruleset.pop(key)
 
 
-async def json_diff(original, target, diffs):
-    json_diffs = jd.diff(original, target, marshal=True)
-    if not json_diffs:
-        return []
-    else:
-        for diff_key in json_diffs:
-            if diff_key == "$delete":
-                for i in json_diffs[diff_key]:
-                    diffs.append({"status": f"add'l. key: {i}"})
-            else:
-                diffs.append({"status": diff_key})
-    return diffs
+async def json_diff(original: Any, target: Any, algo="jsondiff"):
+    match algo:
+        case "jsondiff":
+            import jsondiff
+
+            return jsondiff.diff(original, target, marshal=True)
+        case _:
+            raise NotImplementedError(f"{algo} is not implemented.")

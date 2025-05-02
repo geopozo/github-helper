@@ -349,7 +349,6 @@ class GHApi:
             url = f"https://{prefix}pypi.org/pypi/{name}/json"
             _logger.debug(url)
             try:
-                # TODO: probably need to check that project exists first
                 jq_dir = (
                     r".releases // {} | "
                     r"to_entries | map("
@@ -528,11 +527,9 @@ class GHApi:
             _audit.remove_excluded_keys(current_rulset, excluded_keys)
             _audit.remove_excluded_keys(expected_ruleset, excluded_keys)
 
-            diffs = []
             diffs = await _audit.json_diff(
                 current_rulset,
                 expected_ruleset,
-                diffs,
             )
             for diff in diffs:
                 diff["template"] = template
