@@ -16,7 +16,7 @@ async def load_file(path):
     if not Path(path).is_file():
         raise FileNotFoundError(f"{path} not exist")
 
-    async with aiofiles.open(path) as f:
+    async with aiofiles.open(path, encoding="utf-8") as f:
         file = await f.read()
     return file
 
