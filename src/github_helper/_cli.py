@@ -180,12 +180,12 @@ Permissions:
         required=True,
     )
 
-    audit_repo = subparsers.add_parser(
-        "audit-repo",
+    audit_rulesets = subparsers.add_parser(
+        "audit-rulesets",
         description="",
         help="Audit repo rulesets against template.",
     )
-    audit_repo.add_argument(
+    audit_rulesets.add_argument(
         "-r",
         "--repo",
         help="Name of repository required.",
@@ -269,7 +269,7 @@ async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
         case "audit-releases":
             data, sadness = await gh.audit_releases(repo)
             data = await adpt.transform_audit_releases_data(data)
-        case "audit-repo":
+        case "audit-rulesets":
             data, sadness = await gh.audit_rulesets(repo)
             data = await adpt.transform_audit_rulesets_data(data)
         case "audit-versions":
