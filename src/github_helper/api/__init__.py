@@ -482,17 +482,19 @@ class GHApi:
             "repo" and owner is assumed to be the current user.
 
         """
-        rulesets_jq = jq.compile("map({(.name): .id}) | add")
-        config_path = _TEMPLATE_PATH / "audit-config.json"
-        config = await load_json(config_path)
         _ = await self.get_user()
         owner, repo = self._split_full_name(repo)
         repo_full_name = f"{owner}/{repo}"
+
+        config_path = _TEMPLATE_PATH / "audit-config.json"
+        config = await load_json(config_path)
+
         required_ruleset_templates = _audit.get_required_rulesets(
             config,
             repo_full_name,
         )
 
+        rulesets_jq = jq.compile("map({(.name): .id}) | add")
         endpoint = f"repos/{owner}/{repo}/rulesets"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
