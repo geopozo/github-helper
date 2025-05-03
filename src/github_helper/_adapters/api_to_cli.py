@@ -1,4 +1,5 @@
 import urllib.parse
+from pprint import pformat
 
 import logistro
 
@@ -170,8 +171,12 @@ class GHAdapter:
     async def transform_audit_rulesets_data(self, audit_rulesets_data):
         if self._json:
             return to_json.format_json(audit_rulesets_data, pretty=self._pretty)
-        for rule in audit_rulesets_data:
-            rule["template"] = rule["template"][:24]
+
+        audit_rulesets_data["diffs"] = [
+            pformat(d) if not isinstance(d, str) else d
+            for d in audit_rulesets_data.get("diffs")
+        ]
+
         return to_table.format_table(audit_rulesets_data, pretty=self._pretty)
 
     async def transform_audit_versions_data(self, version_data):

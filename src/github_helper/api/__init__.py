@@ -514,28 +514,37 @@ class GHApi:
             "_links",
             "target",
         ]
-        result = [
-            {"template": t, "status": "missing ruleset"}
-            for t in required_ruleset_templates
-            if t not in active_rulesets
-        ]
 
-        for template, ruleset_id in active_rulesets.items():
-            json_file = f"{template}.json"
-            if template not in required_ruleset_templates:
-                result.append({"template": template, "status": "additional ruleset"})
-                continue
-            current_rulset = await self._get_ruleset(owner, repo, ruleset_id)
-            expected_ruleset = await _audit.load_template_ruleset(json_file)
-            _audit.remove_excluded_keys(current_rulset, excluded_keys)
-            _audit.remove_excluded_keys(expected_ruleset, excluded_keys)
+        added = active_rulesets.keys() - required_ruleset_templates
+        missing = required_ruleset_templates - active_rulesets.keys()
+        overlap = required_ruleset_templates & active_rulesets.keys()
 
-            diffs = await cmp.json_diff(
-                current_rulset,
-                expected_ruleset,
+        diffs = {}
+        for ruleset in overlap:
+            gh_id = active_rulesets[ruleset]
+            current = await self._get_ruleset(owner, repo, gh_id)
+            expected = await _audit.load_template_ruleset(f"{ruleset}.json")
+            _audit.remove_keys(current, excluded_keys)
+            _audit.remove_keys(expected, excluded_keys)
+
+            diffs[ruleset] = await cmp.json_diff(
+                current,
+                expected,
             )
-            for diff in diffs:
-                diff["template"] = template
-            result = result + diffs
-        sadness = len(result)
-        return result, sadness
+
+        # this doesn't really work
+        ret = {
+            "enabled rulesets": (
+                list(added) + len(missing) * [None] + list(diffs.keys())
+            ),
+            "desired rulesets": (
+                len(added) * [None] + list(missing) + list(diffs.keys())
+            ),
+            "diffs": (
+                len(added) * ["extra"]
+                + len(missing) * ["missing"]
+                + list(diffs.values())
+            ),
+        }
+        # links?
+        return ret, 0
