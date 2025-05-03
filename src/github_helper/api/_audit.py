@@ -49,7 +49,7 @@ async def load_template_ruleset(path):
     return await load_json(path=template_path)
 
 
-def remove_key(d, dotted_keys):
+def remove_keys(d, dotted_keys):
     for dotted_key in dotted_keys:
         keys = dotted_key.split(".")
         for key in keys[:-1]:
