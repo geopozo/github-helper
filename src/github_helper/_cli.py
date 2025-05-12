@@ -157,9 +157,9 @@ Permissions:
     )
 
     audit_repo = subparsers.add_parser(
-        "audit-repo",
+        "audit-rulesets",
         description="",
-        help="Audit repo rulesets against template.",
+        help="Audit rulesets against template.",
     )
     audit_repo.add_argument(
         "-r",
@@ -261,7 +261,7 @@ async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
         case "pypi":
             data, sadness = await gh.get_pypi(repo, testing=testing)
             data = await adpt.transform_pypi_data(data)
-        case "audit-repo":
+        case "audit-rulesets":
             data, sadness = await gh.audit_rulesets(repo)
             data = await adpt.transform_audit_rulesets_data(data)
         case "audit-versions":
