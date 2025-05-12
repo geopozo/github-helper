@@ -12,7 +12,7 @@ _HTML_DIR = Path(__file__).resolve().parent
 _STYLES_PATH = _HTML_DIR / "_styles"
 
 
-async def rulesets():
+async def rulesets_template():
     _logger.debug("Building table.")
     styles = html.style(await load_file(_STYLES_PATH / "rulesets.css"))
     _logger.debug("Building page.")
