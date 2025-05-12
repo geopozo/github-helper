@@ -168,7 +168,10 @@ class GHAdapter:
     async def transform_audit_rulesets_data(self, audit_rulesets_data):
         if self._html:
             generated_html = str(await to_html.rulesets_template(audit_rulesets_data))
-            return generated_html
+            if not self._url:
+                return generated_html
+            encoded = urllib.parse.quote(generated_html)
+            return f"data:text/html;charset=utf-8,{encoded}"
         if self._json:
             return to_json.format_json(audit_rulesets_data, pretty=self._pretty)
         for rule in audit_rulesets_data:
