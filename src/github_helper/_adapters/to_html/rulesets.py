@@ -23,6 +23,7 @@ class RulesetRow:
 
     async def htmy(self, context: Context) -> Component:  # noqa: ARG002
         ruleset = self.ruleset
+        # TO DO Falta agregar las columns con el refactor de rulesets
         return html.tr(html.td(ruleset.get("status")))
 
 
