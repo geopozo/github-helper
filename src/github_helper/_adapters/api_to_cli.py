@@ -76,7 +76,7 @@ class GHAdapter:
 
     async def transform_repos_data(self, repos_data):
         if self._html:
-            generated_html = str(await to_html.repos(repos_data))
+            generated_html = str(await to_html.repos_template(repos_data))
             if not self._url:
                 return generated_html
             encoded = urllib.parse.quote(generated_html)
