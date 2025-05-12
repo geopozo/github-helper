@@ -118,7 +118,10 @@ def repo_rows(repos, context: Context) -> Component:  # noqa: ARG001
 
 async def repos_template(repos_data):
     _logger.debug("Building table.")
-    styles = html.style(await load_file(_STYLES_PATH / "repos.css"))
+    styles = [
+        html.style(await load_file(_STYLES_PATH / "common.css")),
+        html.style(await load_file(_STYLES_PATH / "repos.css")),
+    ]
     table = html.table(repo_rows(repos_data), class_="mx-auto")
     modal_iframe = _components.modal(
         "my-modal",
@@ -195,4 +198,4 @@ async def repos_template(repos_data):
         modal_iframe,
         *scripts,
     ]
-    return await _components.render_page([styles], content)
+    return await _components.render_page([*styles], content)

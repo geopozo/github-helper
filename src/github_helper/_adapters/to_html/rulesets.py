@@ -33,8 +33,11 @@ def rulesets_rows(rulesets, context: Context) -> Component:  # noqa: ARG001
 
 async def rulesets_template(rulesets_data):
     _logger.debug("Building table.")
-    styles = html.style(await load_file(_STYLES_PATH / "rulesets.css"))
+    styles = [
+        html.style(await load_file(_STYLES_PATH / "common.css")),
+        html.style(await load_file(_STYLES_PATH / "rulesets.css")),
+    ]
     table = html.table(rulesets_rows(rulesets_data), class_="mx-auto")
     _logger.debug("Building page.")
     content = [table]
-    return await _components.render_page([styles], content)
+    return await _components.render_page([*styles], content)

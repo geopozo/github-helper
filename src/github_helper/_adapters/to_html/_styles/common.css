@@ -1,0 +1,16 @@
+body {
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    width: max-content;
+}
+
+tr.even {
+    background-color: #f0f0f0;
+}
+
+tr.odd {
+    background-color: #ffffff;
+}
