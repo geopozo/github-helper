@@ -12,10 +12,11 @@ class GHAdapter:
     """Allows the CLI to transform the data as required."""
 
     def _check_options(self, formatters):
+        allowed_commands = {"repos", "audit-rulesets"}
         formats = {k for k, v in formatters.items() if v}
         invalid_formats = {"html", "url"} & formats
         if (self._command == "auth-status" and formats) or (
-            self._command != "repos" and invalid_formats
+            self._command not in allowed_commands and invalid_formats
         ):
             raise NotImplementedError(
                 f"{', '.join(invalid_formats)} not valid flags for {self._command}",

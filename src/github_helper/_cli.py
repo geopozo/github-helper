@@ -167,6 +167,7 @@ Permissions:
         help="Name of repository required.",
         required=True,
     )
+
     audit_versions = subparsers.add_parser(
         "audit-versions",
         description="",
