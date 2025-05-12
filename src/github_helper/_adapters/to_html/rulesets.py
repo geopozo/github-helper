@@ -5,6 +5,7 @@ from pathlib import Path
 import logistro
 from htmy import Component, Context, component, html
 
+from github_helper._adapters import to_json
 from github_helper._adapters.to_html import _components
 from github_helper._utils import load_file
 
@@ -23,12 +24,32 @@ class RulesetRow:
 
     async def htmy(self, context: Context) -> Component:  # noqa: ARG002
         ruleset = self.ruleset
-        return html.tr(html.td(ruleset.get("status")))
+        return html.tr(
+            html.td(ruleset["enabled_ruleset"] or ""),
+            html.td(ruleset["desired_ruleset"] or ""),
+            html.td(
+                html.pre(
+                    to_json.format_json(
+                        ruleset["diff"],
+                        pretty=True,
+                    ),
+                ),
+            ),
+        )
 
 
 @component
 def rulesets_rows(rulesets, context: Context) -> Component:  # noqa: ARG001
-    return [RulesetRow(ruleset=r) for r in rulesets]
+    return [
+        RulesetRow(
+            ruleset={
+                "enabled_ruleset": rulesets["enabled rulesets"][r],
+                "desired_ruleset": rulesets["desired rulesets"][r],
+                "diff": rulesets["diffs"][r],
+            },
+        )
+        for r in range(len(rulesets["enabled rulesets"]))
+    ]
 
 
 async def rulesets_template(rulesets_data):
