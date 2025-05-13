@@ -58,7 +58,17 @@ async def rulesets_template(rulesets_data):
         html.style(await load_file(_STYLES_PATH / "common.css")),
         html.style(await load_file(_STYLES_PATH / "rulesets.css")),
     ]
-    table = html.table(rulesets_rows(rulesets_data), class_="mx-auto")
+    table = html.table(
+        html.thead(
+            html.tr(
+                html.th("Enabled Rulesets", colspan=1),
+                html.th("Desired Rulesets", colspan=1),
+                html.th("Diffs", colspan=1),
+            ),
+        ),
+        html.tbody(rulesets_rows(rulesets_data)),
+        class_="mx-auto",
+    )
     _logger.debug("Building page.")
     content = [table]
     return await _components.render_page([*styles], content)
