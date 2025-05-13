@@ -11,5 +11,5 @@
 }
 
 .table-col--code {
-    @apply bg-gray-900 text-green-300 text-xs p-3 rounded-md overflow-x-auto font-mono border border-gray-700;
+    @apply bg-gray-50 text-gray-800 text-xs p-3 rounded-md overflow-x-auto font-mono border border-gray-300;
 }
