@@ -69,7 +69,7 @@ async def rulesets_template(rulesets_data):
                 html.th("Diffs", class_="table-header"),
             ),
         ),
-        html.tbody(rulesets_rows(rulesets_data), class_="algo"),
+        html.tbody(rulesets_rows(rulesets_data)),
         class_="table",
     )
 
