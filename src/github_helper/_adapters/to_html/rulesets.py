@@ -29,11 +29,12 @@ class RulesetRow:
             html.td(ruleset["desired_ruleset"] or "", class_="table-col"),
             html.td(
                 html.pre(
-                    to_json.format_json(
-                        ruleset["diff"],
-                        pretty=True,
-                    ),
-                ),
+                    to_json.format_json(ruleset["diff"], pretty=True),
+                    class_="table-col--code",
+                )
+                if isinstance(ruleset["diff"], dict)
+                else ruleset["diff"],
+                class_="table-col",
             ),
         )
 
