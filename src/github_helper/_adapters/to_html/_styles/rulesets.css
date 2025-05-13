@@ -5,3 +5,7 @@
 .table-header {
     @apply text-center px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border-r;
 }
+
+.table-col {
+    @apply px-4 py-2 align-top border-t border-gray-200 border-r;
+}

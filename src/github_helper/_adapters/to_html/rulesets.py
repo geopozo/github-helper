@@ -25,8 +25,8 @@ class RulesetRow:
     async def htmy(self, context: Context) -> Component:  # noqa: ARG002
         ruleset = self.ruleset
         return html.tr(
-            html.td(ruleset["enabled_ruleset"] or ""),
-            html.td(ruleset["desired_ruleset"] or ""),
+            html.td(ruleset["enabled_ruleset"] or "", class_="table-col"),
+            html.td(ruleset["desired_ruleset"] or "", class_="table-col"),
             html.td(
                 html.pre(
                     to_json.format_json(
