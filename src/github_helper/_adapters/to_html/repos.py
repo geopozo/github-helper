@@ -133,7 +133,7 @@ async def repos_template(repos_data):
                             id_="sort-repo",
                             class_="cursor-pointer",
                             data_order="asc",
-                            onclick="sortBy('sort-repo', '.repo')",
+                            onclick="sortTableBy('sort-repo', '.repo')",
                             title="Sort by asc",
                         ),
                         class_="flex justify-evenly",
@@ -162,6 +162,7 @@ async def repos_template(repos_data):
                     [
                         await load_file(_JS_PATH / "repos.js"),
                         await load_file(_JS_PATH / "modal.js"),
+                        await load_file(_JS_PATH / "utils.js"),
                     ],
                 ),
             ),
