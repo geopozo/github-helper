@@ -155,56 +155,58 @@ async def repos_template(repos_data):
     ]
     content = [
         html.div(
-            html.label(
-                html.input_(
-                    type_="checkbox",
-                    id_="toggle-public",
-                    checked=True,
+            html.div(
+                html.label(
+                    html.input_(
+                        type_="checkbox",
+                        id_="toggle-public",
+                        checked=True,
+                    ),
+                    " Show Public",
                 ),
-                " Show Public",
-            ),
-            html.label(
-                html.input_(
-                    type_="checkbox",
-                    id_="toggle-private",
-                    checked=True,
-                    style="margin-left:1rem;",
+                html.label(
+                    html.input_(
+                        type_="checkbox",
+                        id_="toggle-private",
+                        checked=True,
+                        style="margin-left:1rem;",
+                    ),
+                    " Show Private",
                 ),
-                " Show Private",
-            ),
-            html.label(
-                html.input_(
-                    type_="checkbox",
-                    id_="toggle-archive",
-                    checked=True,
-                    style="margin-left:1rem;",
+                html.label(
+                    html.input_(
+                        type_="checkbox",
+                        id_="toggle-archive",
+                        checked=True,
+                        style="margin-left:1rem;",
+                    ),
+                    " Show Archived",
                 ),
-                " Show Archived",
-            ),
-            html.br(),
-            html.label(
-                " Owner",
-                html.input_(
-                    type_="text",
-                    id_="owner-filter",
-                    name="owner-filter",
-                    placeholder="Owner",
-                    class_="rounded shadow-sm sm:text-sm p-1",
+                html.br(),
+                html.label(
+                    " Owner",
+                    html.input_(
+                        type_="text",
+                        id_="owner-filter",
+                        name="owner-filter",
+                        placeholder="Owner",
+                        class_="rounded p-1",
+                    ),
                 ),
-            ),
-            html.label(
-                " Repo",
-                html.input_(
-                    type_="text",
-                    id_="repo-filter",
-                    name="repo-filter",
-                    placeholder="Repo",
-                    class_="rounded shadow-sm sm:text-sm p-1",
+                html.label(
+                    " Repo",
+                    html.input_(
+                        type_="text",
+                        id_="repo-filter",
+                        name="repo-filter",
+                        placeholder="Repo",
+                        class_="rounded p-1",
+                    ),
                 ),
+                class_="mx-auto",
+                id_="controls",
             ),
-            style="margin-bottom: 1rem;",
-            class_="mx-auto",
-            id_="controls",
+            class_="sticky top-0 w-full bg-slate-300 p-2 z-10",
         ),
         table,
         modal_iframe,
