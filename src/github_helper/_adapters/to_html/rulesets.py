@@ -31,10 +31,7 @@ class RulesetRow:
             html.td(
                 html.pre(
                     html.code(
-                        to_json.format_json(
-                            ruleset["diff"],
-                            pretty=True,
-                        ),
+                        to_json.format_json(ruleset["diff"], pretty=True),
                         class_="language-json rounded-md",
                     ),
                 )
