@@ -223,7 +223,7 @@ async def repos_template(repos_data):
                 class_="mx-auto",
                 id_="controls",
             ),
-            class_="sticky top-0 w-full p-2 z-10",
+            class_="sticky top-0 w-full bg-white p-2 z-10",
         ),
         table,
         modal_iframe,
