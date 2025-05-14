@@ -35,7 +35,7 @@ class RulesetRow:
                             ruleset["diff"],
                             pretty=True,
                         ),
-                        class_="language-json",
+                        class_="language-json rounded-md",
                     ),
                 )
                 if isinstance(ruleset["diff"], dict)
@@ -80,7 +80,7 @@ async def rulesets_template(rulesets_data):
             ),
         ),
         html.tbody(rulesets_rows(rulesets_data)),
-        class_="table",
+        class_="table table-auto w-11/12",
     )
     scripts = [
         html.script(src=f"{_HLJS_URL}/highlight.min.js"),
