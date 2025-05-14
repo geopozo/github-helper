@@ -13,11 +13,12 @@ class GHAdapter:
     """Allows the CLI to transform the data as required."""
 
     def _check_options(self, formatters):
+        allowed_commands = {"repos", "audit-rulesets"}
         formats = {k for k, v in formatters.items() if v}
         invalid_formats = {"html", "url"} & formats
         if (
             (self._command == "auth-status" and formats)
-            or (self._command != "repos" and invalid_formats)
+            or (self._command not in allowed_commands and invalid_formats)
             or (self._command == "audit-releases" and self._json)
         ):
             raise NotImplementedError(
@@ -75,7 +76,7 @@ class GHAdapter:
 
     async def transform_repos_data(self, repos_data):
         if self._html:
-            generated_html = str(await to_html.repos(repos_data))
+            generated_html = str(await to_html.repos_template(repos_data))
             if not self._url:
                 return generated_html
             encoded = urllib.parse.quote(generated_html)
@@ -169,6 +170,15 @@ class GHAdapter:
         )
 
     async def transform_audit_rulesets_data(self, audit_rulesets_data):
+        if self._html:
+            generated_html = str(
+                await to_html.rulesets_template(audit_rulesets_data),
+            )
+            if not self._url:
+                return generated_html
+            encoded = urllib.parse.quote(generated_html)
+            return f"data:text/html;charset=utf-8,{encoded}"
+
         if self._json:
             return to_json.format_json(audit_rulesets_data, pretty=self._pretty)
 
