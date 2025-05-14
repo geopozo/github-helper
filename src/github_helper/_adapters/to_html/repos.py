@@ -130,10 +130,10 @@ async def repos_template(repos_data):
                         html.span("Repository"),
                         html.span(
                             "⬆️",
-                            id_="sort-button",
+                            id_="sort-repo",
                             class_="cursor-pointer",
                             data_order="asc",
-                            onclick="sortByRepo()",
+                            onclick="sortBy('sort-repo', '.repo')",
                             title="Sort by asc",
                         ),
                         class_="flex justify-evenly",
