@@ -14,3 +14,15 @@ tr.even {
 tr.odd {
     background-color: #ffffff;
 }
+
+.table {
+    @apply table-auto mx-auto my-4 border border-gray-300 shadow-md rounded-md overflow-hidden text-sm;
+}
+
+.table-header {
+    @apply text-center px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 border-r;
+}
+
+.table-col {
+    @apply px-4 py-2 align-top border-t border-gray-200 border-r;
+}

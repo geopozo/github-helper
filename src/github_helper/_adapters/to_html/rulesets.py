@@ -62,9 +62,8 @@ def rulesets_rows(rulesets, context: Context) -> Component:  # noqa: ARG001
 async def rulesets_template(rulesets_data):
     _logger.debug("Building table.")
     styles = [
-        html.style(await load_file(_STYLES_PATH / "common.css")),
         html.style(
-            await load_file(_STYLES_PATH / "rulesets.css"),
+            await load_file(_STYLES_PATH / "common.css"),
             type="text/tailwindcss",
         ),
         html.link(
