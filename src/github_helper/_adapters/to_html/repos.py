@@ -100,8 +100,8 @@ class RepoRow:
                     href=f"{github_com}/{repo['owner']}/{repo['name']}",
                     target="_blank",
                 ),
-                *[html.span(s, class_=f"topic {s}") for s in repo["topics"]],
-                class_="topics bg-white hover:bg-slate-200",
+                *[html.span(s, class_=f"topic {s} bg-white") for s in repo["topics"]],
+                class_="topics",
             ),
             class_=(
                 "repo-row "
