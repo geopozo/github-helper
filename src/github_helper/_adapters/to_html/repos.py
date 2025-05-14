@@ -51,13 +51,19 @@ class RepoRow:
                     href=f"{github_com}/{repo['owner']}/{repo['name']}",
                     target="_blank",
                 ),
-                class_="repo",
+                class_="repo border-gray-200 border-r pr-2",
             ),
-            html.td(html.span(repo["version"]), class_="text-center"),
-            html.td(html.span("⑂" if repo["fork"] else "")),
+            html.td(
+                html.span(repo["version"]),
+                class_="text-center",
+            ),
+            html.td(
+                html.span("⑂" if repo["fork"] else ""),
+                class_="table-col",
+            ),
             html.td(
                 html.span(repo["description"] or ""),
-                class_="description",
+                class_="description table-col",
             ),
             html.td(
                 html.a(
@@ -92,7 +98,7 @@ class RepoRow:
                         else repo["collaborators"]
                     )
                 ],
-                class_="collaborators",
+                class_="collaborators table-col",
             ),
             html.td(
                 html.a(
@@ -101,7 +107,7 @@ class RepoRow:
                     target="_blank",
                 ),
                 *[html.span(s, class_=f"topic {s} bg-white") for s in repo["topics"]],
-                class_="topics",
+                class_="topics table-col",
             ),
             class_=(
                 "repo-row "
@@ -141,15 +147,16 @@ async def repos_template(repos_data):
                         ),
                     ),
                     colspan=4,
+                    class_="table-header",
                 ),
-                html.th("Head Tag", colspan=2),
-                html.th("Description", colspan=1),
-                html.th("Collaborators", colspan=1),
-                html.th("Topics", colspan=1),
+                html.th("Head Tag", colspan=2, class_="table-header"),
+                html.th("Description", colspan=1, class_="table-header"),
+                html.th("Collaborators", colspan=1, class_="table-header"),
+                html.th("Topics", colspan=1, class_="table-header"),
             ),
         ),
         html.tbody(repo_rows(repos_data)),
-        class_="mx-auto",
+        class_="table",
     )
     modal_iframe = _components.modal(
         "my-modal",
