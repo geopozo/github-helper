@@ -13,6 +13,7 @@ _logger = logistro.getLogger(__name__)
 
 _HTML_DIR = Path(__file__).resolve().parent
 _STYLES_PATH = _HTML_DIR / "_styles"
+_HLJS_URL = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1"
 
 
 @dataclass(frozen=True, kw_only=True, slots=True)
@@ -29,8 +30,13 @@ class RulesetRow:
             html.td(ruleset["desired_ruleset"] or "", class_="table-col"),
             html.td(
                 html.pre(
-                    to_json.format_json(ruleset["diff"], pretty=True),
-                    class_="table-col--code",
+                    html.code(
+                        to_json.format_json(
+                            ruleset["diff"],
+                            pretty=True,
+                        ),
+                        class_="language-json",
+                    ),
                 )
                 if isinstance(ruleset["diff"], dict)
                 else ruleset["diff"],
@@ -61,6 +67,10 @@ async def rulesets_template(rulesets_data):
             await load_file(_STYLES_PATH / "rulesets.css"),
             type="text/tailwindcss",
         ),
+        html.link(
+            href=f"{_HLJS_URL}/styles/default.min.css",
+            rel="stylesheet",
+        ),
     ]
     table = html.table(
         html.thead(
@@ -73,7 +83,10 @@ async def rulesets_template(rulesets_data):
         html.tbody(rulesets_rows(rulesets_data)),
         class_="table",
     )
-
+    scripts = [
+        html.script(src=f"{_HLJS_URL}/highlight.min.js"),
+        html.script(html.SafeStr("hljs.highlightAll();")),
+    ]
     _logger.debug("Building page.")
-    content = [table]
+    content = [table, *scripts]
     return await _components.render_page([*styles], content)
