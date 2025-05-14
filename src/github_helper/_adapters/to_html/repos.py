@@ -122,7 +122,19 @@ async def repos_template(repos_data):
         html.style(await load_file(_STYLES_PATH / "common.css")),
         html.style(await load_file(_STYLES_PATH / "repos.css")),
     ]
-    table = html.table(repo_rows(repos_data), class_="mx-auto")
+    table = html.table(
+        html.thead(
+            html.tr(
+                html.th("Repository", colspan=4),
+                html.th("Head Tag", colspan=2),
+                html.th("Description", colspan=1),
+                html.th("Collaborators", colspan=1),
+                html.th("Topics", colspan=1),
+            ),
+        ),
+        html.tbody(repo_rows(repos_data)),
+        class_="mx-auto",
+    )
     modal_iframe = _components.modal(
         "my-modal",
         "closeModal()",
