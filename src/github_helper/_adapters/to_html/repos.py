@@ -125,7 +125,21 @@ async def repos_template(repos_data):
     table = html.table(
         html.thead(
             html.tr(
-                html.th("Repository", colspan=4),
+                html.th(
+                    html.div(
+                        html.span("Repository"),
+                        html.span(
+                            "⬆️",
+                            id_="sort-button",
+                            class_="cursor-pointer",
+                            data_order="asc",
+                            onclick="sortByRepo()",
+                            title="Sort by asc",
+                        ),
+                        class_="flex justify-evenly",
+                    ),
+                    colspan=4,
+                ),
                 html.th("Head Tag", colspan=2),
                 html.th("Description", colspan=1),
                 html.th("Collaborators", colspan=1),
