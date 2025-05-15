@@ -13,7 +13,7 @@ nav:
       {
         "dest": "README.md",
         "src": "../README.md",
-        "replace": {"src='docs/": "src='"}
+        "replace": {"src='docs/": "src='", "(docs/": "("}
       }
   - Reference: >-
       {

@@ -53,11 +53,11 @@ dev = [
   "types-aiofiles>=24.1.0.20250326",
 ]
 
-#docs = [
-#    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote; python_version >= '3.11'",
-#    "mkdocs>=1.6.1",
-#    "mkdocs-material>=9.5.49",
-#]
+docs = [
+    "mkquixote @ git+ssh://git@github.com/geopozo/mkquixote; python_version >= '3.11'",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.5.49",
+]
 
 [tool.ruff.lint]
 select = ["ALL"]
