@@ -1,0 +1,1904 @@
+<!DOCTYPE html><html >
+<head >
+<script src="https://cdn.tailwindcss.com">
+
+</script>
+<style >
+a.collaborator:link,
+a.collaborator:hover,
+a.collaborator:visited,
+a.collaborator:focus,
+a.collaborator:active,
+span.topic {
+    border: 1px solid black;
+    padding: 0rem .5rem;
+    border-radius: 10px;
+    margin: 0 .1rem;
+}
+
+td.owner {
+    text-align: right;
+}
+
+td.description {
+    max-width: 25rem;
+}
+
+tr.repo-row td a:link,
+tr.repo-row td a:hover,
+tr.repo-row td a:visited,
+tr.repo-row td a:focus,
+tr.repo-row td a:active {
+    color: black;
+}
+
+body {
+    overflow-x: auto;
+    width: 100%;
+}
+
+table {
+    width: max-content;
+}
+
+tr.even {
+    background-color: #f0f0f0;
+}
+
+tr.odd {
+    background-color: #ffffff;
+}
+
+tr.repo-row.private {
+    font-weight: 350;
+}
+
+tr.repo-row.public {
+    font-weight: 500;
+}
+
+tr.repo-row.archived td {
+    background-color: rgba(255, 0, 0, 0.04);
+}
+
+#controls {
+    width: max-content;
+}
+
+</style>
+</head>
+<body >
+<div style="margin-bottom: 1rem;" class="mx-auto" id="controls">
+<label >
+<input type="checkbox" id="toggle-public" checked="true"/>
+ Show Public
+</label>
+<label >
+<input type="checkbox" id="toggle-private" checked="true" style="margin-left:1rem;"/>
+ Show Private
+</label>
+<label >
+<input type="checkbox" id="toggle-archive" checked="true" style="margin-left:1rem;"/>
+ Show Archived
+</label>
+<br />
+<label >
+ Owner
+<input type="text" id="owner-filter" name="owner-filter" placeholder="Owner" class="rounded shadow-sm sm:text-sm p-1"/>
+</label>
+<label >
+ Repo
+<input type="text" id="repo-filter" name="repo-filter" placeholder="Repo" class="rounded shadow-sm sm:text-sm p-1"/>
+</label>
+</div>
+<table class="mx-auto">
+<tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/.github" target="_blank">.github</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/.github/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/.github" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/brewkeeper" target="_blank">brewkeeper</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/brewkeeper/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/brewkeeper" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span >📌</span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/contate" target="_blank">contate</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A **very** simple static website manager</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/contate/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/contate" target="_blank">🔧</a><span class="topic cms">cms</span><span class="topic cms-static">cms-static</span><span class="topic static-site">static-site</span><span class="topic static-site-generator">static-site-generator</span></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/dmenu" target="_blank">dmenu</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Fork of dmenu from suckless</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/dmenu/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/dmenu" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/dmenu-git" target="_blank">dmenu-git</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >For of aur pkgbuild</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/dmenu-git/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/dmenu-git" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/gitstatus" target="_blank">gitstatus</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >a go module for sysclient|boss that reports on git repository status</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/gitstatus/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/gitstatus" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/i3" target="_blank">i3</a></td>
+<td class="text-center"><span >heads/next</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >A tiling window manager for X11</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/i3/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/i3" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/i3-git" target="_blank">i3-git</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Fork of aur packagebuild</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/i3-git/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/i3-git" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/i3blocks-config" target="_blank">i3blocks-config</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >fork+ of i3blocks-contrib, which is unmaintained</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/i3blocks-config/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/i3blocks-config" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span >📌</span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/ilog" target="_blank">ilog</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >a stupid minimal go logging interface</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/ilog/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/ilog" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/public_keys" target="_blank">public_keys</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Oliver and my public keys</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/public_keys/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/public_keys" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/server_template" target="_blank">server_template</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Basic server setup</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/server_template/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/server_template" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span >📌</span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/static_template" target="_blank">static_template</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >static templates is a basic directory structure and helper scripts to compile a static website</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/static_template/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/static_template" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span >📌</span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/sutils" target="_blank">sutils</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Server Utilities!</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/sutils/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/sutils" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/sysboss" target="_blank">sysboss</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Collects machine status from clients</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/sysboss/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/sysboss" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/sysclient" target="_blank">sysclient</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Is a client for sysboss</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/sysclient/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/sysclient" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span >📌</span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/user_bootstrap" target="_blank">user_bootstrap</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >dotfiles and some more</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/user_bootstrap/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/user_bootstrap" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span >📌</span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/uwho" target="_blank">uwho</a></td>
+<td class="text-center"><span >heads/alpha</span></td>
+<td ><span ></span></td>
+<td class="description"><span >User authentication framework in go</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/uwho/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/uwho" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/wsssh" target="_blank">wsssh</a></td>
+<td class="text-center"><span >v1.0-42-g00ee570</span></td>
+<td ><span ></span></td>
+<td class="description"><span >AccessTunnel is the start of ssh over websockets</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/wsssh/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/wsssh" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/ajpikul.com_server" target="_blank">ajpikul.com_server</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >my website</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/ajpikul.com_server/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/ajpikul.com_server" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/ajpikul.com_static2" target="_blank">ajpikul.com_static2</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >The static portion of my website</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/ajpikul.com_static2/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/ajpikul.com_static2" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/ajpikul.com_system" target="_blank">ajpikul.com_system</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >system description of ajpikul server</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/ajpikul.com_system/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/ajpikul.com_system" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ajpikul-com" target="_blank">ajpikul-com</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ajpikul-com/lenovo_config" target="_blank">lenovo_config</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >This is a system description for the lenovo laptop</span></td>
+<td class="collaborators"><a href="https://www.github.com/ajpikul-com/lenovo_config/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ajpikul-com/lenovo_config" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/aliwelchoo" target="_blank">aliwelchoo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/aliwelchoo/plotly.js" target="_blank">plotly.js</a></td>
+<td class="text-center"><span >heads/chart2music</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Open-source JavaScript charting library behind Plotly and Dash</span></td>
+<td class="collaborators"><a href="https://www.github.com/aliwelchoo/plotly.js/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">ayjayt<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/aliwelchoo/plotly.js" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/BeagleBoneBlackHack" target="_blank">BeagleBoneBlackHack</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/BeagleBoneBlackHack/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/BeagleBoneBlackHack" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/auditmatic" target="_blank">auditmatic</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >auditmatic is a set of bashscripts used to facilitate system maintenance </span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/auditmatic/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/auditmatic" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/authdoor" target="_blank">authdoor</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >authdoor is a wrapper for go stdlib http funcs allowing dynamic (runtime) config and auth</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/authdoor/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/authdoor" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/ayjayt.github.io" target="_blank">ayjayt.github.io</a></td>
+<td class="text-center"><span >heads/backupMaster</span></td>
+<td ><span ></span></td>
+<td class="description"><span >just for whatever i'm playing with</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/ayjayt.github.io/settings/access" target="_blank">🔧</a><a href="https://www.github.com/oliverchubet" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">oliverchubet<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/ayjayt.github.io" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/bikemelter" target="_blank">bikemelter</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >bikemelter is a proof of concept, web interface, oled peristaltic pump</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/bikemelter/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/bikemelter" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/common-lisp-jupyter" target="_blank">common-lisp-jupyter</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >A Common Lisp kernel for Jupyter along with a library for building Jupyter kernels.</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/common-lisp-jupyter/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/common-lisp-jupyter" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/cowyo" target="_blank">cowyo</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >This is a fork (duplicate) of schollz/cowyo</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/cowyo/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/cowyo" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/domanager" target="_blank">domanager</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >domain manager combines namecheap and letsencrypt</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/domanager/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/domanager" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/gifBox" target="_blank">gifBox</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Linux: Make an mp4 of a box on your screen</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/gifBox/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/gifBox" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/injection" target="_blank">injection</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/injection/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/injection" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/issuebot" target="_blank">issuebot</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >issuebot is a github slackbot</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/issuebot/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/issuebot" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/jupyterhub" target="_blank">jupyterhub</a></td>
+<td class="text-center"><span >4.0.1-173-ge52700e</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Multi-user server for Jupyter notebooks</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/jupyterhub/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/jupyterhub" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/jupyterlab-translate" target="_blank">jupyterlab-translate</a></td>
+<td class="text-center"><span >v1.3.3</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >JupyterLab Language pack helper</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/jupyterlab-translate/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/jupyterlab-translate" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/justClaims" target="_blank">justClaims</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >You can now access JWT claims easily. You're welcome.</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/justClaims/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/justClaims" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/justEmail" target="_blank">justEmail</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >this is a library to make it easier to send emails from your server</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/justEmail/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/justEmail" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/justRedis" target="_blank">justRedis</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >redis, as efficient as I can</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/justRedis/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/justRedis" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/justSQL" target="_blank">justSQL</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >this library encourages us to use SQL well</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/justSQL/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/justSQL" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/markdown" target="_blank">markdown</a></td>
+<td class="text-center"><span >3.7-8-g4260e7b</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >A Python implementation of John Gruber’s Markdown with Extension support.</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/markdown/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/markdown" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/plotly-image-export-alpine" target="_blank">plotly-image-export-alpine</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/plotly-image-export-alpine/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/plotly-image-export-alpine" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/protoc-gen-doc" target="_blank">protoc-gen-doc</a></td>
+<td class="text-center"><span >v1.2.0-47-g8fcf976</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Documentation generator plugin for Google Protocol Buffers</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/protoc-gen-doc/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/protoc-gen-doc" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/spellbot" target="_blank">spellbot</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >the spell bot</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/spellbot/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/spellbot" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/sslchk" target="_blank">sslchk</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >sslchk is a go package that verifies the ssl certificate chain https, tls</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/sslchk/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/sslchk" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/uxmux" target="_blank">uxmux</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >This is a framebuffer implementation of liteHTML. It probably won't use hardware acceleration.</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/uxmux/settings/access" target="_blank">🔧</a><a href="https://www.github.com/keelimeguy" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">keelimeguy<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/uxmux" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/vocab" target="_blank">vocab</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >this is where i make my vocab csv's for lexilize</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/vocab/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/vocab" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/welly" target="_blank">welly</a></td>
+<td class="text-center"><span >heads/announcement</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Welly helps with well loading, wireline logs, log quality, data science</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/welly/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/welly" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/xarray" target="_blank">xarray</a></td>
+<td class="text-center"><span >v2023.04.2-23-g964d350</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >N-D labeled arrays and datasets in Python</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/xarray/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/xarray" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/ChameleonMini" target="_blank">ChameleonMini</a></td>
+<td class="text-center"><span >RevE-DirectFlashWriteThru-118-ged39bcd</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >The ChameleonMini is a versatile contactless smartcard emulator compliant to NFC. For further information see the Getting Started Page or the GitHub-Wiki-Tab above.</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/ChameleonMini/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/ChameleonMini" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/GoServerSkeleton" target="_blank">GoServerSkeleton</a></td>
+<td class="text-center"><span >v1.1-7-gddacc75</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >A skeleton for making website servers in Go</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/GoServerSkeleton/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/GoServerSkeleton" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/justLogging" target="_blank">justLogging</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >a logging library Keelin built for the go server</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/justLogging/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/justLogging" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/ajpikul.com_books" target="_blank">ajpikul.com_books</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >this is the dev environment for my bookkeeping setup</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/ajpikul.com_books/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/ajpikul.com_books" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/ajpikul.com_static" target="_blank">ajpikul.com_static</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >My static website</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/ajpikul.com_static/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/ajpikul.com_static" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/alpha" target="_blank">alpha</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >alpha is our first separate library of tools</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/alpha/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/alpha" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/autopogo.com_lua" target="_blank">autopogo.com_lua</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/autopogo.com_lua/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/autopogo.com_lua" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/autopogo.com_restserver" target="_blank">autopogo.com_restserver</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/autopogo.com_restserver/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/autopogo.com_restserver" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/autopogo.com_static" target="_blank">autopogo.com_static</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/autopogo.com_static/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/autopogo.com_static" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/bantermix.com_static" target="_blank">bantermix.com_static</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >the static website</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/bantermix.com_static/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/bantermix.com_static" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/board_notes" target="_blank">board_notes</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/board_notes/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/board_notes" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/books" target="_blank">books</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >my finances</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/books/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/books" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/boost_patch" target="_blank">boost_patch</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/boost_patch/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/boost_patch" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/business_studies" target="_blank">business_studies</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >this is a collection of writings on running my business</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/business_studies/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/business_studies" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/clFFT" target="_blank">clFFT</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/clFFT/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/clFFT" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/coral_dev_system" target="_blank">coral_dev_system</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/coral_dev_system/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/coral_dev_system" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/dev_server" target="_blank">dev_server</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/dev_server/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/dev_server" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/label" target="_blank">label</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >script and instructions for label printing</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/label/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/label" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/parakeet" target="_blank">parakeet</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/parakeet/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/parakeet" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/parakeet-extension" target="_blank">parakeet-extension</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >the extension for parakeet</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/parakeet-extension/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/parakeet-extension" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/server" target="_blank">server</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >the golang server</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/server/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/server" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/test" target="_blank">test</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >This is a test repository</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/test/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/test" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/todo" target="_blank">todo</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >private todo list</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/todo/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/todo" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/webproxy" target="_blank">webproxy</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >webproxy is/was a basic proxy for osoximeter/microscope stuff</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/webproxy/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/webproxy" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/writing-private" target="_blank">writing-private</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >writing</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/writing-private/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/writing-private" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/AngryMango" target="_blank">AngryMango</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >The original LED controller for MangoDX</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/AngryMango/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/AngryMango" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/BBB_devicetree" target="_blank">BBB_devicetree</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A group of kernel configurations for SPI and custom LCD implementations.</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/BBB_devicetree/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/BBB_devicetree" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/ChamNewBoard" target="_blank">ChamNewBoard</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Chameleon Modifications</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/ChamNewBoard/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/ChamNewBoard" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/ChameleonKL82_CBC_VCOM" target="_blank">ChameleonKL82_CBC_VCOM</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >CBC Layer for VCOM (unsure)</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/ChameleonKL82_CBC_VCOM/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/ChameleonKL82_CBC_VCOM" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/ChameleonRTC" target="_blank">ChameleonRTC</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Chameleon RTC</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/ChameleonRTC/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/ChameleonRTC" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/GoldenAlgorithm" target="_blank">GoldenAlgorithm</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >from mangodx</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/GoldenAlgorithm/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/GoldenAlgorithm" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/KL82_PollOS_USB" target="_blank">KL82_PollOS_USB</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A polling operating system for the kl83 security hardware based on a USB Full Speed driver w/ encryption</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/KL82_PollOS_USB/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/KL82_PollOS_USB" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/Phonon2016" target="_blank">Phonon2016</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >This was some work I did for senior design.</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/Phonon2016/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/Phonon2016" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/ShinyMango" target="_blank">ShinyMango</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >the lightboard for mangodx</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/ShinyMango/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/ShinyMango" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/Testing_Client_Portal" target="_blank">Testing_Client_Portal</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Several concepts for a testing-portal for online access/remote control of engineering hardware</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/Testing_Client_Portal/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/Testing_Client_Portal" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/Testing_SBC_Gate" target="_blank">Testing_SBC_Gate</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >SBC driver/testing side, complimentary to Testing_Client_Portal</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/Testing_SBC_Gate/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/Testing_SBC_Gate" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/cc1310" target="_blank">cc1310</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >cc1310 hardware</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/cc1310/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/cc1310" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/crashtest" target="_blank">crashtest</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >a helper library to test for exit codes in golang tests</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/crashtest/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/crashtest" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/directory" target="_blank">directory</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >directory app- objects and tags w/ flexible querying</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/directory/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/directory" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/electrocham" target="_blank">electrocham</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A electron-based client interface to control a USB security device</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/electrocham/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/electrocham" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/flexybox" target="_blank">flexybox</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >FlexyBox cc1310 library</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/flexybox/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/flexybox" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/issuebot_gravitational-interview" target="_blank">issuebot_gravitational-interview</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Issuebot is a slackbot that allows creating new github issues with a command</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/issuebot_gravitational-interview/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/issuebot_gravitational-interview" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/kinetis_framework" target="_blank">kinetis_framework</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A customer+vendor hardware abstraction library for the kinetis line of NXP uCs</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/kinetis_framework/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/kinetis_framework" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/kl03" target="_blank">kl03</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Button controls and display drivers for the kl03 kinetis uC</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/kl03/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/kl03" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/kl43" target="_blank">kl43</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Button controls and display drivers for the kl43 kinetis uC</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/kl43/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/kl43" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/kl43_democase" target="_blank">kl43_democase</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >an assembly RGB driver to paint images to a TFT lcd screen</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/kl43_democase/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/kl43_democase" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/linux_lcd_firmware_demos" target="_blank">linux_lcd_firmware_demos</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >8ish demos for different LCD screens off linux (RGB + Spi, Touch)</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/linux_lcd_firmware_demos/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/linux_lcd_firmware_demos" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/liteHTML_fb" target="_blank">liteHTML_fb</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >lite HTML</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/liteHTML_fb/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/liteHTML_fb" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/our_webapp" target="_blank">our_webapp</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >tplot webapp</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/our_webapp/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/our_webapp" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/our_website" target="_blank">our_website</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >original tplot website</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/our_website/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/our_website" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/poi" target="_blank">poi</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Poi hardware (two branches)</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/poi/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/poi" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/redis_modules_test" target="_blank">redis_modules_test</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Just a test for writing redis modules</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/redis_modules_test/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/redis_modules_test" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/reflow-oven" target="_blank">reflow-oven</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >reflow oven hardware</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/reflow-oven/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/reflow-oven" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/simpelink_demo" target="_blank">simpelink_demo</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A demo app for TI CC1310 LoRA Simplelink Chip</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/simpelink_demo/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/simpelink_demo" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/terasys" target="_blank">terasys</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >the other side of the startup company's monitoring solution</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/terasys/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/terasys" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/terasys_ticketbooth" target="_blank">terasys_ticketbooth</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >an MVP for a remote-monitoring startup company</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/terasys_ticketbooth/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/terasys_ticketbooth" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/tplot_components" target="_blank">tplot_components</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >all my tplot components</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/tplot_components/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/tplot_components" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/tplot_footprints" target="_blank">tplot_footprints</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >tplot footprints</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/tplot_footprints/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/tplot_footprints" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ayjayt" target="_blank">ayjayt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ayjayt/uart-kl43-programmer" target="_blank">uart-kl43-programmer</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A programmer for the kinetis family implemented as a C library for Linux UART (testing on the beaglebone black)</span></td>
+<td class="collaborators"><a href="https://www.github.com/ayjayt/uart-kl43-programmer/settings/access" target="_blank">🔧</a></td>
+<td class="topics"><a href="https://www.github.com/ayjayt/uart-kl43-programmer" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/.github" target="_blank">.github</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/.github/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/.github" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/Kaleido" target="_blank">Kaleido</a></td>
+<td class="text-center"><span >v1.0.0-rc.0-9-g87e173d</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Fast static image export for web-based visualization libraries with zero dependencies</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/Kaleido/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/Kaleido" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/lascheck" target="_blank">lascheck</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Python library for checking conformity of Log ASCII Standard (LAS) files to standards</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/lascheck/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/lascheck" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/logistro" target="_blank">logistro</a></td>
+<td class="text-center"><span >v1.1.0</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Wrapper for logging - envoltura de logging </span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/logistro/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">davidangarita1<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/logistro" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/markdown" target="_blank">markdown</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >A Python implementation of John Gruber’s Markdown with Extension support.</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/markdown/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/markdown" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/neovim-collection" target="_blank">neovim-collection</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A collection of plugins and configs for neovim</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/neovim-collection/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/neovim-collection" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/plotly.js" target="_blank">plotly.js</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Open-source JavaScript charting library behind Plotly and Dash</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/plotly.js/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/plotly.js" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span >📌</span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pozo-demo" target="_blank">pozo-demo</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A pozo-py demo!</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pozo-demo/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pozo-demo" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pozo-demo-extracted" target="_blank">pozo-demo-extracted</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >A pozo-py demo for general data ingress</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pozo-demo-extracted/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pozo-demo-extracted" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span >📌</span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pozo-py" target="_blank">pozo-py</a></td>
+<td class="text-center"><span >v0.9.29-22-gf2a9c5d</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Help visualizing well log data - Herramienta para visualizar registros de pozos</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pozo-py/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pozo-py" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/processor-dumper" target="_blank">processor-dumper</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Processor Dumper</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/processor-dumper/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/processor-dumper" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pytest" target="_blank">pytest</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >The pytest framework makes it easy to write small tests, yet scales to support complex functional testing</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pytest/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pytest" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/uv" target="_blank">uv</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >An extremely fast Python package and project manager, written in Rust.</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/uv/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/uv" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/plotly.py" target="_blank">plotly.py</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >The interactive graphing library for Python :sparkles: This project now includes Plotly Express!</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/plotly.py/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/plotly.py" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/baile" target="_blank">baile</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/baile/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/baile" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/geopozo-classes" target="_blank">geopozo-classes</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Topics for meetups at geopozo</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/geopozo-classes/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/geopozo-classes" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/github-helper" target="_blank">github-helper</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A tool for quickly looking at status of all repos.</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/github-helper/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/github-helper" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/hidrogeno" target="_blank">hidrogeno</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/hidrogeno/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/hidrogeno" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/jupyter-test" target="_blank">jupyter-test</a></td>
+<td class="text-center"><span >dirty-3-g0334995</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A jupyter-test</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/jupyter-test/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/jupyter-test" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/mkquixote" target="_blank">mkquixote</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A collection of mkdocs plugins to help python projects</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/mkquixote/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/mkquixote" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/porosity-permeability" target="_blank">porosity-permeability</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >An analysis of permeability and porosity</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/porosity-permeability/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/porosity-permeability" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pozo-course" target="_blank">pozo-course</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A couse of petroanalysis with pozo</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pozo-course/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pozo-course" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pozo-multi" target="_blank">pozo-multi</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A demo/scratch site for dealing with multiple wells</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pozo-multi/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pozo-multi" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pozo-py-premium" target="_blank">pozo-py-premium</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >La versión profesional de pozo-py/Premium version of pozo-py</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pozo-py-premium/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pozo-py-premium" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pozomath-py" target="_blank">pozomath-py</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A collection of additional math equations for pozo</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pozomath-py/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pozomath-py" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/pycon-co-2025" target="_blank">pycon-co-2025</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Info for pycon-co-2025</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/pycon-co-2025/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/pycon-co-2025" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/research" target="_blank">research</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/research/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/research" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/striplogs" target="_blank">striplogs</a></td>
+<td class="text-center"><span >heads/test</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/striplogs/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">davidangarita1<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/striplogs" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/whiteboards" target="_blank">whiteboards</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Whiteboards from work</span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/whiteboards/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/whiteboards" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/geopozo" target="_blank">geopozo</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/geopozo/neyberson-ecuaciones" target="_blank">neyberson-ecuaciones</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/geopozo/neyberson-ecuaciones/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a><a href="https://www.github.com/davidangarita1" class="collaborator" target="_blank" title="Can read and clone this repository.">davidangarita1<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/geopozo/neyberson-ecuaciones" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/chart2music" target="_blank">chart2music</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Turns charts into music so the blind can hear data</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/chart2music/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/chart2music" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/clases" target="_blank">clases</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Plantillas</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/clases/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/clases" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/classes" target="_blank">classes</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Worksheets</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/classes/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/classes" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/cytoscape.js" target="_blank">cytoscape.js</a></td>
+<td class="text-center"><span >heads/unstable</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Graph theory (network) library for visualisation and analysis</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/cytoscape.js/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/cytoscape.js" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/cytoscape.js-dagre" target="_blank">cytoscape.js-dagre</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >The Dagre layout for DAGs and trees for Cytoscape.js</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/cytoscape.js-dagre/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/cytoscape.js-dagre" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/dagre" target="_blank">dagre</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Directed graph layout for JavaScript</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/dagre/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/dagre" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/graphlib" target="_blank">graphlib</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >A directed multi-graph library for JavaScript</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/graphlib/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/graphlib" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/heap.js" target="_blank">heap.js</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >A binary heap implementation in CoffeeScript/JavaScript.</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/heap.js/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/heap.js" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/json-browser" target="_blank">json-browser</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >terns json into a browsable graph</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/json-browser/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/json-browser" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/logmenu" target="_blank">logmenu</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A simple interface to the important logs</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/logmenu/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/logmenu" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/ood-py" target="_blank">ood-py</a></td>
+<td class="text-center"><span >v1.0.9</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A python package providing the Observing Ordered Dictionary datastructure</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/ood-py/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/ood-py" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/process_viewer" target="_blank">process_viewer</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Print out info about a process tree</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/process_viewer/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/process_viewer" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/systory" target="_blank">systory</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >A git wrapper to help manage systems</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/systory/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/systory" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/ts-template" target="_blank">ts-template</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Template for typescript</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/ts-template/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/ts-template" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/writing" target="_blank">writing</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/writing/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/writing" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/Kaleido" target="_blank">Kaleido</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Fast static image export for web-based visualization libraries with zero dependencies</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/Kaleido/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/Kaleido" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/paula-chart2music" target="_blank">paula-chart2music</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Turns charts into music so the blind can hear data</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/paula-chart2music/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/paula-chart2music" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/HR" target="_blank">HR</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Discussion of hiring and employee records</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/HR/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/HR" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/accounting-scratch" target="_blank">accounting-scratch</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/accounting-scratch/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/accounting-scratch" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/budget_processor" target="_blank">budget_processor</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Para create presupuestos bonitos</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/budget_processor/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/budget_processor" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/drive-explorer-server" target="_blank">drive-explorer-server</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Helps organize/maintain google drive</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/drive-explorer-server/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/drive-explorer-server" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/grupopikul.com_server" target="_blank">grupopikul.com_server</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Server for Proxy and Auth</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/grupopikul.com_server/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/grupopikul.com_server" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/grupopikul.com_static" target="_blank">grupopikul.com_static</a></td>
+<td class="text-center"><span >otherlogin-9-gaded2ca</span></td>
+<td ><span ></span></td>
+<td class="description"><span >like ajpikul.com_static</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/grupopikul.com_static/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/grupopikul.com_static" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/grupopikul.com_static2" target="_blank">grupopikul.com_static2</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Second take on the theme</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/grupopikul.com_static2/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/grupopikul.com_static2" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/grupopikul.com_system" target="_blank">grupopikul.com_system</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >mainly based off ajpikul.com</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/grupopikul.com_system/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/grupopikul.com_system" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/las_scratch" target="_blank">las_scratch</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Sandbox of notebooks &amp; data for LAS</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/las_scratch/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/las_scratch" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/py-venvs" target="_blank">py-venvs</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Configs for different venvs</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/py-venvs/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/py-venvs" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private archived">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/grupopikul" target="_blank">grupopikul</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/grupopikul/pozo" target="_blank">pozo</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Library for working with well data</span></td>
+<td class="collaborators"><a href="https://www.github.com/grupopikul/pozo/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">ayjayt<sup class="badge">4</sup></a></td>
+<td class="topics"><a href="https://www.github.com/grupopikul/pozo" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/neyberson" target="_blank">neyberson</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/neyberson/pozo-py" target="_blank">pozo-py</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span >⑂</span></td>
+<td class="description"><span >Help visualizing well log data - Herramienta para visualizar registros de pozos</span></td>
+<td class="collaborators"><a href="https://www.github.com/neyberson/pozo-py/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">ayjayt<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/neyberson/pozo-py" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/neyberson" target="_blank">neyberson</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/neyberson/pozo-course" target="_blank">pozo-course</a></td>
+<td class="text-center"><span >heads/main</span></td>
+<td ><span ></span></td>
+<td class="description"><span >This is a pozo course in spanish</span></td>
+<td class="collaborators"><a href="https://www.github.com/neyberson/pozo-course/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">ayjayt<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/neyberson/pozo-course" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/plotly" target="_blank">plotly</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/plotly/Kaleido" target="_blank">Kaleido</a></td>
+<td class="text-center"><span >v1.0.0rc13</span></td>
+<td ><span ></span></td>
+<td class="description"><span >Fast static image export for web-based visualization libraries with zero dependencies</span></td>
+<td class="collaborators"><a href="https://www.github.com/plotly/Kaleido/settings/access" target="_blank">🔧</a><a href="https://www.github.com/antoinerg" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">antoinerg<sup class="badge">4</sup></a><a href="https://www.github.com/gvwilson" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">gvwilson<sup class="badge">4</sup></a><a href="https://www.github.com/bpostlethwaite" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">bpostlethwaite<sup class="badge">4</sup></a><a href="https://www.github.com/chriddyp" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">chriddyp<sup class="badge">4</sup></a><a href="https://www.github.com/BRONSOLO" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">BRONSOLO<sup class="badge">4</sup></a><a href="https://www.github.com/cldougl" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">cldougl<sup class="badge">4</sup></a><a href="https://www.github.com/emilykl" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">emilykl<sup class="badge">4</sup></a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Can also manage issues, pull requests, and some repository settings.">ayjayt<sup class="badge">3</sup></a><a href="https://www.github.com/jonmmease" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">jonmmease<sup class="badge">2</sup></a><a href="https://www.github.com/LiamConnors" class="collaborator" target="_blank" title="Can read and clone this repository.">LiamConnors<sup class="badge">0</sup></a><a href="https://www.github.com/ashmpace" class="collaborator" target="_blank" title="Can read and clone this repository.">ashmpace<sup class="badge">0</sup></a><a href="https://www.github.com/ndrezn" class="collaborator" target="_blank" title="Can read and clone this repository.">ndrezn<sup class="badge">0</sup></a><a href="https://www.github.com/danton267" class="collaborator" target="_blank" title="Can read and clone this repository.">danton267<sup class="badge">0</sup></a><a href="https://www.github.com/nickmelnikov82" class="collaborator" target="_blank" title="Can read and clone this repository.">nickmelnikov82<sup class="badge">0</sup></a></td>
+<td class="topics"><a href="https://www.github.com/plotly/Kaleido" target="_blank">🔧</a></td>
+</tr><tr class="repo-row public ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/plotly" target="_blank">plotly</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/plotly/choreographer" target="_blank">choreographer</a></td>
+<td class="text-center"><span >v1.0.7-2-g7914048</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/plotly/choreographer/settings/access" target="_blank">🔧</a><a href="https://www.github.com/bpostlethwaite" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">bpostlethwaite<sup class="badge">4</sup></a><a href="https://www.github.com/chriddyp" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">chriddyp<sup class="badge">4</sup></a><a href="https://www.github.com/BRONSOLO" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">BRONSOLO<sup class="badge">4</sup></a><a href="https://www.github.com/cldougl" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">cldougl<sup class="badge">4</sup></a><a href="https://www.github.com/emilykl" class="collaborator" target="_blank" title="Full access to the repository, including settings and collaborators.">emilykl<sup class="badge">4</sup></a><a href="https://www.github.com/marthacryan" class="collaborator" target="_blank" title="Can also manage issues, pull requests, and some repository settings.">marthacryan<sup class="badge">3</sup></a><a href="https://www.github.com/selfeki" class="collaborator" target="_blank" title="Can also manage issues, pull requests, and some repository settings.">selfeki<sup class="badge">3</sup></a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Can also manage issues, pull requests, and some repository settings.">ayjayt<sup class="badge">3</sup></a><a href="https://www.github.com/ndrezn" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">ndrezn<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/plotly/choreographer" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/robderstadt" target="_blank">robderstadt</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/robderstadt/evilbrisket" target="_blank">evilbrisket</a></td>
+<td class="text-center"><span >heads/develop</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/robderstadt/evilbrisket/settings/access" target="_blank">🔧</a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">ayjayt<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/robderstadt/evilbrisket" target="_blank">🔧</a></td>
+</tr><tr class="repo-row private ">
+<td ><span ></span></td>
+<td class="owner"><a href="https://www.github.com/ubirajaramneto" target="_blank">ubirajaramneto</a></td>
+<td ><span >/</span></td>
+<td class="repo"><a href="https://www.github.com/ubirajaramneto/encyclopedia_of_software_development_tools_and_standards" target="_blank">encyclopedia_of_software_development_tools_and_standards</a></td>
+<td class="text-center"><span >heads/master</span></td>
+<td ><span ></span></td>
+<td class="description"><span ></span></td>
+<td class="collaborators"><a href="https://www.github.com/ubirajaramneto/encyclopedia_of_software_development_tools_and_standards/settings/access" target="_blank">🔧</a><a href="https://www.github.com/kaiomagalhaes" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">kaiomagalhaes<sup class="badge">2</sup></a><a href="https://www.github.com/ayjayt" class="collaborator" target="_blank" title="Can read, clone, and push to this repository">ayjayt<sup class="badge">2</sup></a></td>
+<td class="topics"><a href="https://www.github.com/ubirajaramneto/encyclopedia_of_software_development_tools_and_standards" target="_blank">🔧</a></td>
+</tr>
+</table>
+<div id="my-modal" class="fixed inset-0 z-50 grid place-content-center bg-black/50 p-4" role="dialog" style="display: none;">
+<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+<div class="flex items-start justify-end">
+<button type="button" class="-me-4 -mt-4 p-2 text-gray-500" onclick="closeModal()">
+X
+</button>
+</div>
+<div >
+<iframe src="" height="500" class="w-full"></iframe>
+</div>
+</div>
+</div>
+<script >
+const publicCheckbox = document.getElementById('toggle-public');
+const privateCheckbox = document.getElementById('toggle-private');
+const archivedCheckbox = document.getElementById('toggle-archive');
+const ownerInput = document.getElementById('owner-filter');
+const repoInput = document.getElementById('repo-filter');
+
+function filterAll() {
+    console.log("Filtering All.")
+    const ownerFilter = ownerInput.value.toLowerCase();
+    const repoFilter = repoInput.value.toLowerCase();
+    const rows = document.querySelectorAll('table tbody tr');
+
+    rows.forEach(row => {
+        const matchOwner = [...row.querySelectorAll('td.owner')].some(td =>
+            td.textContent.toLowerCase().includes(ownerFilter)
+        );
+        const matchRepo = [...row.querySelectorAll('td.repo')].some(td =>
+            td.textContent.toLowerCase().includes(repoFilter)
+        );
+        archived = !(!archivedCheckbox.checked && row.classList.contains('archived'))
+        private = !(!privateCheckbox.checked && row.classList.contains('private'))
+        public = !(!publicCheckbox.checked && row.classList.contains('public'))
+
+        toDisplay = matchOwner && matchRepo && archived && private && public
+        row.style.display = toDisplay ? '' : 'none';
+    });
+    updateVisibleRowClasses();
+}
+
+function updateVisibleRowClasses() {
+    const rows = [...document.querySelectorAll('table tbody tr')];
+    let visibleIndex = 0;
+
+    rows.forEach(row => {
+        row.classList.remove('odd', 'even');
+
+        if (row.style.display !== 'none') {
+            row.classList.add(visibleIndex % 2 === 0 ? 'even' : 'odd');
+            visibleIndex++;
+        }
+    });
+}
+
+const openModalIframe = (data) => {
+    const iframe = modal.querySelector("iframe");
+    iframe.src = data;
+    openModal();
+}
+
+publicCheckbox.addEventListener('change', filterAll);
+privateCheckbox.addEventListener('change', filterAll);
+archivedCheckbox.addEventListener('change', filterAll);
+ownerInput.addEventListener('input', filterAll);
+repoInput.addEventListener('input', filterAll);
+filterAll();
+
+const modal = document.getElementById("my-modal");
+
+const openModal = () => modal.style.display = "grid";
+
+const closeModal = () => modal.style.display = "none";
+
+</script>
+</body>
+</html>
