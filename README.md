@@ -3,16 +3,16 @@ status of one or ALL repositories at the same time.
 
 It has a python, CLI, json, and HTML interface.
 
-### Supported Interfaces:
+## Supported Interfaces
 
   - local git repo
   - git tags via github
   - github releases
   - pypi
   - pypi testing
-  - conda
+  - conda (coming)
 
-### Version Auditing
+## Version Auditing
 
 It ensures that versions are the same across sources, and that the builds are
 also the same (same platforms supported). It notified you of discrepancies.
@@ -27,16 +27,28 @@ It allows you to check its access level (public private archived), as well as
 who has access.
 
 
-### Example Repo HTML Interface
+## Example Repo HTML Interface
 
-[Example](docs/repos.html)
+[Example (Click)](docs/repos.html)
 
-![Screenshot of Repos HTML Output](docs/images/repos_html_interface.png)
+Click to expand
 
-### Example Version Audit
+[ ![Screenshot of Repos HTML Output](docs/images/repos_html_interface.png) ](docs/images/repos_html_interface.png)
 
-![Screenshot of Multi-Version Output](docs/images/version_audit.png)
+## Example Version Audit
 
-### Example Single-Version Inspection (Incomplete)
+Click to expand
 
-![Screenshot of Terminal Output](docs/images/single_version_audit.png)
+[ ![Screenshot of Multi-Version Output](docs/images/version_audit.png) ](docs/images/version_audit.png)
+
+## Example Single-Version Inspection (Incomplete)
+
+Click to expand
+
+[ ![Screenshot of Terminal Output Single Version](docs/images/single_version_audit.png) ](docs/images/single_version_audit.png)
+
+## Example Release Inspection (Platforms)
+
+Click to expand
+
+[ ![Screenshot of Terminal Output Releases](docs/images/release_audit.png) ](docs/images/release_audit.png)
