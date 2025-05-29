@@ -139,7 +139,11 @@ class Repo:
     async def update_repo(self):
         """Return an updated repository."""
         if (self._path).is_dir():
-            return await self._fetch_repo()
+            try:
+                return await self._fetch_repo()
+            except GitError:
+                _logger.exception("Error in fetch, deleting path and retrying?")
+                # TODO(AJP): not great # noqa: TD003, FIX002
         else:
             return await self._clone_repo()
 
@@ -152,6 +156,7 @@ class Repo:
         )
 
     async def _clone_repo(self):
+        _logger.debug2(f"Cloning new repo: {self.url!s}/{self.owner!s}/{self.name!s}")
         await self._git_(
             "clone",
             "--filter=tree:0",
