@@ -271,12 +271,9 @@ class GHApi:
 
         async def query_version(repo):
             _logger.debug(f"Downloading repo {repo['owner']}/{repo['name']}")
-            private = repo["visibility"] == "private"
-            url = "ssh://git@github.com" if private else None
             r = await folder_repos.add_repo(
                 repo["owner"],
                 repo["name"],
-                url=url,
             )
             repo["version"] = await r.describe(repo["default_branch"])
 
@@ -349,7 +346,6 @@ class GHApi:
             url = f"https://{prefix}pypi.org/pypi/{name}/json"
             _logger.debug(url)
             try:
-                # TODO: probably need to check that project exists first
                 jq_dir = (
                     r".releases // {} | "
                     r"to_entries | map("

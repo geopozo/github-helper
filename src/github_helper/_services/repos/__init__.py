@@ -167,7 +167,7 @@ class Repo:
 class RepoFolder:
     """Provides functions for manage repositories."""
 
-    _github = "https://www.github.com"
+    _github = "ssh://git@github.com"
 
     def __init__(self, *, cache=True, path=None):
         """Initializize a new RepoFolder with arguments."""
