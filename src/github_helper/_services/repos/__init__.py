@@ -3,6 +3,7 @@
 import asyncio
 import atexit
 import fnmatch
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -56,10 +57,13 @@ class Repo:
     # check git version
     async def _git_(self, *args, repo=True):
         myself = ["-C", self._path] if repo else []
+        env = os.environ.copy()
+        env["GIT_TERMINAL_PROMPT"] = "0"
         p = await asyncio.create_subprocess_exec(
             "git",
             *myself,
             *args,
+            env=env,
             stderr=subprocess.PIPE,
             stdout=subprocess.PIPE,
         )
