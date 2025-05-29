@@ -71,7 +71,7 @@ class Repo:
         retval = await p.wait()
         if retval:
             raise GitError(
-                f"Command: {args}. Reval: {retval!s}. Stderr: {stderr}.",
+                f"git {myself} {args}. Retval: {retval!s}. Stderr: {stderr}.",
             )
         return stdout
 
