@@ -1,7 +1,8 @@
 # Roadmap
 
+- [ ] BLOCKING: we need to make decision about versions/diff and merge
+
 - [ ] We need to manually close the agent. (new branch)!!!
-- [ ] Esta mal
 
 - [ ] Diff arbol:
   - [ ] No imprimir pretty, solo indicar diferencias
