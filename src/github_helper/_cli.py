@@ -119,6 +119,12 @@ Permissions:
         help="Name of repository required.",
         required=True,
     )
+    configs_parser.add_argument(
+        "-f",
+        "--filename",
+        help="Name of the file required.",
+        required=True,
+    )
 
     releases_parser = subparsers.add_parser(
         "releases",
@@ -150,36 +156,6 @@ Permissions:
         help="Use testing pypi, not regular.",
     )
 
-    pypi_audit_parser = subparsers.add_parser(
-        "audit-pypi",
-        description="Show all pypi packages from a repo with comments.",
-        help="Return all pypi releases of a repo.",
-    )
-    pypi_audit_parser.add_argument(
-        "-r",
-        "--repo",
-        help="Name of repository required.",
-        required=True,
-    )
-    pypi_audit_parser.add_argument(
-        "-t",
-        "--testing",
-        action="store_true",
-        help="Use testing pypi, not regular.",
-    )
-
-    releases_audit_parser = subparsers.add_parser(
-        "audit-releases",
-        description="Show all releases from a repo with comments.",
-        help="Return all releases of a repo with comments.",
-    )
-    releases_audit_parser.add_argument(
-        "-r",
-        "--repo",
-        help="Name of repository required.",
-        required=True,
-    )
-
     audit_repo = subparsers.add_parser(
         "audit-repo",
         description="",
@@ -201,6 +177,25 @@ Permissions:
         "--repo",
         help="Name of repository required.",
         required=True,
+    )
+
+    group = audit_versions.add_mutually_exclusive_group()
+
+    group.add_argument(
+        "-c",
+        "--count",
+        action="store",
+        type=int,
+        default=15,
+        help="How many versions to audit",
+    )
+    group.add_argument(
+        "-v",
+        "--version",
+        action="store",
+        type=str,
+        default=None,
+        help="Audit a specific version in more detail",
     )
 
     basic_args = parser.parse_args()
@@ -227,8 +222,11 @@ def run_cli():
 async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
     parser, cli_args = _get_cli_args()
     repo = cli_args.pop("repo", None)
+    filename = cli_args.pop("filename", None)
     paginate = cli_args.pop("all", False)  # Internamente en gh api es un --paginate
     command = cli_args.pop("command", None)
+    count = cli_args.pop("count", None)
+    version = cli_args.pop("version", None)
     cli_args.pop("log")
     cli_args.pop("human")
     testing = cli_args.pop("testing", False)
@@ -255,7 +253,7 @@ async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
             data, sadness = await gh.get_remote_tags(repo)
             data = await adpt.transform_tags_data(data)
         case "project-configs":
-            data, sadness = await gh.get_project_configs(repo)
+            data, sadness = await gh.get_project_configs(repo, filename)
             data = await adpt.transform_project_configs_data(data)
         case "releases":
             data, sadness = await gh.get_releases(repo)
@@ -263,17 +261,15 @@ async def _run_cli_async():  # noqa: C901, PLR0912, PLR0915 complex
         case "pypi":
             data, sadness = await gh.get_pypi(repo, testing=testing)
             data = await adpt.transform_pypi_data(data)
-        case "audit-pypi":
-            data, sadness = await gh.audit_pypi(repo, testing=testing)
-            data = await adpt.transform_audit_releases_data(data)
-        case "audit-releases":
-            data, sadness = await gh.audit_releases(repo)
-            data = await adpt.transform_audit_releases_data(data)
         case "audit-repo":
             data, sadness = await gh.audit_rulesets(repo)
             data = await adpt.transform_audit_rulesets_data(data)
         case "audit-versions":
-            data, sadness = await gh.audit_versions(repo)
+            data, sadness = await gh.audit_versions(
+                repo,
+                count=count,
+                only_version=version,
+            )
             data = await adpt.transform_audit_versions_data(data)
         case _:
             print("No command supplied.", file=sys.stderr)

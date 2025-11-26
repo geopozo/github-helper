@@ -1,26 +1,52 @@
 """A CLI dashboard for github status."""
 
 import asyncio
+import itertools
 import re
+import sys
 import tomllib
 import warnings
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, TypedDict, TypeVar
 
 import aiohttp
 import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
+from colored import Fore, Style
 
 from github_helper._services import gh as srv
 from github_helper._services import repos as repo_srv
 from github_helper._services import ssh_srv
 from github_helper._services.gh import GHError, ScopesError, ScopesWarning
 from github_helper._utils import load_json
-from github_helper.api import _audit, _compare_versions
+from github_helper.api import _audit, versions
+
+from ._pkg_audit import ReleaseAudit
 
 _logger = logistro.getLogger(__name__)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _TEMPLATE_PATH = _SCRIPT_DIR / "templates"
+
+# could just put this in CLI and be done with it
+# could also force
+if not sys.stdout.isatty():
+
+    class _NoColor:
+        def __getattr__(self, name):
+            return ""
+
+    # Override colored's foreground, background, and style
+    Fore = Style = _NoColor()  # type: ignore[misc, assignment]
+
+
+async def _noop(tup=0, ret=None):
+    ### Allows us to fake async noops
+    if not tup:
+        return ret
+    else:
+        return (ret,) * tup
 
 
 _check_ran = False
@@ -48,6 +74,11 @@ def _log_one_json(obj):
             option=orjson.OPT_INDENT_2,
         ).decode()
         _logger.debug2(f"gh result:\n {raw!s}")
+
+
+_T = TypeVar("_T")
+RetVal = tuple[_T, int]
+"""Return type for api's that can exit the program."""
 
 
 class GHApi:
@@ -285,24 +316,27 @@ class GHApi:
         sadness = int(not repos)
         return repos, sadness
 
-    async def get_remote_tags(self, repo):
-        """Return tags for a repo."""
-        _ = await self.get_user()
-        tags_jq = jq.compile("map({tag: .name})")
-        owner, repo = self._split_full_name(full_name=repo)
-        endpoint = f"repos/{owner}/{repo}/tags"
-        _logger.debug(f"Calling API: {endpoint}")
-        retval, out, err = await srv.gh_api(endpoint)
-        srv.check_retval(retval, err, endpoint=endpoint)
-        tags = tags_jq.input_value(orjson.loads(out)).first()
-        sadness = int(not tags)
-        return tags, sadness
+    # this should take a name TODO (or several)
+    class ConfigDescription(TypedDict):
+        """Description of a config."""
 
-    async def get_project_configs(self, repo):
+        object: Any
+        _original: str
+
+    ConfigSet = dict[str, ConfigDescription]
+
+    async def get_project_configs(
+        self,
+        repo: str,
+        *filenames: str,
+        ref: str | None = None,
+    ) -> RetVal[ConfigSet]:
         """Find all projects in a repo."""
+        if not filenames:
+            raise ValueError("A least one filename must be supplied.")
         owner, repo = self._split_full_name(full_name=repo)
         folder_repos = repo_srv.RepoFolder()
-        projects = {}
+        projects: dict = {}
 
         _logger.debug(f"Downloading repo {owner}/{repo}")
         r = await folder_repos.add_repo(
@@ -310,91 +344,129 @@ class GHApi:
             repo,
             url="ssh://git@github.com",
         )
-        ref = "main" if "main" in await r.list_branches() else "master"
-        py_files = await r.get_files_by_name("pyproject.toml", ref=ref)
-        js_files = await r.get_files_by_name("package.json", ref=ref)
-        if py_files:
-            projects["py"] = {}
-            for f in py_files:
-                _logger.debug2(f"Found py: {f['path']}")
-                projects["py"][f["path"]] = {
-                    "object": tomllib.loads(f["content"].decode()),
-                    "_original": f["content"].decode(),
-                }
-        if js_files:
-            projects["js"] = {}
-            for f in js_files:
-                _logger.debug2(f"Found js: {f['path']}")
+        if not ref:
+            ref = "main" if "main" in await r.list_branches() else "master"
+        files: list[dict] = []
+        for name in filenames:
+            files.extend(await r.get_files_by_name(name, ref=ref) or [])
+        configs: GHApi.ConfigSet = {}
+        for f in files:
+            obj = None
+            if f["path"].endswith(".json"):
                 obj = orjson.loads(f["content"])
-                projects["js"][f["path"]] = {
-                    "object": obj,
-                    "_original": f["content"].decode(),
-                }
+            elif f["path"].endswith(".toml"):
+                obj = tomllib.loads(f["content"].decode())
+            configs[f["path"]] = {
+                "object": obj,
+                "_original": f["content"].decode(),
+            }
 
         sadness = int(not projects)
-        return projects, sadness
+        return configs, sadness
 
-    async def get_pypi(self, repo, *, testing=False):
-        """Get all pypi releases for a particular project."""
-        project_configs, sadness = await self.get_project_configs(repo)
-        project_names = set()
-        if "py" in project_configs:
-            for config in project_configs["py"].values():
-                name = config.get("object", {}).get("project", {}).get("name", {})
-                if name:
-                    project_names.add(name)
+    @dataclass(slots=True, kw_only=True)
+    class Tag:
+        """Return type for get_remote_tags."""
+
+        tag: str
+        """Tag"""
+
+        version: versions.Version | None = None
+        """Calculated version."""
+
+        def __post_init__(self):
+            """Initialize derivative values."""
+            self.version = versions.Version(self.tag)
+
+        def tag_diff(self) -> bool:
+            """Check if our version tag correctly formatted."""
+            # NOTE: this is biased towards python, semver is different!
+            return self.tag.removeprefix("v") != str(self.version).removeprefix("v")
+
+        def __json__(self):
+            """Convert to json."""
+            return {
+                "tag": self.tag,
+                "version": self.version.__json__() if self.version else None,
+            }
+
+    async def get_remote_tags(self, repo, count=None) -> RetVal[list[Tag]]:
+        """Return tags ("tag":"name") for a repo."""
+        _ = await self.get_user()
+        tags_jq = jq.compile("map({tag: .name})")
+        owner, repo = self._split_full_name(full_name=repo)
+        endpoint = f"repos/{owner}/{repo}/tags"
+        _logger.debug(f"Calling API: {endpoint}")
+        retval, out, err = await srv.gh_api(endpoint)
+        srv.check_retval(retval, err, endpoint=endpoint)
+        tags_dict = tags_jq.input_value(orjson.loads(out)).first()
+        tags = [GHApi.Tag(**tag) for tag in tags_dict]
+        sadness = int(not tags)
+        return tags[:count], sadness
+
+    @dataclass(slots=True, kw_only=True)
+    class Release(Tag):
+        """Release object containing version and files."""
+
+        prerelease: bool
+        """Does the source mark it as prerelease?"""
+        files: list[str]
+        """Files that came with it."""
+        audit: ReleaseAudit | None = None
+
+        def __json__(self):
+            """Convert to json."""
+            old = GHApi.Tag.__json__(self)
+            old.update(
+                {
+                    "prerelease": self.prerelease,
+                    "files": self.files,
+                    "audit": self.audit.__json__() if self.audit else None,
+                },
+            )
+            return old
+
+    async def get_pypi(
+        self,
+        project_name: str,
+        *,
+        testing: bool = False,
+    ) -> RetVal[list[Release]]:
+        """Get all pypi releases for ALL projects in a repo."""
         prefix = "test." if testing else ""
 
-        async def fetch_json(name):
-            url = f"https://{prefix}pypi.org/pypi/{name}/json"
-            _logger.debug(url)
-            try:
-                # TODO: probably need to check that project exists first
-                jq_dir = (
-                    r".releases // {} | "
-                    r"to_entries | map("
-                    r"{tag: .key, files:"
-                    r"[ .value[] | select(.yank != true) | .filename ]"
-                    r"})"
-                )
-                pypi_jq = jq.compile(jq_dir)
-                session = aiohttp.ClientSession()
-                response = await session.get(url)
-                pypi_json = await response.json()
-                data = pypi_jq.input_value(pypi_json).first()
-                return _compare_versions.order_versions(data, "tag")
-            finally:
-                await response.release()
-                await session.close()
-
-        releases = {}
-        for name in project_names:
-            releases[name] = await fetch_json(name)
-        sadness = int(not releases)
-        _logger.debug2(releases)
-        return releases, sadness
-
-    async def audit_pypi(self, repo, count=7, *, testing=False):
-        """Get all pypi releases for a project and audit it."""
-        releases, sadness = await self.get_pypi(repo, testing=testing)
-        if sadness:
-            return None, sadness
-
-        releases = [release for project in releases.values() for release in project]
-        for release in releases:
-            release["audit"] = _compare_versions.ReleaseAudit(
-                release,
-                prerelease_respect=True,
+        url = f"https://{prefix}pypi.org/pypi/{project_name}/json"
+        _logger.debug(url)
+        try:
+            jq_dir = (
+                r".releases // {} | "
+                r"to_entries | map("
+                r"{tag: .key, files:"
+                r"[ .value[] | select(.yanked != true) | .filename ]"
+                r"})"
             )
+            pypi_jq = jq.compile(jq_dir)
+            session = aiohttp.ClientSession()
+            response = await session.get(url)
+            pypi_json = await response.json()
+            if pypi_json.get("message", None) == "Not Found":
+                return [], 1
+            releases = pypi_jq.input_value(pypi_json).first()
+        finally:
+            await response.release()
+            await session.close()
 
-        # I want count to be the API call or something
-        # but it has to be ordered first.
-        return (
-            _compare_versions.order_versions(releases, "tag")[:count],
-            sadness,
-        )
+        sadness = int(not releases)
+        coerced_releases: list[GHApi.Release] = [
+            GHApi.Release(
+                **r,
+                prerelease=versions.Version(r["tag"]).is_prerelease,
+            )
+            for r in releases
+        ]
+        return coerced_releases, sadness
 
-    async def get_releases(self, repo):
+    async def get_releases(self, repo: str) -> RetVal[list[Release]]:
         """Return releases for a repo."""
         _ = await self.get_user()
         releases_jq = jq.compile(
@@ -413,57 +485,115 @@ class GHApi:
         retval, out, err = await srv.gh_api(endpoint)
         srv.check_retval(retval, err, endpoint=endpoint)
         obj = orjson.loads(out)
-        _log_one_json(obj)
         releases = releases_jq.input_value(obj).first()
         sadness = int(not releases)
-        _logger.debug2(releases)
-        return releases, sadness
+        coerced_releases: list[GHApi.Release] = [
+            GHApi.Release(
+                **r,
+            )
+            for r in releases
+        ]
+        return coerced_releases, sadness
 
-    async def audit_releases(self, repo, count=7):
-        """Run get_releases and process information."""
-        releases, sadness = await self.get_releases(repo)
-        if sadness:
-            return None, sadness
-
-        for release in releases:
-            release["audit"] = _compare_versions.ReleaseAudit(release)
-
-        # I want count to be the API call or something
-        # but it has to be ordered first.
-        return (
-            _compare_versions.order_versions(releases, "tag")[:count],
-            sadness,
-        )
-
-    async def audit_versions(self, repo):
+    async def audit_versions(  # noqa: C901
+        self,
+        repo: str,
+        count: int = 20,
+        only_version: str | None = None,
+    ) -> RetVal[list[dict]]:
         """
         Verify that version of a repository have differences.
 
         Args:
             repo: the name of the repo to verify. Can be "owner/repo" or just
             "repo" and owner is assumed to be the current user.
+            count: the number of versions to look at
+            only_version: deep dive on one version
 
         """
-        tags, sadness = await self.get_remote_tags(repo)
-        releases, sadness = await self.get_releases(repo)
-
-        filtered_tags = _compare_versions.filter_versions(tags, "tag")
-        filtered_releases = _compare_versions.filter_versions(releases, "tag")
-
-        versions = filtered_tags | filtered_releases
-
-        result = _compare_versions.order_versions(
-            [
-                {
-                    "version": v,
-                    "tags": v in filtered_tags,
-                    "releases": v in filtered_releases,
-                }
-                for v in versions
-            ],
-            "version",
+        project_configs, sadness = await self.get_project_configs(
+            repo,
+            "pyproject.toml",
         )
-        return result, sadness
+
+        project_names = []
+        for path, config in project_configs.items():
+            if not path.endswith("pyproject.toml"):
+                continue
+            name = config.get("object", {}).get("project", {}).get("name", {})
+            if name:
+                project_names.append(name)
+        if len(project_names) > 1:
+            raise NotImplementedError("Repo has more than one project :-(")
+
+        (
+            (tags, _),
+            (release, _),
+            (pypi, pypi_sadness),
+            (test_pypi, test_pypi_sadness),
+        ) = await asyncio.gather(
+            self.get_remote_tags(repo),
+            self.get_releases(repo),
+            (self.get_pypi(project_names[0]) if project_names else _noop(2, [])),
+            (
+                self.get_pypi(project_names[0], testing=True)
+                if project_names
+                else _noop(2, [])
+            ),
+        )
+
+        @dataclass(slots=True)
+        class VersionSet:
+            gh_tags: GHApi.Tag | None = None
+            gh_releases: GHApi.Release | None = None
+            pypi: GHApi.Release | None = None
+            test_pypi: GHApi.Release | None = None
+
+        all_versions: dict[
+            versions.Version,
+            VersionSet,
+        ] = {}
+
+        for attrname, o in itertools.chain(
+            (("gh_tags", t) for t in tags),
+            (("gh_releases", r) for r in release),
+            (("pypi", r) for r in pypi),
+            (("test_pypi", r) for r in test_pypi),
+            [],
+        ):
+            v = getattr(o, "version", None) or versions.Version(o.tag)
+            if not v.valid:
+                continue
+            vset = all_versions.setdefault(v, VersionSet())
+            if getattr(vset, attrname, None):
+                warnings.warn(
+                    "Looks like conflicting poorly-written versions caused overwrite.",
+                    stacklevel=2,
+                )
+            if isinstance(o, GHApi.Release):
+                o.audit = ReleaseAudit(o)
+            setattr(vset, attrname, o)
+
+        if only_version:
+            v = versions.Version(only_version)
+            r = all_versions.get(v)
+            if not r:
+                return [], 1
+            all_versions = {v: r}
+        all_versions = dict(sorted(all_versions.items(), reverse=True))
+        result = [
+            {
+                "version": v.__json__(),
+                "gh_tags": r.gh_tags.__json__() if r.gh_tags else None,
+                "gh_releases": (r.gh_releases.__json__() if r.gh_releases else None),
+                "pypi": r.pypi.__json__() if r.pypi else None,
+                "test.pypi": (r.test_pypi.__json__() if r.test_pypi else None),
+                "validity": str(v.kind),
+            }
+            for v, r in list(all_versions.items())[:count]  # count
+        ]
+
+        return result, 0  # maybe no sadness for audit?
 
     async def _get_ruleset(self, owner, repo, ruleset_id):
         """Return releset for a user by Id."""

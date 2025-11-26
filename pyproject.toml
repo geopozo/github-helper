@@ -101,3 +101,6 @@ help = "Run test by test, slowly, quitting after first error"
 [tool.poe.tasks.filter-test]
 cmd = "pytest -W error -vvvx -rA"
 help = "Run any/all tests one by one with basic settings: can include filename and -k filters"
+
+[tool.typos]
+files.extend-exclude = ["*.es.*"]

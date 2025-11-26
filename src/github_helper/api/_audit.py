@@ -1,7 +1,7 @@
 import fnmatch
 from pathlib import Path
 
-import jsondiff as jd
+import jsondiff as jd  # type: ignore[import-untyped]
 
 from github_helper._services.gh import GHError
 from github_helper._utils import load_json
