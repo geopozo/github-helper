@@ -3,6 +3,7 @@ const privateCheckbox = document.getElementById('toggle-private');
 const archivedCheckbox = document.getElementById('toggle-archive');
 const ownerInput = document.getElementById('owner-filter');
 const repoInput = document.getElementById('repo-filter');
+const tbody = document.querySelector("tbody");
 
 function filterAll() {
     console.log("Filtering All.")

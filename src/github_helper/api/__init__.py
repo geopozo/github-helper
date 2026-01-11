@@ -11,6 +11,7 @@ import jq  # type: ignore [import-not-found]
 import logistro
 import orjson
 
+from github_helper import cmp
 from github_helper._services import gh as srv
 from github_helper._services import repos as repo_srv
 from github_helper._services import ssh_srv
@@ -349,7 +350,6 @@ class GHApi:
             url = f"https://{prefix}pypi.org/pypi/{name}/json"
             _logger.debug(url)
             try:
-                # TODO: probably need to check that project exists first
                 jq_dir = (
                     r".releases // {} | "
                     r"to_entries | map("
@@ -482,17 +482,19 @@ class GHApi:
             "repo" and owner is assumed to be the current user.
 
         """
-        rulesets_jq = jq.compile("map({(.name): .id}) | add")
-        config_path = _TEMPLATE_PATH / "audit-config.json"
-        config = await load_json(config_path)
         _ = await self.get_user()
         owner, repo = self._split_full_name(repo)
         repo_full_name = f"{owner}/{repo}"
+
+        config_path = _TEMPLATE_PATH / "audit-config.json"
+        config = await load_json(config_path)
+
         required_ruleset_templates = _audit.get_required_rulesets(
             config,
             repo_full_name,
         )
 
+        rulesets_jq = jq.compile("map({(.name): .id}) | add")
         endpoint = f"repos/{owner}/{repo}/rulesets"
         _logger.debug(f"Calling API: {endpoint}")
         retval, out, err = await srv.gh_api(endpoint)
@@ -512,30 +514,37 @@ class GHApi:
             "_links",
             "target",
         ]
-        result = [
-            {"template": t, "status": "missing ruleset"}
-            for t in required_ruleset_templates
-            if t not in active_rulesets
-        ]
 
-        for template, ruleset_id in active_rulesets.items():
-            json_file = f"{template}.json"
-            if template not in required_ruleset_templates:
-                result.append({"template": template, "status": "additional ruleset"})
-                continue
-            current_rulset = await self._get_ruleset(owner, repo, ruleset_id)
-            expected_ruleset = await _audit.load_template_ruleset(json_file)
-            _audit.remove_excluded_keys(current_rulset, excluded_keys)
-            _audit.remove_excluded_keys(expected_ruleset, excluded_keys)
+        added = active_rulesets.keys() - required_ruleset_templates
+        missing = required_ruleset_templates - active_rulesets.keys()
+        overlap = required_ruleset_templates & active_rulesets.keys()
 
-            diffs = []
-            diffs = await _audit.json_diff(
-                current_rulset,
-                expected_ruleset,
-                diffs,
+        diffs = {}
+        for ruleset in overlap:
+            gh_id = active_rulesets[ruleset]
+            current = await self._get_ruleset(owner, repo, gh_id)
+            expected = await _audit.load_template_ruleset(f"{ruleset}.json")
+            _audit.remove_keys(current, excluded_keys)
+            _audit.remove_keys(expected, excluded_keys)
+
+            diffs[ruleset] = await cmp.json_diff(
+                current,
+                expected,
             )
-            for diff in diffs:
-                diff["template"] = template
-            result = result + diffs
-        sadness = len(result)
-        return result, sadness
+
+        # this doesn't really work
+        ret = {
+            "enabled rulesets": (
+                list(added) + len(missing) * [None] + list(diffs.keys())
+            ),
+            "desired rulesets": (
+                len(added) * [None] + list(missing) + list(diffs.keys())
+            ),
+            "diffs": (
+                len(added) * ["extra"]
+                + len(missing) * ["missing"]
+                + list(diffs.values())
+            ),
+        }
+        # links?
+        return ret, 0
